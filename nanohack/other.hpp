@@ -8,7 +8,6 @@ namespace other {
 		Vector3 re_p = loco->transform( )->position( ) + loco->transform( )->up( ) * (PlayerEyes::EyeOffset( ).y + loco->eyes( )->viewOffset( ).y);
 		// real eye pos
 
-
 		Vector3 choice = Vector3::Zero( );
 
 		if (LineOfSight(re_p, target_ply->find_mpv_bone( )->position)) {

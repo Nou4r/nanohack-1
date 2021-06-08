@@ -61,9 +61,9 @@ namespace menu {
 			current_ += 1;
 
 		if (current_ < 0)
-			current_ = 0;
-		if (current_ > item_amount - 1)
 			current_ = item_amount - 1;
+		if (current_ > item_amount - 1)
+			current_ = 0;
 
 		Renderer::text({ 200, 400.f - 17 }, Color3(0, 127, 255), 14.f, true, true, wxorstr_(L"nanohack"));
 
@@ -112,6 +112,9 @@ namespace menu {
 
 					if (*entry.int_val >= max)
 						*entry.int_val = 0;
+
+					if (*entry.int_val < 0)
+						*entry.int_val = max - 1;
 				}
 				if (this_is_active)
 					Renderer::text({ 200, 400.f + y_pos }, col, 14.f, true, true, wxorstr_(L"-> %s: %s <-"), entry.label.c_str( ), entry.strings[ *entry.int_val ].c_str( ));

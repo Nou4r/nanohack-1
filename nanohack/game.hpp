@@ -767,6 +767,20 @@ public:
 		dfc = Vector2( );
 	}
 };
+class Attack {
+public:
+	FIELD("Rust.Data::ProtoBuf::Attack::hitID", hitID, uint32_t);
+	FIELD("Rust.Data::ProtoBuf::Attack::hitBone", hitBone, uint32_t);
+	FIELD("Rust.Data::ProtoBuf::Attack::hitMaterialID", hitMaterialID, uint32_t);
+};
+class PlayerAttack {
+public:
+	FIELD("Rust.Data::ProtoBuf::PlayerAttack::attack", attack, Attack*);
+};
+class PlayerProjectileAttack {
+public:
+	FIELD("Rust.Data::ProtoBuf::PlayerProjectileAttack::playerAttack", playerAttack, PlayerAttack*);
+};
 std::map<uint64_t, BoneCache*> cachedBones = std::map<uint64_t, BoneCache*>( );
 class BasePlayer;
 BasePlayer* target_ply = nullptr;
@@ -787,6 +801,10 @@ public:
 	static inline void(*ClientUpdate_)(BasePlayer*) = nullptr;
 	void ClientUpdate( ) {
 		return ClientUpdate_(this);
+	}
+	static inline void(*SendProjectileAttack_)(BasePlayer*, PlayerProjectileAttack*) = nullptr;
+	void SendProjectileAttack(PlayerProjectileAttack* attack) {
+		return SendProjectileAttack_(this, attack);
 	}
 
 	const wchar_t* _displayName( ) {
@@ -1169,6 +1187,7 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::DoHit(HitTest,Vector3,Vector3): Boolean", Projectile::DoHit_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);
+	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::SendProjectileAttack(PlayerProjectileAttack): Void", BasePlayer::SendProjectileAttack_);
 	ASSIGN_HOOK("UnityEngine.CoreModule::UnityEngine::MonoBehaviour::StartCoroutine(Collections.IEnumerator): Coroutine", MonoBehaviour::StartCoroutine_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerWalkMovement::UpdateVelocity(): Void", PlayerWalkMovement::UpdateVelocity_);
 	ASSIGN_HOOK("Assembly-CSharp::ItemModProjectile::GetRandomVelocity(): Single", ItemModProjectile::GetRandomVelocity_);

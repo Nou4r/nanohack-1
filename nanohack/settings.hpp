@@ -19,6 +19,7 @@ namespace settings {
 	float test2 = 0.f;
 
 	int lightning = 0;
+	int h_override = 0;
 }
 
 uintptr_t game_assembly = 0;

@@ -25,11 +25,11 @@ void ClientUpdate_hk(BasePlayer* player) {
 
 						float amb = 1.f;
 						if (settings::lightning == 1)
-							amb = 3.f;
+							amb = 4.f;
 						else if (settings::lightning == 2)
 							amb = 6.f;
 
-						sky->Day( )->AmbientMultiplier( ) = amb == 3.f ? 0.5f : 1.f;
+						sky->Day( )->AmbientMultiplier( ) = amb == 4.f ? 0.2f : 1.f;
 						sky->Night( )->AmbientMultiplier( ) = amb;
 					}
 				}
@@ -45,6 +45,24 @@ Vector3 GetModifiedAimConeDirection_hk(float aimCone, Vector3 inputVec, bool any
 	}
 
 	return AimConeUtil::GetModifiedAimConeDirection(aimCone, inputVec, anywhereInside);
+}
+void SendProjectileAttack_hk(BasePlayer* player, PlayerProjectileAttack* playerProjectileAttack) {
+	uint32_t hitID = playerProjectileAttack->playerAttack( )->attack( )->hitID( );
+	BaseCombatEntity* entity = BaseNetworkable::clientEntities( )->Find<BaseCombatEntity*>(hitID);
+
+	if (!entity)
+		return player->SendProjectileAttack(playerProjectileAttack);
+
+	if (settings::h_override != 0) {
+		if (entity->IsPlayer( )) {
+			if (settings::h_override == 1)
+				playerProjectileAttack->playerAttack( )->attack( )->hitBone( ) = StringPool::Get(xorstr_("spine4"));
+			else if (settings::h_override == 2)
+				playerProjectileAttack->playerAttack( )->attack( )->hitBone( ) = StringPool::Get(xorstr_("head"));
+		}
+	}
+
+	return player->SendProjectileAttack(playerProjectileAttack);
 }
 Vector3 BodyLeanOffset_hk(PlayerEyes* a1) {
 	if (settings::manipulator) {
@@ -173,6 +191,7 @@ void do_hooks( ) {
 	hookengine::hook(BasePlayer::CanAttack_, CanAttack_hk);
 	hookengine::hook(BasePlayer::OnLand_, OnLand_hk);
 	hookengine::hook(Projectile::DoMovement_, DoMovement_hk);
+	hookengine::hook(BasePlayer::SendProjectileAttack_, SendProjectileAttack_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
 	hookengine::hook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);
 	hookengine::hook(BasePlayer::ClientInput_, ClientInput_hk);
