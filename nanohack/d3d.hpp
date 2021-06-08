@@ -28,12 +28,10 @@ namespace d3d {
 				menu::add_checkbox(&settings::freeaim, wxorstr_(L"remove aiming restrictions"));
 				menu::add_checkbox(&settings::infinite_jump, wxorstr_(L"remove jumping restrictions"));
 				menu::add_checkbox(&settings::fastloot, wxorstr_(L"fast loot"));
+				menu::add_selectable(&settings::lightning, wxorstr_(L"lightning"), { wxorstr_(L"regular"), wxorstr_(L"dark ambient"), wxorstr_(L"light ambient") });
 
 				menu::add_slider(&settings::test1, wxorstr_(L"float1"));
 				menu::add_slider(&settings::test2, wxorstr_(L"float2"));
-
-				std::vector<std::wstring> list{ wxorstr_(L"regular"), wxorstr_(L"modified"), wxorstr_(L"lsd") };
-				menu::add_selectable(&settings::lightning, wxorstr_(L"lightning"), list);
 
 				menu_init = true;
 			}

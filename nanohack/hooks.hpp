@@ -15,15 +15,23 @@ void ClientUpdate_hk(BasePlayer* player) {
 			else
 				other::m_manipulate = Vector3::Zero( );
 
-			auto list = TOD_Sky::instances( );
-			if (list) {
-				for (int j = 0; j < list->size; j++) {
-					auto sky = reinterpret_cast<TOD_Sky*>(list->get(j));
-					if (!sky)
-						continue;
+			if (settings::lightning != 0) {
+				auto list = TOD_Sky::instances( );
+				if (list) {
+					for (int j = 0; j < list->size; j++) {
+						auto sky = reinterpret_cast<TOD_Sky*>(list->get(j));
+						if (!sky)
+							continue;
 
-					sky->Day( )->AmbientMultiplier( ) = 1.f;
-					sky->Night( )->AmbientMultiplier( ) = 6.f;
+						float amb = 1.f;
+						if (settings::lightning == 1)
+							amb = 3.f;
+						else if (settings::lightning == 2)
+							amb = 6.f;
+
+						sky->Day( )->AmbientMultiplier( ) = amb == 3.f ? 0.5f : 1.f;
+						sky->Night( )->AmbientMultiplier( ) = amb;
+					}
 				}
 			}
 		}
