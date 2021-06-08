@@ -30,6 +30,8 @@ namespace players {
 
 					if (target_ply->find_mpv_bone()->visible)
 						Renderer::text({ screen_center.x, screen_center.y + 55 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[shootable]"));
+
+					Renderer::text({ screen_center.x, screen_center.y + 25 }, Color3(255, 0, 0), 12.f, true, true, target_ply->_displayName( ));
 				}
 		}
 
