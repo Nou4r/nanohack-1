@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{e3d7229b-8f6a-4844-b62e-06813cdf5d60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core\drawing">
+      <UniqueIdentifier>{f2a62f6b-47cd-4368-9a0b-39571e0ecb6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core\utils">
+      <UniqueIdentifier>{4feeda76-230c-4aff-9862-5b40be2ec0a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core\sdk">
+      <UniqueIdentifier>{e7118637-4a27-454c-a2e7-0f7a50b5950c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core\sdk\il2cpp">
+      <UniqueIdentifier>{05bbfb5a-dd07-4ada-9653-cf6442e35426}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="entry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="d3d.hpp">
+      <Filter>Source Files\core\drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.hpp">
+      <Filter>Source Files\core\drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.hpp">
+      <Filter>Source Files\core\drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="hookengine.hpp">
+      <Filter>Source Files\core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="mem.hpp">
+      <Filter>Source Files\core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.hpp">
+      <Filter>Source Files\core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="xorstr.hpp">
+      <Filter>Source Files\core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dissector.hpp">
+      <Filter>Source Files\core\sdk\il2cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="wrapper.hpp">
+      <Filter>Source Files\core\sdk\il2cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.hpp">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="crc32.hpp">
+      <Filter>Source Files\core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="game.hpp">
+      <Filter>Source Files\core\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="structs.hpp">
+      <Filter>Source Files\core\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="hooks.hpp">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="bonecache.hpp">
+      <Filter>Source Files\core\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="players.hpp">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="aimutils.hpp">
+      <Filter>Source Files\core\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="other.hpp">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
