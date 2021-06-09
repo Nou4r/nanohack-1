@@ -11,79 +11,13 @@ void ClientUpdate_hk(BasePlayer* player) {
 			bonecache::cachePlayer(player);
 		}
 		if (player->userID( ) == local->userID( )) {
+			GLOBAL_TIME = Time::time( );
 			viewMatrix = Camera::getViewMatrix( );
 
 			if (settings::manipulator && target_ply != nullptr)
 				other::find_manipulate_angle( );
 			else
 				other::m_manipulate = Vector3::Zero( );
-
-			/*auto list = BaseViewModel::ActiveModels( );
-			if (list) {
-				auto model = reinterpret_cast<BaseViewModel*>(list->get(0));
-				std::cout << (uintptr_t)model << std::endl;
-				if (model) {
-					auto arr = model->GetComponentsInChildren<SkinnedMeshRenderer>(Type::SkinnedMeshRenderer( ));
-					if (arr) {
-						if (!propertyF)
-							propertyF = Shader::PropertyToID(xorstr_("_Color"));
-						if (!shader)
-							shader = Shader::Find(xorstr_("Hidden/Internal-Colored"));
-
-						for (int j = 0; j < arr->size( ); j++) {
-							auto renderer = arr->get(j);
-							if (!renderer)
-								continue;
-
-							Material* material = renderer->material( );
-							if (material) {
-								auto m_shader = material->shader( );
-								if (m_shader) {
-									if (m_shader != shader) {
-										material->SetColor(propertyF, Color(1, 0, 0, 1));
-										material->set_shader(shader);
-										material->SetInt(xorstr_("_ZTest"), 8);
-									}
-								}
-							}
-						}
-					}
-				}
-			}*/
-			auto held = local->GetHeldEntity( )->viewModel( )->viewModelPrefab( );
-			if (held) {
-				auto list1 = held->GetComponentsInChildren<Renderer_>(Type::Renderer( ));
-				auto list3 = held->GetComponentsInChildren<SkinnedMeshRenderer>(Type::SkinnedMeshRenderer( ));
-
-				auto active_list = list1;
-				std::cout << "list ptr: " << (uintptr_t)active_list << std::endl;
-				if (active_list) {
-					std::cout << (int)active_list->size( ) << std::endl;
-
-					if (!propertyF)
-						propertyF = Shader::PropertyToID(xorstr_("_Color"));
-					if (!shader)
-						shader = Shader::Find(xorstr_("Hidden/Internal-Colored"));
-
-					for (int j = 0; j < active_list->size( ); j++) {
-						auto renderer = active_list->get(j);
-						if (!renderer)
-							continue;
-
-						Material* material = renderer->material( );
-						if (material) {
-							auto m_shader = material->shader( );
-							if (m_shader) {
-								if (m_shader != shader) {
-									material->SetColor(propertyF, Color(1, 0, 0, 1));
-									material->set_shader(shader);
-									material->SetInt(xorstr_("_ZTest"), 8);
-								}
-							}
-						}
-					}
-				}
-			}
 
 			if (settings::lightning != 0) {
 				auto list = TOD_Sky::instances( );
@@ -166,8 +100,8 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 	if (settings::omnisprint) {
 		Vector3 vel = self->TargetMovement( );
 
-		float max_speed = self->Ducking( ) > 0.5 ? 1.7f + settings::test1 : 5.6f;
-		float target_speed = max(max_speed, vel.length( ));
+		float max_speed = self->Ducking( ) > 0.5 ? 1.7f : 5.6f;
+		float target_speed = std::max(max_speed, vel.length( ));
 		if (vel.length( ) > 0.f) {
 			Vector3 target_vel = Vector3(vel.x / vel.length( ) * target_speed, vel.y, vel.z / vel.length( ) * target_speed);
 			self->TargetMovement( ) = target_vel;
@@ -259,6 +193,18 @@ uintptr_t StartCoroutine_hk(MonoBehaviour* a1, uintptr_t un2) {
 
 	return a1->StartCoroutine(un2);
 }
+void BobApply_hk(ViewmodelBob* self, uintptr_t vm, float fov) {
+	if (!settings::omnisprint)
+		self->Apply(vm, fov);
+}
+void SwayApply_hk(ViewmodelSway* self, uintptr_t vm) {
+	if (!settings::omnisprint)
+		self->Apply(vm);
+}
+void LowerApply_hk(ViewmodelLower* self, uintptr_t vm) {
+	if (!settings::omnisprint)
+		self->Apply(vm);
+}
 void do_hooks( ) {
 	hookengine::hook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
 	hookengine::hook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
@@ -266,6 +212,9 @@ void do_hooks( ) {
 	hookengine::hook(BasePlayer::CanAttack_, CanAttack_hk);
 	hookengine::hook(BasePlayer::OnLand_, OnLand_hk);
 	hookengine::hook(Projectile::DoMovement_, DoMovement_hk);
+	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
+	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);
+	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
 	hookengine::hook(BasePlayer::SendProjectileAttack_, SendProjectileAttack_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
 	hookengine::hook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);

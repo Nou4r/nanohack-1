@@ -271,6 +271,7 @@ public:
 	STATIC_FUNCTION("UnityEngine.CoreModule::UnityEngine::Time::get_renderedFrameCount(): Int32", renderedFrameCount, int( ));
 	STATIC_FUNCTION("UnityEngine.CoreModule::UnityEngine::Time::get_realtimeSinceStartup(): Single", realtimeSinceStartup, float( ));
 };
+float GLOBAL_TIME = 0.f;
 class BaseCombatEntity : public BaseEntity {
 public:
 	FIELD("Assembly-CSharp::BaseCombatEntity::_health", health, float);
@@ -518,12 +519,34 @@ public:
 		set_flying_(this, state);
 	}
 };
+class ViewmodelBob {
+public:
+	static inline void(*Apply_)(ViewmodelBob*, uintptr_t, float) = nullptr;
+	void Apply(uintptr_t vm, float fov) {
+		Apply_(this, vm, fov);
+	}
+};
+class ViewmodelSway {
+public:
+	static inline void(*Apply_)(ViewmodelSway*, uintptr_t) = nullptr;
+	void Apply(uintptr_t vm) {
+		Apply_(this, vm);
+	}
+};
+class ViewmodelLower {
+public:
+	static inline void(*Apply_)(ViewmodelLower*, uintptr_t) = nullptr;
+	void Apply(uintptr_t vm) {
+		Apply_(this, vm);
+	}
+};
 class BaseViewModel : public Component {
 public:
 	static List<BaseViewModel*>* ActiveModels( ) {
 		static auto clazz = CLASS("Assembly-CSharp::BaseViewModel");
 		return *reinterpret_cast<List<BaseViewModel*>**>(std::uint64_t(clazz->static_fields) + 0x8);
 	}
+	FIELD("Assembly-CSharp::BaseViewModel::model", model, Model*);
 };
 class ViewModel : public Component {
 public:
@@ -680,7 +703,11 @@ public:
 		return reinterpret_cast<bool(__fastcall*)(Projectile*)>(off)(this);
 	}
 };
-class BaseProjectile : public BaseEntity {
+class AttackEntity : public BaseEntity {
+public:
+	FIELD("Assembly-CSharp::AttackEntity::lastTickTime", lastTickTime, float);
+};
+class BaseProjectile : public AttackEntity {
 public:
 	class Magazine {
 	public:
@@ -694,9 +721,32 @@ public:
 	FIELD("Assembly-CSharp::BaseProjectile::projectileVelocityScale", projectileVelocityScale, float);
 	FIELD("Assembly-CSharp::BaseProjectile::aimCone", aimCone, float);
 	FIELD("Assembly-CSharp::BaseProjectile::hipAimCone", hipAimCone, float);
+	FIELD("Assembly-CSharp::BaseProjectile::nextReloadTime", nextReloadTime, float);
+	FIELD("Assembly-CSharp::BaseProjectile::reloadTime", reloadTime, float);
 	FIELD("Assembly-CSharp::BaseProjectile::automatic", automatic, bool);
 	FIELD("Assembly-CSharp::BaseProjectile::aimSway", aimSway, float);
 	FIELD("Assembly-CSharp::BaseProjectile::aimSwaySpeed", aimSwaySpeed, float);
+
+	bool HasReloadCooldown( ) {
+		return GLOBAL_TIME < this->nextReloadTime( );
+	}
+	float CalculateCooldownTime(float nextTime, float cooldown) {
+		float num = GLOBAL_TIME;
+		float num2 = 0.f;
+
+		float ret = nextTime;
+
+		if (ret < 0.f) {
+			ret = std::max(0.f, num + cooldown - num2);
+		}
+		else if (num - ret <= num2) {
+			ret = std::min(ret + cooldown, num + cooldown);
+		}
+		else {
+			ret = std::max(ret + cooldown, num + cooldown - num2);
+		}
+		return ret;
+	}
 };
 class PlayerModel {
 public:
@@ -1258,6 +1308,9 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::DoFirstPersonCamera(Camera): Void", PlayerEyes::DoFirstPersonCamera_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::ClientInput(InputState): Void", BasePlayer::ClientInput_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::DoMovement(Single): Void", Projectile::DoMovement_);
+	ASSIGN_HOOK("Assembly-CSharp::ViewmodelSway::Apply(CachedTransform<BaseViewModel>&): Void", ViewmodelSway::Apply_);
+	ASSIGN_HOOK("Assembly-CSharp::ViewmodelBob::Apply(CachedTransform<BaseViewModel>&,Single): Void", ViewmodelBob::Apply_);
+	ASSIGN_HOOK("Assembly-CSharp::ViewmodelLower::Apply(CachedTransform<BaseViewModel>&): Void", ViewmodelLower::Apply_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::DoHit(HitTest,Vector3,Vector3): Boolean", Projectile::DoHit_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);

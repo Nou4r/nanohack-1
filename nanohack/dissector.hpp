@@ -215,6 +215,8 @@ public:
 		case UnmanagedFastcall:
 			return reinterpret_cast<function_fastcall_ptr_t>(this->m_Address)(params...);
 		}
+
+		return reinterpret_cast<function_stdcall_ptr_t>(this->m_Address)(params...);
 	}
 
 	UnmanagedPointer(ptr_t dwAddress, UnmanagedCallingConvention unmCallingConvention) {
