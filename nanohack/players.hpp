@@ -14,28 +14,29 @@ namespace players {
 	void loop( ) {
 		auto local = LocalPlayer::Entity( );
 		if (local == nullptr || !local->isCached( ))
-			target_ply = nullptr; return;
+			return;
+
+		if (target_ply != nullptr) {
+			if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
+				target_ply = nullptr;
+			else
+				if (target_ply->isCached( )) {
+					auto bounds = target_ply->bones( )->bounds;
+					if (!bounds.empty( ))
+						Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
+
+					if (settings::manipulator && !other::m_manipulate.empty( ))
+						Renderer::text({ screen_center.x, screen_center.y + 40 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[manipulated]"));
+
+					if (target_ply->find_mpv_bone( )->visible)
+						Renderer::text({ screen_center.x, screen_center.y + 55 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[shootable]"));
+
+					Renderer::text({ screen_center.x, screen_center.y + 25 }, Color3(255, 0, 0), 12.f, true, true, target_ply->_displayName( ));
+				}
+		}
 
 		auto playerList = BasePlayer::visiblePlayerList( );
 		if (playerList) {
-			if (target_ply != nullptr) {
-				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
-					target_ply = nullptr;
-				else
-					if (target_ply->isCached( )) {
-						auto bounds = target_ply->bones( )->bounds;
-						if (!bounds.empty( ))
-							Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
-
-						if (settings::manipulator && !other::m_manipulate.empty( ))
-							Renderer::text({ screen_center.x, screen_center.y + 40 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[manipulated]"));
-
-						if (target_ply->find_mpv_bone( )->visible)
-							Renderer::text({ screen_center.x, screen_center.y + 55 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[shootable]"));
-
-						Renderer::text({ screen_center.x, screen_center.y + 25 }, Color3(255, 0, 0), 12.f, true, true, target_ply->_displayName( ));
-					}
-			}
 			for (int i = 0; i < playerList->vals->size; i++) {
 				auto player = *reinterpret_cast<BasePlayer**>(std::uint64_t(playerList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
 
@@ -69,10 +70,6 @@ namespace players {
 							target_ply = player;
 				}
 			}
-		}
-		else {
-			target_ply = nullptr;
-			other::m_manipulate = Vector3::Zero( );
 		}
 	}
 }
