@@ -1,6 +1,9 @@
 #include <intrin.h>
 #define CALLED_BY(func,off) (reinterpret_cast<std::uint64_t>(_ReturnAddress()) > func && reinterpret_cast<std::uint64_t>(_ReturnAddress()) < func + off)
 
+Shader* shader;
+int propertyF;
+
 void ClientUpdate_hk(BasePlayer* player) {
 	auto local = LocalPlayer::Entity( );
 	if (local) {
@@ -14,6 +17,73 @@ void ClientUpdate_hk(BasePlayer* player) {
 				other::find_manipulate_angle( );
 			else
 				other::m_manipulate = Vector3::Zero( );
+
+			/*auto list = BaseViewModel::ActiveModels( );
+			if (list) {
+				auto model = reinterpret_cast<BaseViewModel*>(list->get(0));
+				std::cout << (uintptr_t)model << std::endl;
+				if (model) {
+					auto arr = model->GetComponentsInChildren<SkinnedMeshRenderer>(Type::SkinnedMeshRenderer( ));
+					if (arr) {
+						if (!propertyF)
+							propertyF = Shader::PropertyToID(xorstr_("_Color"));
+						if (!shader)
+							shader = Shader::Find(xorstr_("Hidden/Internal-Colored"));
+
+						for (int j = 0; j < arr->size( ); j++) {
+							auto renderer = arr->get(j);
+							if (!renderer)
+								continue;
+
+							Material* material = renderer->material( );
+							if (material) {
+								auto m_shader = material->shader( );
+								if (m_shader) {
+									if (m_shader != shader) {
+										material->SetColor(propertyF, Color(1, 0, 0, 1));
+										material->set_shader(shader);
+										material->SetInt(xorstr_("_ZTest"), 8);
+									}
+								}
+							}
+						}
+					}
+				}
+			}*/
+			auto held = local->GetHeldEntity( )->viewModel( )->viewModelPrefab( );
+			if (held) {
+				auto list1 = held->GetComponentsInChildren<Renderer_>(Type::Renderer( ));
+				auto list3 = held->GetComponentsInChildren<SkinnedMeshRenderer>(Type::SkinnedMeshRenderer( ));
+
+				auto active_list = list1;
+				std::cout << "list ptr: " << (uintptr_t)active_list << std::endl;
+				if (active_list) {
+					std::cout << (int)active_list->size( ) << std::endl;
+
+					if (!propertyF)
+						propertyF = Shader::PropertyToID(xorstr_("_Color"));
+					if (!shader)
+						shader = Shader::Find(xorstr_("Hidden/Internal-Colored"));
+
+					for (int j = 0; j < active_list->size( ); j++) {
+						auto renderer = active_list->get(j);
+						if (!renderer)
+							continue;
+
+						Material* material = renderer->material( );
+						if (material) {
+							auto m_shader = material->shader( );
+							if (m_shader) {
+								if (m_shader != shader) {
+									material->SetColor(propertyF, Color(1, 0, 0, 1));
+									material->set_shader(shader);
+									material->SetInt(xorstr_("_ZTest"), 8);
+								}
+							}
+						}
+					}
+				}
+			}
 
 			if (settings::lightning != 0) {
 				auto list = TOD_Sky::instances( );
@@ -51,6 +121,9 @@ void SendProjectileAttack_hk(BasePlayer* player, PlayerProjectileAttack* playerP
 	BaseCombatEntity* entity = BaseNetworkable::clientEntities( )->Find<BaseCombatEntity*>(hitID);
 
 	if (!entity)
+		return player->SendProjectileAttack(playerProjectileAttack);
+
+	if (!entity->IsValid( ))
 		return player->SendProjectileAttack(playerProjectileAttack);
 
 	if (settings::h_override != 0) {
@@ -92,9 +165,11 @@ bool CanAttack_hk(BasePlayer* self) {
 void UpdateVelocity_hk(PlayerWalkMovement* self) {
 	if (settings::omnisprint) {
 		Vector3 vel = self->TargetMovement( );
-		float speed = max(5.6, vel.length( ));
+
+		float max_speed = self->Ducking( ) > 0.5 ? 1.7f + settings::test1 : 5.6f;
+		float target_speed = max(max_speed, vel.length( ));
 		if (vel.length( ) > 0.f) {
-			Vector3 target_vel = Vector3(vel.x / vel.length( ) * speed, vel.y, vel.z / vel.length( ) * speed);
+			Vector3 target_vel = Vector3(vel.x / vel.length( ) * target_speed, vel.y, vel.z / vel.length( ) * target_speed);
 			self->TargetMovement( ) = target_vel;
 		}
 	}

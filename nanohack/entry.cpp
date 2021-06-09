@@ -48,6 +48,12 @@
 
 void entry_thread( ) {
 	d3d::init( );
+
+	AllocConsole( );
+	SetConsoleTitleA(xorstr_("dbg"));
+	freopen_s(reinterpret_cast<FILE**>(stdin), xorstr_("CONIN$"), xorstr_("r"), stdin);
+	freopen_s(reinterpret_cast<FILE**>(stdout), xorstr_("CONOUT$"), xorstr_("w"), stdout);
+
 	initialize_cheat( );
 	do_hooks( );
 }

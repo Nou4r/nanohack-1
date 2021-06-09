@@ -26,6 +26,14 @@ public:
 		static auto off = METHOD("mscorlib::System::Type::GetType(String): Type");
 		return reinterpret_cast<Type * (__cdecl*)(String*)>(off)(String::New(qualified_name));
 	}
+	static Type* SkinnedMeshRenderer( ) {
+		Type* type = GetType(xorstr_("UnityEngine.SkinnedMeshRenderer, UnityEngine.CoreModule"));
+		return type;
+	}
+	static Type* Renderer( ) {
+		Type* type = GetType(xorstr_("UnityEngine.Renderer, UnityEngine.CoreModule"));
+		return type;
+	}
 };
 class GameObject;
 class Component {
@@ -42,10 +50,10 @@ public:
 		return SafeExecution::Execute<T*>(off, nullptr, this, type);
 	}
 	template<typename T = Component>
-	T* GetComponentInChildren(Type* type) {
+	Array<T*>* GetComponentsInChildren(Type* type) {
 		if (!this || !type) return nullptr;
-		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Component::GetComponentInChildren(Type,Boolean): Component");
-		return SafeExecution::Execute<T*>(off, nullptr, this, type, false);
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Component::GetComponentsInChildren(Type): Component[]");
+		return SafeExecution::Execute<Array<T*>*>(off, nullptr, this, type);
 	}
 	GameObject* gameObject( ) {
 		if (!this) return nullptr;
@@ -305,6 +313,7 @@ public:
 	FIELD("Assembly-CSharp::BaseMovement::<TargetMovement>k__BackingField", TargetMovement, Vector3);
 	FIELD("Assembly-CSharp::BaseMovement::<Running>k__BackingField", Running, float);
 	FIELD("Assembly-CSharp::BaseMovement::<Grounded>k__BackingField", Grounded, float);
+	FIELD("Assembly-CSharp::BaseMovement::<Ducking>k__BackingField", Ducking, float);
 };
 class ModelState;
 class PlayerWalkMovement : public BaseMovement {
@@ -509,8 +518,21 @@ public:
 		set_flying_(this, state);
 	}
 };
+class BaseViewModel : public Component {
+public:
+	static List<BaseViewModel*>* ActiveModels( ) {
+		static auto clazz = CLASS("Assembly-CSharp::BaseViewModel");
+		return *reinterpret_cast<List<BaseViewModel*>**>(std::uint64_t(clazz->static_fields) + 0x8);
+	}
+};
+class ViewModel : public Component {
+public:
+	FIELD("Assembly-CSharp::ViewModel::instance", instance, BaseViewModel*);
+	FIELD("Assembly-CSharp::ViewModel::viewModelPrefab", viewModelPrefab, Component*);
+};
 class HeldEntity : public BaseEntity {
 public:
+	FIELD("Assembly-CSharp::HeldEntity::viewModel", viewModel, ViewModel*);
 	static inline void(*AddPunch_)(HeldEntity*, Vector3, float) = nullptr;
 	void AddPunch(Vector3 amount, float duration) {
 		return AddPunch_(this, amount, duration);
@@ -520,6 +542,57 @@ public:
 		static auto off = METHOD("Assembly-CSharp::HeldEntity::GetItem(): Item");
 		return reinterpret_cast<Item * (__fastcall*)(HeldEntity*)>(off)(this);
 	}
+};
+class Shader {
+public:
+	static Shader* Find(char* name) {
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Shader::Find(String): Shader");
+		return reinterpret_cast<Shader * (__fastcall*)(String*)>(off)(String::New(name));
+	}
+	static int PropertyToID(char* name) {
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Shader::PropertyToID(String): Int32");
+		return reinterpret_cast<int(__fastcall*)(String*)>(off)(String::New(name));
+	}
+};
+class Material {
+public:
+	void SetColor(int proper, Color value) {
+		if (!this) return;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Material::SetColor(Int32,Color): Void");
+		return reinterpret_cast<void(__fastcall*)(Material*, int, Color)>(off)(this, proper, value);
+	}
+	void SetColor(char* proper, Color value) {
+		if (!this) return;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Material::SetColor(String,Color): Void");
+		return reinterpret_cast<void(__fastcall*)(Material*, String*, Color)>(off)(this, String::New(proper), value);
+	}
+	void SetInt(char* name, int value) {
+		if (!this) return;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Material::SetInt(String,Int32): Void");
+		return reinterpret_cast<void(__fastcall*)(Material*, String*, int)>(off)(this, String::New(name), value);
+	}
+	Shader* shader( ) {
+		if (!this) return nullptr;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Material::get_shader(): Shader");
+		return reinterpret_cast<Shader * (__fastcall*)(Material*)>(off)(this);
+	}
+	void set_shader(Shader* val) {
+		if (!this) return;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Material::set_shader(Shader): Void");
+		return reinterpret_cast<void(__fastcall*)(Material*, Shader*)>(off)(this, val);
+	}
+};
+class Renderer_ {
+public:
+	Material* material( ) {
+		if (!this) return nullptr;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Renderer::get_material(): Material");
+		return reinterpret_cast<Material * (__fastcall*)(Renderer_*)>(off)(this);
+	}
+};
+class SkinnedMeshRenderer : public Renderer_ {
+public:
+
 };
 class ItemModProjectile {
 public:
