@@ -35,6 +35,12 @@ public:
 		return type;
 	}
 };
+namespace System {
+	class Object {
+	public:
+
+	};
+}
 class GameObject;
 class Component {
 public:
@@ -414,6 +420,11 @@ public:
 		static auto off = METHOD("Assembly-CSharp::PlayerEyes::MovementRight(): Vector3");
 		return reinterpret_cast<Vector3(__fastcall*)(PlayerEyes*)>(off)(this);
 	}
+	Vector3 BodyForward( ) {
+		if (!this) return Vector3::Zero( );
+		static auto off = METHOD("Assembly-CSharp::PlayerEyes::BodyForward(): Vector3");
+		return reinterpret_cast<Vector3(__fastcall*)(PlayerEyes*)>(off)(this);
+	}
 	Ray BodyRay( ) {
 		if (!this) return Ray( );
 		static auto off = METHOD("Assembly-CSharp::PlayerEyes::BodyRay(): Ray");
@@ -552,6 +563,10 @@ class ViewModel : public Component {
 public:
 	FIELD("Assembly-CSharp::ViewModel::instance", instance, BaseViewModel*);
 	FIELD("Assembly-CSharp::ViewModel::viewModelPrefab", viewModelPrefab, Component*);
+	static inline void(*Play_)(ViewModel*, String*, int) = nullptr;
+	void Play(String* name, int layer = 0) {
+		Play_(this, name, layer);
+	}
 };
 class HeldEntity : public BaseEntity {
 public:
@@ -673,6 +688,12 @@ public:
 		return reinterpret_cast<Vector3(__fastcall*)(HitTest*)>(off)(this);
 	}
 };
+class Physics {
+public:
+	static void IgnoreLayerCollision(int layer1, int layer2, bool ignore) {
+		return reinterpret_cast<void(*)(int, int, bool)>(il2cpp_resolve_icall(xorstr_("UnityEngine.Physics::IgnoreLayerCollision")))(layer1, layer2, ignore);
+	}
+};
 class Projectile : public Component {
 public:
 	FIELD("Assembly-CSharp::Projectile::drag", drag, float);
@@ -746,6 +767,16 @@ public:
 			ret = std::max(ret + cooldown, num + cooldown - num2);
 		}
 		return ret;
+	}
+};
+class FlintStrikeWeapon : public BaseProjectile {
+public:
+	FIELD("Assembly-CSharp::FlintStrikeWeapon::successFraction", successFraction, float);
+	FIELD("Assembly-CSharp::FlintStrikeWeapon::_didSparkThisFrame", _didSparkThisFrame, bool);
+
+	static inline void(*DoAttack_)(FlintStrikeWeapon*) = nullptr;
+	void DoAttack( ) {
+		return DoAttack_(this);
 	}
 };
 class PlayerModel {
@@ -827,8 +858,8 @@ public:
 
 class MonoBehaviour {
 public:
-	static inline uintptr_t(*StartCoroutine_)(MonoBehaviour*, uintptr_t) = nullptr;
-	uintptr_t StartCoroutine(uintptr_t routine) {
+	static inline System::Object* (*StartCoroutine_)(MonoBehaviour*, System::Object*) = nullptr;
+	System::Object* StartCoroutine(System::Object* routine) {
 		return StartCoroutine_(this, routine);
 	}
 };
@@ -857,9 +888,9 @@ public:
 	Bone* r_ankle_scale;
 	Bone* r_foot;
 
-	Vector3 bottom;
 	box_bounds bounds;
 	Vector2 dfc;
+	Vector2 forward;
 
 	BoneCache( ) {
 		head = new Bone( );
@@ -885,9 +916,9 @@ public:
 		r_ankle_scale = new Bone( );
 		r_foot = new Bone( );
 
-		bottom = Vector3::Zero( );
 		bounds = { 0, 0, 0, 0 };
 		dfc = Vector2( );
+		forward = { };
 	}
 };
 class Attack {
@@ -1313,6 +1344,7 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::ViewmodelLower::Apply(CachedTransform<BaseViewModel>&): Void", ViewmodelLower::Apply_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::DoHit(HitTest,Vector3,Vector3): Boolean", Projectile::DoHit_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
+	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);
 	ASSIGN_HOOK("UnityEngine.CoreModule::UnityEngine::MonoBehaviour::StartCoroutine(Collections.IEnumerator): Coroutine", MonoBehaviour::StartCoroutine_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerWalkMovement::UpdateVelocity(): Void", PlayerWalkMovement::UpdateVelocity_);

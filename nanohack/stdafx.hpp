@@ -26,3 +26,5 @@ float get_lowest(std::vector<float> input) {
 
 	return ret;
 }
+#define FOUNDW(str,str2) str.find(str2) != std::wstring::npos
+#define FOUND(str,str2) str.find(str2) != std::string::npos

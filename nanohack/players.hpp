@@ -1,24 +1,36 @@
 namespace players {
 	float dfc(BasePlayer* player) {
-		if (!player) 
+		if (!player)
 			return 1000.f;
 
-		if (!player->isCached( )) 
+		if (!player->isCached( ))
 			return 1000.f;
 
-		if (player->bones()->dfc.empty( )) 
+		if (player->bones( )->dfc.empty( ))
 			return 1000.f;
 
 		return screen_center.distance_2d(player->bones( )->dfc);
 	}
 	void loop( ) {
+		Renderer::circle(screen_center - Vector2(2, 2), Color3(255, 255, 255), 4.f, 0.75f);
+		Renderer::circle(screen_center + Vector2(2, 2), Color3(0, 0, 0), 4.f, 0.75f);
+		
 		auto local = LocalPlayer::Entity( );
-		if (local == nullptr || !local->isCached( ))
+		if (local == nullptr || !local->isCached( )) {
+			target_ply = nullptr;
 			return;
+		}
+
+		if (!local->HasPlayerFlag(PlayerFlags::Connected)) {
+			target_ply = nullptr;
+			return;
+		}
 
 		auto playerList = BasePlayer::visiblePlayerList( );
-		if (!playerList)
+		if (!playerList) {
+			target_ply = nullptr;
 			return;
+		}
 
 		if (target_ply != nullptr) {
 			if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
@@ -41,10 +53,10 @@ namespace players {
 
 		auto held = local->GetHeldEntity<BaseProjectile>( );
 		if (held) {
-			if (held->HasReloadCooldown( ) && held->class_name_hash() != STATIC_CRC32("BowWeapon") && held->class_name_hash() != STATIC_CRC32("CompoundBowWeapon")) { // im sorry for my sins
+			if (held->HasReloadCooldown( ) && held->class_name_hash( ) != STATIC_CRC32("BowWeapon") && held->class_name_hash( ) != STATIC_CRC32("CompoundBowWeapon")) { // im sorry for my sins
 				float time_left = held->nextReloadTime( ) - GLOBAL_TIME;
 				float time_full = held->CalculateCooldownTime(held->nextReloadTime( ), held->reloadTime( )) - GLOBAL_TIME;
-				
+
 				Renderer::rectangle_filled({ screen_center.x - 26, screen_center.y + 64 }, { 51, 5 }, Color3(0, 0, 0));
 				Renderer::rectangle_filled({ screen_center.x - 25, screen_center.y + 65 }, { 50 * (time_left / time_full), 4 }, Color3(0, 255, 0));
 				Renderer::text({ (screen_center.x - 25) + (50 * (time_left / time_full)), screen_center.y + 65 + 2 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)ceil(time_left));
@@ -64,6 +76,7 @@ namespace players {
 
 			auto bounds = player->bones( )->bounds;
 			if (!bounds.empty( )) {
+				int y_ = 0;
 
 				float box_width = bounds.right - bounds.left;
 				float box_height = bounds.bottom - bounds.top;
@@ -74,8 +87,31 @@ namespace players {
 
 				Renderer::text(headPos, col, 13.f, true, true, wxorstr_(L"%s [%dhp %dm]"), player->_displayName( ), (int)ceil(player->health( )), (int)ceil(player->bones( )->head->position.distance(local->bones( )->head->position)));
 
-				if (player->GetHeldItem( ))
-					Renderer::text(footPos, col, 13.f, true, true, player->GetHeldItem( )->info( )->shortname( ));
+				/*Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);*/
+				Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+				Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+
+				Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+
+				Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+				Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+
+				Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+
+				if (player->GetHeldItem( )) {
+					Renderer::text(footPos, col, 13.f, true, true, player->GetHeldItem( )->info( )->shortname( )); 
+					y_ += 16;
+				}
+				if (player->HasPlayerFlag(PlayerFlags::Wounded)) {
+					Renderer::text(footPos + Vector2(0, y_), Color3(255, 0, 0, 128), 13.f, true, true, wxorstr_(L"*wounded*"));
+					y_ += 16;
+				}
+				if (player->HasPlayerFlag(PlayerFlags::SafeZone)) {
+					Renderer::text(footPos + Vector2(0, y_), Color3(0, 255, 0, 128), 13.f, true, true, wxorstr_(L"*safezone*"));
+					y_ += 16;
+				}
 
 				if (target_ply == nullptr)
 					target_ply = player;

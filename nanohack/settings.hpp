@@ -2,24 +2,26 @@ namespace settings {
 	bool menu = true;
 	bool cheat_init = false;
 
-	bool nofall = false;
-	bool infinite_jump = false;
-	bool players = false;
+	bool nofall = true;
+	bool always_eoka = true;
+	bool infinite_jump = true;
+	bool players = true;
 	bool npcs = false;
-	bool manipulator = false;
-	bool omnisprint = false;
-	bool freeaim = false;
-	bool psilent = false;
-	bool bigger_bullets = false;
-	bool fastloot = false;
-	bool faster_bullets = false;
-	bool penetrate = false;
+	bool manipulator = true;
+	bool walkonwater = true;
+	bool omnisprint = true;
+	bool freeaim = true;
+	bool psilent = true;
+	bool bigger_bullets = true;
+	bool fastloot = true;
+	bool faster_bullets = true;
+	bool penetrate = true;
 
 	float test1 = 0.f;
 	float test2 = 0.f;
 
-	int lightning = 0;
-	int h_override = 0;
+	int lightning = 2;
+	int h_override = 2;
 }
 
 uintptr_t game_assembly = 0;

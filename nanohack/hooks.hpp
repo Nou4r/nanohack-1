@@ -19,6 +19,28 @@ void ClientUpdate_hk(BasePlayer* player) {
 			else
 				other::m_manipulate = Vector3::Zero( );
 
+			Physics::IgnoreLayerCollision(4, 12, !settings::walkonwater);
+			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
+			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
+
+			/*static bool once = false;
+			if (target_ply != nullptr && !once) {
+
+				auto arr = target_ply->model( )->boneTransforms( );
+				auto arr2 = target_ply->model( )->boneNames( );
+				if (arr) {
+					for (int i = 0; i < arr->size( ); i++) {
+						auto transform = reinterpret_cast<Transform*>(arr->get(i));
+						if (!transform)
+							return;
+
+						printf("%ls || idx: %d", arr2->get(i)->buffer, i);
+					}
+				}
+					 
+				once = true;
+			}*/
+
 			if (settings::lightning != 0) {
 				auto list = TOD_Sky::instances( );
 				if (list) {
@@ -70,6 +92,12 @@ void SendProjectileAttack_hk(BasePlayer* player, PlayerProjectileAttack* playerP
 	}
 
 	return player->SendProjectileAttack(playerProjectileAttack);
+}
+void DoAttack_hk(FlintStrikeWeapon* weapon) {
+	if (settings::always_eoka)
+		weapon->_didSparkThisFrame( ) = true;
+
+	return weapon->DoAttack( );
 }
 Vector3 BodyLeanOffset_hk(PlayerEyes* a1) {
 	if (settings::manipulator) {
@@ -184,10 +212,10 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	}
 	return prj->DoHit(test, point, normal);
 }
-uintptr_t StartCoroutine_hk(MonoBehaviour* a1, uintptr_t un2) {
+System::Object* StartCoroutine_hk(MonoBehaviour* a1, System::Object* un2) {
 	if (settings::fastloot) {
-		static auto ptr = METHOD("Assembly-CSharp::ItemIcon::SetTimedLootAction(UInt32,Action): Void");
-		if (CALLED_BY(ptr, 0x656))
+		static auto v = METHOD("Assembly-CSharp::ItemIcon::SetTimedLootAction(UInt32,Action): Void");
+		if (CALLED_BY(v, 0x656))
 			*reinterpret_cast<float*>(un2 + 0x28) = -0.2f;
 	}
 
@@ -212,6 +240,7 @@ void do_hooks( ) {
 	hookengine::hook(BasePlayer::CanAttack_, CanAttack_hk);
 	hookengine::hook(BasePlayer::OnLand_, OnLand_hk);
 	hookengine::hook(Projectile::DoMovement_, DoMovement_hk);
+	hookengine::hook(FlintStrikeWeapon::DoAttack_, DoAttack_hk);
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);

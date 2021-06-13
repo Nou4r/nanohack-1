@@ -2,52 +2,51 @@ namespace bonecache {
 	std::array<int, 20> bones = {
 		1, 2, 3, 5, 6, 14, 15, 17, 18, 21, 23, 24, 25, 26, 27, 48, 55, 56, 57, 76
 	};
-	bool get_bounds(box_bounds& out, BasePlayer* player, float expand = 0) {
-		out = { FLT_MAX, FLT_MIN, FLT_MAX, FLT_MIN };
+	box_bounds get_bounds(BasePlayer* player, float expand = 0) {
+		box_bounds ret = { FLT_MAX, FLT_MIN, FLT_MAX, FLT_MIN };
 
-		for (auto& j : bones) {
+		for (auto j : bones) {
+			auto arr = player->model( )->boneTransforms( );
+			if (arr) {
+				auto transform = player->model( )->boneTransforms( )->gett(j);
+				if (transform) {
+					Vector2 sc;
+					auto world_pos = transform->position( );
 
-			if (player->model( )) {
-				if (player->model( )->boneTransforms( )) {
-					auto transform = player->model( )->boneTransforms( )->gett(j);
-					if (transform) {
-						Vector3 world_position = transform->position( );
+					if (j == 48)
+						world_pos.y += 0.2f;
 
-						if (j == 48) // jaw
-							world_position.y += 0.2f;
+					if (Camera::world_to_screen(world_pos, sc)) {
+						Vector2 bone_screen = sc;
 
-						Vector2 sc;
-						if (Camera::world_to_screen(world_position, sc)) {
-							Vector2 bone_screen = sc;
-							if (bone_screen.x < out.left)
-								out.left = bone_screen.x;
-							if (bone_screen.x > out.right)
-								out.right = bone_screen.x;
-							if (bone_screen.y < out.top)
-								out.top = bone_screen.y;
-							if (bone_screen.y > out.bottom)
-								out.bottom = bone_screen.y;
-						}
+						if (bone_screen.x < ret.left)
+							ret.left = bone_screen.x;
+						if (bone_screen.x > ret.right)
+							ret.right = bone_screen.x;
+						if (bone_screen.y < ret.top)
+							ret.top = bone_screen.y;
+						if (bone_screen.y > ret.bottom)
+							ret.bottom = bone_screen.y;
 					}
 				}
 			}
 		}
 
-		if (out.left == FLT_MAX)
-			return false;
-		if (out.right == FLT_MIN)
-			return false;
-		if (out.top == FLT_MAX)
-			return false;
-		if (out.bottom == FLT_MIN)
-			return false;
+		if (ret.left == FLT_MAX)
+			return box_bounds::null( );
+		if (ret.right == FLT_MIN)
+			return box_bounds::null( );
+		if (ret.top == FLT_MAX)
+			return box_bounds::null( );
+		if (ret.bottom == FLT_MIN)
+			return box_bounds::null( );
 
-		out.left -= expand;
-		out.right += expand;
-		out.top -= expand;
-		out.bottom += expand;
+		ret.left -= expand;
+		ret.right += expand;
+		ret.top -= expand;
+		ret.bottom += expand;
 
-		return true;
+		return ret;
 	};
 	void cachePlayer(BasePlayer* player) {
 		auto model = player->model( );
@@ -77,21 +76,21 @@ namespace bonecache {
 			cache->r_ankle_scale = model->resolve(STATIC_CRC32("r_ankle_scale"));
 			cache->r_foot = model->resolve(STATIC_CRC32("r_foot"));
 
-			box_bounds bo;
+
 			if (player->userID( ) != LocalPlayer::Entity( )->userID( )) {
-				if (get_bounds(bo, player, 4.f))
-					if (!bo.empty( ))
-						cache->bounds = bo;
+				box_bounds bo = get_bounds(player, 4.f);
+				if (!bo.empty( ))
+					cache->bounds = bo;
 
 				Vector2 footPos;
-				if (Camera::world_to_screen(cache->head->position, footPos)) {
+				if (Camera::world_to_screen(cache->head->position, footPos))
 					cache->dfc = footPos;
+
+				Vector2 forwardd;
+				if (Camera::world_to_screen(cache->head->position + (player->eyes( )->BodyForward( ) * 2), forwardd)) {
+					cache->forward = forwardd;
 				}
 			}
-				
-
-			if (LocalPlayer::Entity( )->userID( ) == player->userID( ))
-				cache->bottom = LocalPlayer::Entity( )->transform( )->position( );
 
 			if (!map_contains_key(cachedBones, player->userID( )))
 				cachedBones.insert(std::make_pair(player->userID( ), cache));

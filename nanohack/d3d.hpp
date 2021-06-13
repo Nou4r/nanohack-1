@@ -21,7 +21,9 @@ namespace d3d {
 				menu::add_checkbox(&settings::psilent, wxorstr_(L"psilent"));
 				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") });
 				menu::add_checkbox(&settings::manipulator, wxorstr_(L"manipulator"));
+				menu::add_checkbox(&settings::always_eoka, wxorstr_(L"1 hit eoka"));
 				menu::add_checkbox(&settings::penetrate, wxorstr_(L"pierce"));
+				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
 				menu::add_checkbox(&settings::bigger_bullets, wxorstr_(L"expand hitboxes"));
 				menu::add_checkbox(&settings::faster_bullets, wxorstr_(L"faster bullets"));
 				menu::add_checkbox(&settings::omnisprint, wxorstr_(L"omnidirectional sprinting"));
@@ -92,8 +94,6 @@ namespace d3d {
 			auto table = *reinterpret_cast<PVOID**>(swapchain);
 			present_original = reinterpret_cast<HRESULT(__fastcall*)(IDXGISwapChain*, UINT, UINT)>(table[ 8 ]);
 			resize_original = reinterpret_cast<HRESULT(__fastcall*)(IDXGISwapChain*, UINT, UINT, UINT, DXGI_FORMAT, UINT)>(table[ 13 ]);
-
-			swapchain->Release( );
 
 			hookengine::hook(present_original, present_hook);
 			hookengine::hook(resize_original, resize_hook);
