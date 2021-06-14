@@ -159,7 +159,7 @@ namespace Renderer {
 	}
 
 	void filled_circle(const Vector2 start, Color3 color, float radius) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), 1.f));
+		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), color.a / 255));
 		m_pCanvas->FillEllipse({ { start.x, start.y}, radius,radius }, m_pSolidBrush);
 	}
 
@@ -199,7 +199,7 @@ namespace Renderer {
 				m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y + 1), dwrite_layout, m_pSolidBrush);
 			}
 
-			m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, 255)));
+			m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, clr.a)));
 
 			m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y), dwrite_layout, m_pSolidBrush);
 			dwrite_layout->Release( );
@@ -219,7 +219,7 @@ namespace Renderer {
 			m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y + 1), dwrite_layout, m_pSolidBrush);
 		}
 
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, 255)));
+		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, clr.a)));
 		m_pCanvas->DrawTextLayout(D2D1::Point2F(pos.x, pos.y), dwrite_layout, m_pSolidBrush);
 		dwrite_layout->Release( );
 	}

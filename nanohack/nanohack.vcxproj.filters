@@ -84,5 +84,8 @@
     <ClInclude Include="other.hpp">
       <Filter>Source Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="math.hpp">
+      <Filter>Source Files\core\utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -922,6 +922,7 @@ public:
 	box_bounds bounds;
 	Vector2 dfc;
 	Vector2 forward;
+	Quaternion e_rot;
 
 	BoneCache( ) {
 		head = new Bone( );
@@ -950,6 +951,7 @@ public:
 		bounds = { 0, 0, 0, 0 };
 		dfc = Vector2( );
 		forward = { };
+		e_rot = {};
 	}
 };
 class Attack {
@@ -1130,6 +1132,12 @@ public:
 			return false;
 
 		return map_contains_key(cachedBones, this->userID( ));
+	}
+	bool out_of_fov( ) {
+		if (!this->bones( )->dfc.empty( ))
+			return true;
+
+		return this->bones( )->dfc.distance(screen_center) < 1000.f;
 	}
 	bool is_visible( ) {
 		if (!this->isCached( ))

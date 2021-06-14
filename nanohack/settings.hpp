@@ -6,6 +6,7 @@ namespace settings {
 	bool always_eoka = true;
 	bool infinite_jump = true;
 	bool players = true;
+	bool oof_indicators = true;
 	bool npcs = false;
 	bool manipulator = true;
 	bool walkonwater = true;

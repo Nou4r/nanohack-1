@@ -43,6 +43,7 @@
 #include "game.hpp"
 #include "bonecache.hpp"
 #include "other.hpp"
+#include "math.hpp"
 #include "players.hpp"
 #include "d3d.hpp"
 #include "aimutils.hpp"

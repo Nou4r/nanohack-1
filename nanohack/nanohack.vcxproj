@@ -162,6 +162,7 @@
     <ClInclude Include="crc32.hpp" />
     <ClInclude Include="d3d.hpp" />
     <ClInclude Include="dissector.hpp" />
+    <ClInclude Include="math.hpp" />
     <ClInclude Include="other.hpp" />
     <ClInclude Include="players.hpp" />
     <ClInclude Include="game.hpp" />

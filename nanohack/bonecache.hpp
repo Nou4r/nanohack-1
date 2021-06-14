@@ -91,6 +91,9 @@ namespace bonecache {
 					cache->forward = forwardd;
 				}
 			}
+			else {
+				cache->e_rot = LocalPlayer::Entity( )->eyes( )->rotation( );
+			}
 
 			if (!map_contains_key(cachedBones, player->userID( )))
 				cachedBones.insert(std::make_pair(player->userID( ), cache));

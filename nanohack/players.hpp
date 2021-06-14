@@ -100,6 +100,20 @@ namespace players {
 				Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
 				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
 
+				if (settings::oof_indicators) {
+					if (player->out_of_fov( )) {
+						Vector3 local_pos = local->bones( )->head->position;
+						float y = local_pos.x - player->bones( )->head->position.x;
+						float x = local_pos.z - player->bones( )->head->position.z;
+						Vector3 eulerAngles = math::EulerAngles(local->bones( )->e_rot);
+						float num = atan2(y, x) * 57.29578f - 180.f - eulerAngles.y;
+						Vector2 point = math::CalculateRotationPoint(num, 5.f, screen_center.x, screen_center.y, 200.f);
+
+						Renderer::filled_circle(point, Color3(43, 43, 43, 128), 9.f);
+						Renderer::circle(point, col, 9.f, 0.5f);
+					}
+				}
+
 				if (player->GetHeldItem( )) {
 					Renderer::text(footPos, col, 13.f, true, true, player->GetHeldItem( )->info( )->shortname( ));
 					y_ += 16;
