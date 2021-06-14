@@ -17,6 +17,7 @@ namespace d3d {
 
 			if (!menu_init) {
 				menu::add_checkbox(&settings::players, wxorstr_(L"player esp"));
+				menu::add_checkbox(&settings::chams, wxorstr_(L"chams"));
 				menu::add_checkbox(&settings::npcs, wxorstr_(L"npc esp"));
 				menu::add_checkbox(&settings::psilent, wxorstr_(L"psilent"));
 				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") });

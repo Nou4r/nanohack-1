@@ -19,6 +19,10 @@ public:
 		}
 	}
 };
+class Object {
+public:
+
+};
 class Type {
 public:
 	// pass as "Namespace.Classname, Assembly.Name"
@@ -34,11 +38,22 @@ public:
 		Type* type = GetType(xorstr_("UnityEngine.Renderer, UnityEngine.CoreModule"));
 		return type;
 	}
+	static Type* Shader( ) {
+		Type* type = GetType(xorstr_("UnityEngine.Shader, UnityEngine.CoreModule"));
+		return type;
+	}
 };
 namespace System {
 	class Object {
 	public:
 
+	};
+	class File {
+	public:
+		static Array<byte>* ReadAllBytes(const char* path) {
+			static auto ptr = METHOD("System.IO.FileSystem::System.IO::File::ReadAllBytes(String): Byte[]");
+			return reinterpret_cast<Array<byte>*(__cdecl*)(String*)>(ptr)(String::New(path));
+		}
 	};
 }
 class GameObject;
@@ -247,6 +262,7 @@ public:
 	}
 	FIELD("Assembly-CSharp::BaseEntity::model", model, Model*);
 };
+
 class GamePhysics {
 public:
 	enum QueryTriggerInteraction {
@@ -258,7 +274,7 @@ public:
 	STATIC_FUNCTION("Assembly-CSharp::GamePhysics::CheckCapsule(Vector3,Vector3,Single,Int32,QueryTriggerInteraction): Boolean", CheckCapsule, bool(Vector3, Vector3, float, int, QueryTriggerInteraction));
 };
 bool LineOfSight(Vector3 a, Vector3 b) {
-	bool result = GamePhysics::LineOfSight(a, b, 1503731969, 0.f);
+	bool result = GamePhysics::LineOfSight(a, b, 10551296, 0.f);
 	return result;
 }
 class Time {
@@ -627,6 +643,11 @@ public:
 		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Renderer::get_material(): Material");
 		return reinterpret_cast<Material * (__fastcall*)(Renderer_*)>(off)(this);
 	}
+	Array<Material*>* materials( ) {
+		if (!this) return nullptr;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Renderer::get_materials(): Material[]");
+		return reinterpret_cast<Array<Material*>*(__fastcall*)(Renderer_*)>(off)(this);
+	}
 };
 class SkinnedMeshRenderer : public Renderer_ {
 public:
@@ -779,6 +800,15 @@ public:
 		return DoAttack_(this);
 	}
 };
+class Renderer_;
+class SkinnedMultiMesh {
+public:
+	List<Renderer_*>* Renderers( ) {
+		if (!this) return nullptr;
+		static auto off = OFFSET("Assembly-CSharp::SkinnedMultiMesh::<Renderers>k__BackingField");
+		return *reinterpret_cast<List<Renderer_*>**>(this + off);
+	}
+};
 class PlayerModel {
 public:
 	Vector3 newVelocity( ) {
@@ -791,6 +821,7 @@ public:
 		static auto off = OFFSET("Assembly-CSharp::PlayerModel::<IsNpc>k__BackingField");
 		return *reinterpret_cast<bool*>(this + off);
 	}
+	FIELD("Assembly-CSharp::PlayerModel::_multiMesh", _multiMesh, SkinnedMultiMesh*);
 };
 class TOD_AtmosphereParameters {
 public:
@@ -1165,6 +1196,24 @@ public:
 		}
 
 		return nullptr;
+	}
+};
+class AssetBundle {
+public:
+	Array<String*>* GetAllAssetNames( ) {
+		if (!this) return {};
+		static auto off = METHOD("UnityEngine.AssetBundleModule::UnityEngine::AssetBundle::GetAllAssetNames(): String[]");
+		return reinterpret_cast<Array<String*>*(*)(AssetBundle*)>(off)(this);
+	}
+	template<typename T = Object>
+	T* LoadAsset(char* name, Type* type) {
+		if (!this) return {};
+		static auto off = METHOD("UnityEngine.AssetBundleModule::UnityEngine::AssetBundle::LoadAsset(String,Type): Object");
+		return reinterpret_cast<Object * (*)(AssetBundle*, String*, Type*)>(off)(this, String::New(name), type);
+	}
+	static AssetBundle* LoadFromFile(char* path) {
+		static auto off = METHOD("UnityEngine.AssetBundleModule::UnityEngine::AssetBundle::LoadFromFile(String): AssetBundle");
+		return reinterpret_cast<AssetBundle * (*)(String*)>(off)(String::New(path));
 	}
 };
 class Model : public Component {

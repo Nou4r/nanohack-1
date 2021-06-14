@@ -14,7 +14,7 @@ namespace players {
 	void loop( ) {
 		Renderer::circle(screen_center - Vector2(2, 2), Color3(255, 255, 255), 4.f, 0.75f);
 		Renderer::circle(screen_center + Vector2(2, 2), Color3(0, 0, 0), 4.f, 0.75f);
-		
+
 		auto local = LocalPlayer::Entity( );
 		if (local == nullptr || !local->isCached( )) {
 			target_ply = nullptr;
@@ -42,12 +42,12 @@ namespace players {
 						Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
 
 					if (settings::manipulator && !other::m_manipulate.empty( ))
-						Renderer::text({ screen_center.x, screen_center.y + 55 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[manipulated]"));
+						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
 
 					if (target_ply->find_mpv_bone( )->visible)
-						Renderer::text({ screen_center.x, screen_center.y + 40 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[shootable]"));
+						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
-					Renderer::text({ screen_center.x, screen_center.y + 25 }, Color3(255, 0, 0), 12.f, true, true, target_ply->_displayName( ));
+					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 				}
 		}
 
@@ -57,9 +57,9 @@ namespace players {
 				float time_left = held->nextReloadTime( ) - GLOBAL_TIME;
 				float time_full = held->CalculateCooldownTime(held->nextReloadTime( ), held->reloadTime( )) - GLOBAL_TIME;
 
-				Renderer::rectangle_filled({ screen_center.x - 26, screen_center.y + 64 }, { 51, 5 }, Color3(0, 0, 0));
-				Renderer::rectangle_filled({ screen_center.x - 25, screen_center.y + 65 }, { 50 * (time_left / time_full), 4 }, Color3(0, 255, 0));
-				Renderer::text({ (screen_center.x - 25) + (50 * (time_left / time_full)), screen_center.y + 65 + 2 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)ceil(time_left));
+				Renderer::rectangle_filled({ screen_center.x - 26, screen_center.y + 20 }, { 51, 5 }, Color3(0, 0, 0));
+				Renderer::rectangle_filled({ screen_center.x - 25, screen_center.y + 21 }, { 50 * (time_left / time_full), 4 }, Color3(0, 255, 0));
+				Renderer::text({ (screen_center.x - 25) + (50 * (time_left / time_full)), screen_center.y + 21 + 2 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)ceil(time_left));
 			}
 		}
 
@@ -101,15 +101,11 @@ namespace players {
 				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
 
 				if (player->GetHeldItem( )) {
-					Renderer::text(footPos, col, 13.f, true, true, player->GetHeldItem( )->info( )->shortname( )); 
+					Renderer::text(footPos, col, 13.f, true, true, player->GetHeldItem( )->info( )->shortname( ));
 					y_ += 16;
 				}
 				if (player->HasPlayerFlag(PlayerFlags::Wounded)) {
 					Renderer::text(footPos + Vector2(0, y_), Color3(255, 0, 0, 128), 13.f, true, true, wxorstr_(L"*wounded*"));
-					y_ += 16;
-				}
-				if (player->HasPlayerFlag(PlayerFlags::SafeZone)) {
-					Renderer::text(footPos + Vector2(0, y_), Color3(0, 255, 0, 128), 13.f, true, true, wxorstr_(L"*safezone*"));
 					y_ += 16;
 				}
 
@@ -118,6 +114,61 @@ namespace players {
 				else
 					if (dfc(target_ply) > dfc(player))
 						target_ply = player;
+			}
+		}
+	}
+
+	void gamethread_loop( ) {
+		auto local = LocalPlayer::Entity( );
+		if (local == nullptr || !local->isCached( )) {
+			target_ply = nullptr;
+			return;
+		}
+
+		if (!local->HasPlayerFlag(PlayerFlags::Connected)) {
+			target_ply = nullptr;
+			return;
+		}
+
+		auto playerList = BasePlayer::visiblePlayerList( );
+		if (!playerList) {
+			target_ply = nullptr;
+			return;
+		}
+
+		for (int i = 0; i < playerList->vals->size; i++) {
+			auto player = *reinterpret_cast<BasePlayer**>(std::uint64_t(playerList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
+
+			if (!player) continue;
+			if (!player->IsValid( )) continue;
+			if (!player->isCached( )) continue;
+			if (player->health( ) <= 0.0f) continue;
+			if (player->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
+			if (player->playerModel( )->isNpc( ) && !settings::npcs) continue;
+			if (player->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
+
+			//assets/shaders/chams.shader
+			//assets/shaders/chamslit.shader
+
+			if (settings::chams) {
+				static auto	bundle = AssetBundle::LoadFromFile(xorstr_("C:/Users/yty/Desktop/d/EgguWare-Unturned-master/EgguWare-Unturned-master/Assets/loader.assets"));
+				static auto shader_from_bundle = (Shader*)bundle->LoadAsset(xorstr_("assets/shaders/chams.shader"), Type::Shader( ));
+				if (shader_from_bundle && bundle) {
+					auto renderer_list = player->playerModel( )->_multiMesh( )->Renderers( );
+					if (renderer_list) {
+						for (int j = 0; j < renderer_list->size; j++) {
+							auto renderer = (Renderer_*)renderer_list->get(j);
+							if (!renderer)
+								continue;
+
+							if (renderer->material( )->shader( ) != shader_from_bundle) {
+								renderer->material( )->set_shader(shader_from_bundle);
+								renderer->material( )->SetColor(xorstr_("_ColorVisible"), Color::yellow( ));
+								renderer->material( )->SetColor(xorstr_("_ColorBehind"), Color::red( ));
+							}
+						}
+					}
+				}
 			}
 		}
 	}

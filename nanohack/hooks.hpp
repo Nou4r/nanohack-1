@@ -23,6 +23,21 @@ void ClientUpdate_hk(BasePlayer* player) {
 			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
 			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
 
+			/*auto held = local->GetHeldEntity( );
+			if (held) {
+				auto renderers = held->GetComponentsInChildren<Renderer_>(Type::Renderer( ));
+				if (renderers) {
+					for (int j = 0; j < renderers->size( ); j++) {
+						auto renderer = renderers->get(j);
+						if (!renderer)
+							continue;
+						
+						static auto b = Shader::Find(xorstr_("lol"));
+
+						renderer->material( )->set_shader(b);
+					}
+				}
+			}*/
 			/*static bool once = false;
 			if (target_ply != nullptr && !once) {
 
@@ -34,18 +49,19 @@ void ClientUpdate_hk(BasePlayer* player) {
 						if (!transform)
 							return;
 
-						printf("%ls || idx: %d", arr2->get(i)->buffer, i);
+						printf("%ls || idx: %d\n", arr2->get(i)->buffer, i);
 					}
 				}
 					 
 				once = true;
 			}*/
+			players::gamethread_loop( );
 
 			if (settings::lightning != 0) {
 				auto list = TOD_Sky::instances( );
 				if (list) {
 					for (int j = 0; j < list->size; j++) {
-						auto sky = reinterpret_cast<TOD_Sky*>(list->get(j));
+						auto sky = (TOD_Sky*)list->get(j);
 						if (!sky)
 							continue;
 

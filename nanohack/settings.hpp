@@ -13,6 +13,7 @@ namespace settings {
 	bool freeaim = true;
 	bool psilent = true;
 	bool bigger_bullets = true;
+	bool chams = false;
 	bool fastloot = true;
 	bool faster_bullets = true;
 	bool penetrate = true;
