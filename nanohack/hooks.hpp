@@ -88,26 +88,32 @@ Vector3 GetModifiedAimConeDirection_hk(float aimCone, Vector3 inputVec, bool any
 
 	return AimConeUtil::GetModifiedAimConeDirection(aimCone, inputVec, anywhereInside);
 }
-void SendProjectileAttack_hk(BasePlayer* player, PlayerProjectileAttack* playerProjectileAttack) {
-	uint32_t hitID = playerProjectileAttack->playerAttack( )->attack( )->hitID( );
-	BaseCombatEntity* entity = BaseNetworkable::clientEntities( )->Find<BaseCombatEntity*>(hitID);
+Attack* BuildAttackMessage_hk(HitTest* self) {
+	auto ret = self->BuildAttackMessage( );
 
-	if (!entity)
-		return player->SendProjectileAttack(playerProjectileAttack);
+	DDraw::Line(LocalPlayer::Entity( )->eyes( )->position_e( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
 
-	if (!entity->IsValid( ))
-		return player->SendProjectileAttack(playerProjectileAttack);
+	auto entity = BaseNetworkable::clientEntities( )->Find<BasePlayer*>(ret->hitID( ));
 
-	if (settings::h_override != 0) {
-		if (entity->IsPlayer( )) {
-			if (settings::h_override == 1)
-				playerProjectileAttack->playerAttack( )->attack( )->hitBone( ) = StringPool::Get(xorstr_("spine4"));
-			else if (settings::h_override == 2)
-				playerProjectileAttack->playerAttack( )->attack( )->hitBone( ) = StringPool::Get(xorstr_("head"));
-		}
+	if (settings::h_override == 0 || !entity || !entity->IsPlayer( ))
+		return ret;
+
+	if (!LocalPlayer::Entity( )->isCached( ) || !entity->isCached( ))
+		return ret;
+
+	if (settings::h_override == 1) {
+		ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
+		ret->hitPositionWorld( ) = entity->bones( )->spine4->position;
+	}
+	else if (settings::h_override == 2) {
+		ret->hitBone( ) = StringPool::Get(xorstr_("head"));
+		ret->hitPositionWorld( ) = entity->bones( )->head->position;
 	}
 
-	return player->SendProjectileAttack(playerProjectileAttack);
+	//Vector3 re_p = LocalPlayer::Entity( )->transform( )->position( ) + LocalPlayer::Entity( )->transform( )->up( ) * (PlayerEyes::EyeOffset( ).y + LocalPlayer::Entity( )->eyes( )->viewOffset( ).y);
+	//ret->pointStart( ) = re_p;
+
+	return ret;
 }
 void DoAttack_hk(FlintStrikeWeapon* weapon) {
 	if (settings::always_eoka)
@@ -186,7 +192,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 void DoMovement_hk(Projectile* pr, float deltaTime) {
 	if (pr->isAuthoritative( ))
 		if (settings::bigger_bullets)
-			pr->thickness( ) = 0.5f;
+			pr->thickness( ) = 1.0f + settings::test1;
 
 	return pr->DoMovement(deltaTime);
 }
@@ -260,7 +266,8 @@ void do_hooks( ) {
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
-	hookengine::hook(BasePlayer::SendProjectileAttack_, SendProjectileAttack_hk);
+	//hookengine::hook(BasePlayer::SendProjectileAttack_, SendProjectileAttack_hk);
+	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
 	hookengine::hook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);
 	hookengine::hook(BasePlayer::ClientInput_, ClientInput_hk);

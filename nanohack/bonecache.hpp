@@ -83,7 +83,8 @@ namespace bonecache {
 					cache->bounds = bo;
 
 				Vector2 footPos;
-				if (Camera::world_to_screen(cache->head->position, footPos))
+				cache->w2s = Camera::world_to_screen(cache->head->position, footPos);
+				if (cache->w2s)
 					cache->dfc = footPos;
 
 				Vector2 forwardd;

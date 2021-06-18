@@ -238,7 +238,7 @@ public:
 	};
 	bool IsValid( ) {
 		if (!this) return false;
-		return !this->IsDestroyed( );
+		return !this->IsDestroyed( ) && this->net( ) != nullptr;
 	}
 	void ServerRPC(const char* funcName) {
 		if (!this) return;
@@ -677,6 +677,7 @@ public:
 		return reinterpret_cast<String * (__fastcall*)(uint32_t)>(off)(i);
 	}
 };
+class Attack;
 class HitTest {
 public:
 	FIELD("Assembly-CSharp::HitTest::type", type, Type);
@@ -707,6 +708,10 @@ public:
 		if (!this) return Vector3::Zero( );
 		static auto off = METHOD("Assembly-CSharp::HitTest::HitNormalWorld(): Vector3");
 		return reinterpret_cast<Vector3(__fastcall*)(HitTest*)>(off)(this);
+	}
+	static inline Attack* (*BuildAttackMessage_)(HitTest*) = nullptr;
+	Attack* BuildAttackMessage( ) {
+		return BuildAttackMessage_(this);
 	}
 };
 class Physics {
@@ -922,6 +927,7 @@ public:
 	box_bounds bounds;
 	Vector2 dfc;
 	Vector2 forward;
+	bool w2s;
 	Quaternion e_rot;
 
 	BoneCache( ) {
@@ -952,6 +958,7 @@ public:
 		dfc = Vector2( );
 		forward = { };
 		e_rot = {};
+		w2s = false;
 	}
 };
 class Attack {
@@ -959,6 +966,9 @@ public:
 	FIELD("Rust.Data::ProtoBuf::Attack::hitID", hitID, uint32_t);
 	FIELD("Rust.Data::ProtoBuf::Attack::hitBone", hitBone, uint32_t);
 	FIELD("Rust.Data::ProtoBuf::Attack::hitMaterialID", hitMaterialID, uint32_t);
+	FIELD("Rust.Data::ProtoBuf::Attack::hitPositionWorld", hitPositionWorld, Vector3);
+	FIELD("Rust.Data::ProtoBuf::Attack::pointStart", pointStart, Vector3);
+	FIELD("Rust.Data::ProtoBuf::Attack::pointEnd", pointEnd, Vector3);
 };
 class PlayerAttack {
 public:
@@ -1134,10 +1144,10 @@ public:
 		return map_contains_key(cachedBones, this->userID( ));
 	}
 	bool out_of_fov( ) {
-		if (!this->bones( )->dfc.empty( ))
+		if (!this->isCached( ))
 			return true;
 
-		return this->bones( )->dfc.distance(screen_center) < 1000.f;
+		return this->bones( )->dfc.distance_2d(screen_center) > 1000.f;
 	}
 	bool is_visible( ) {
 		if (!this->isCached( ))
@@ -1205,6 +1215,10 @@ public:
 
 		return nullptr;
 	}
+};
+class DDraw {
+public:
+	STATIC_FUNCTION("Assembly-CSharp::UnityEngine::DDraw::Line(Vector3,Vector3,Color,Single,Boolean,Boolean): Void", Line, void(Vector3, Vector3, Color, float, bool, bool));
 };
 class AssetBundle {
 public:
@@ -1391,7 +1405,8 @@ void initialize_cheat( ) {
 	init_methods( );
 
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::ClientUpdate(): Void", BasePlayer::ClientUpdate_);
-	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::SendProjectileAttack(PlayerProjectileAttack): Void", BasePlayer::SendProjectileAttack_);
+	ASSIGN_HOOK("Assembly-CSharp::HitTest::BuildAttackMessage(): Attack", HitTest::BuildAttackMessage_);
+	//ASSIGN_HOOK("Assembly-CSharp::BasePlayer::SendProjectileAttack(PlayerProjectileAttack): Void", BasePlayer::SendProjectileAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerWalkMovement::HandleJumping(ModelState,Boolean,Boolean): Void", PlayerWalkMovement::HandleJumping_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::DoFirstPersonCamera(Camera): Void", PlayerEyes::DoFirstPersonCamera_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::ClientInput(InputState): Void", BasePlayer::ClientInput_);

@@ -48,6 +48,8 @@ namespace players {
 						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
+
+					//Renderer::boldtext({ screen_center.x + 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[%.2f, %.2f]"), target_ply->bones()->dfc.x, target_ply->bones( )->dfc.y);
 				}
 		}
 
@@ -57,9 +59,9 @@ namespace players {
 				float time_left = held->nextReloadTime( ) - GLOBAL_TIME;
 				float time_full = held->CalculateCooldownTime(held->nextReloadTime( ), held->reloadTime( )) - GLOBAL_TIME;
 
-				Renderer::rectangle_filled({ screen_center.x - 26, screen_center.y + 20 }, { 51, 5 }, Color3(0, 0, 0));
-				Renderer::rectangle_filled({ screen_center.x - 25, screen_center.y + 21 }, { 50 * (time_left / time_full), 4 }, Color3(0, 255, 0));
-				Renderer::text({ (screen_center.x - 25) + (50 * (time_left / time_full)), screen_center.y + 21 + 2 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)ceil(time_left));
+				Renderer::rectangle_filled({ screen_center.x - 26, screen_center.y + 30 }, { 51, 5 }, Color3(0, 0, 0));
+				Renderer::rectangle_filled({ screen_center.x - 25, screen_center.y + 31 }, { 50 * (time_left / time_full), 4 }, Color3(0, 255, 0));
+				Renderer::text({ (screen_center.x - 25) + (50 * (time_left / time_full)), screen_center.y + 31 + 2 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)ceil(time_left));
 			}
 		}
 
@@ -105,11 +107,11 @@ namespace players {
 						Vector3 local_pos = local->bones( )->head->position;
 						float y = local_pos.x - player->bones( )->head->position.x;
 						float x = local_pos.z - player->bones( )->head->position.z;
-						Vector3 eulerAngles = math::EulerAngles(local->bones( )->e_rot);
+						Vector3 eulerAngles = math::euler_angles(local->bones( )->e_rot);
 						float num = atan2(y, x) * 57.29578f - 180.f - eulerAngles.y;
-						Vector2 point = math::CalculateRotationPoint(num, 5.f, screen_center.x, screen_center.y, 200.f);
+						Vector2 point = math::calculate_rotation_point(num, 5.f, screen_center.x, screen_center.y, 200.f);
 
-						Renderer::filled_circle(point, Color3(43, 43, 43, 128), 9.f);
+						Renderer::filled_circle(point, Color3(43, 43, 43, 200), 9.f);
 						Renderer::circle(point, col, 9.f, 0.5f);
 					}
 				}

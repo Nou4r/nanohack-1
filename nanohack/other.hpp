@@ -1,6 +1,5 @@
 namespace other {
 	Vector3 m_manipulate = Vector3::Zero( );
-	
 	float m_last_manipulate_time = 0.f;
 
 	void find_manipulate_angle( ) {
@@ -28,12 +27,10 @@ namespace other {
 			Vector3(0.f, 0.7f, 0.f), // small up
 			Vector3(0.f, 1.40f, 0.f), // big up
 
-			Vector3(0.f, -0.7f, 0.f), // small down
-			Vector3(0.f, -1.40f, 0.f), // big down
-
 			Vector3(forward.x * 0.7f, 0.f, forward.z * 0.7f), // small forward
 			Vector3(forward.x * 1.40f, 0.f, forward.z * 1.40f), // big forward
-		};
+		}; // restoring procedure: *= 1.428571428571429 for 0.7f
+		   //                      *= 0.7142857142857143 for 1.4f
 
 		for (auto s : arr) {
 			Vector3 point = re_p + s;

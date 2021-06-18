@@ -34,13 +34,16 @@ namespace menu {
 	void add_item(bool* value, std::wstring label, /**/int type = 0, float* f_value = 0, float power = 0,/**/ std::vector<std::wstring> strings = { }, int* i_val = 0) {
 		int id = 0;
 
-		id = last_id + 1;
-		last_id += 1;
+		if (type != 3) {
+			id = last_id + 1;
+			last_id += 1;
+		}
 
 		items.emplace_back(value, label, id, type, f_value, power, strings, i_val);
 
-		if (items.size( ) >= 1)
-			item_amount += 1;
+		if (type != 3)
+			if (items.size( ) >= 1)
+				item_amount += 1;
 	}
 	void add_checkbox(bool* value, std::wstring label) {
 		add_item(value, label, 0);
@@ -50,6 +53,9 @@ namespace menu {
 	}
 	void add_selectable(int* controllable, std::wstring label, std::vector<std::wstring> strings) {
 		add_item(0, label, 2, 0, 0, strings, controllable);
+	}
+	void add_spacer( ) {
+		add_item(0, wxorstr_(L""), 3);
 	}
 	int current_ = 0;
 	void draw( ) {
@@ -121,7 +127,9 @@ namespace menu {
 				else
 					Renderer::text({ 200, 400.f + y_pos }, col, 14.f, true, true, wxorstr_(L"%s: %s"), entry.label.c_str( ), entry.strings[ *entry.int_val ].c_str( ));
 			}
-
+			else if (entry.type == 3) {
+				// nothing lol
+			}
 			y_pos += 17;
 		}
 	}

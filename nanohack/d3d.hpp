@@ -20,22 +20,24 @@ namespace d3d {
 				menu::add_checkbox(&settings::npcs, wxorstr_(L"npc esp"));
 				menu::add_checkbox(&settings::chams, wxorstr_(L"chams"));
 				menu::add_checkbox(&settings::oof_indicators, wxorstr_(L"out of fov indicators"));
+				menu::add_spacer( );
 				menu::add_checkbox(&settings::psilent, wxorstr_(L"psilent"));
 				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") });
 				menu::add_checkbox(&settings::manipulator, wxorstr_(L"manipulator"));
 				menu::add_checkbox(&settings::always_eoka, wxorstr_(L"1 hit eoka"));
 				menu::add_checkbox(&settings::penetrate, wxorstr_(L"pierce"));
-				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
 				menu::add_checkbox(&settings::bigger_bullets, wxorstr_(L"expand hitboxes"));
 				menu::add_checkbox(&settings::faster_bullets, wxorstr_(L"faster bullets"));
+				menu::add_spacer( );
+				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
 				menu::add_checkbox(&settings::omnisprint, wxorstr_(L"omnidirectional sprinting"));
 				menu::add_checkbox(&settings::nofall, wxorstr_(L"no fall damage"));
 				menu::add_checkbox(&settings::freeaim, wxorstr_(L"remove aiming restrictions"));
 				menu::add_checkbox(&settings::infinite_jump, wxorstr_(L"remove jumping restrictions"));
 				menu::add_checkbox(&settings::fastloot, wxorstr_(L"fast loot"));
 				menu::add_selectable(&settings::lightning, wxorstr_(L"lightning"), { wxorstr_(L"regular"), wxorstr_(L"dark ambient"), wxorstr_(L"light ambient") });
-				
-				//menu::add_slider(&settings::test1, wxorstr_(L"float1"));
+				menu::add_spacer( );
+				menu::add_slider(&settings::test1, wxorstr_(L"float1"));
 				//menu::add_slider(&settings::test2, wxorstr_(L"float2"));
 
 				menu_init = true;

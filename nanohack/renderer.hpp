@@ -159,7 +159,7 @@ namespace Renderer {
 	}
 
 	void filled_circle(const Vector2 start, Color3 color, float radius) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), color.a / 255));
+		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, color.a)));
 		m_pCanvas->FillEllipse({ { start.x, start.y}, radius,radius }, m_pSolidBrush);
 	}
 
