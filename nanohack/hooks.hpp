@@ -23,21 +23,28 @@ void ClientUpdate_hk(BasePlayer* player) {
 			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
 			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
 
-			/*auto held = local->GetHeldEntity( );
+			auto held = local->GetHeldEntity( );
 			if (held) {
-				auto renderers = held->GetComponentsInChildren<Renderer_>(Type::Renderer( ));
-				if (renderers) {
-					for (int j = 0; j < renderers->size( ); j++) {
-						auto renderer = renderers->get(j);
-						if (!renderer)
-							continue;
-						
-						static auto b = Shader::Find(xorstr_("lol"));
+				auto nigga = BaseViewModel::ActiveModels( );
+				if (nigga) {
+					for (int i = 0; i < nigga->size; i++) {
+						auto renderer_list = reinterpret_cast<BaseViewModel*>(nigga->get(i))->GetComponentsInChildren<SkinnedMeshRenderer>(Type::SkinnedMeshRenderer( ));
+						if (renderer_list) {
 
-						renderer->material( )->set_shader(b);
+							for (int j = 0; j < renderer_list->size( ); j++) {
+								auto renderer = (Renderer_*)renderer_list->get(j);
+								if (!renderer)
+									continue;
+
+								if (renderer->material( )->shader( ) != nullptr) {
+									renderer->material( )->set_shader(nullptr);
+								}
+							}
+						}
 					}
 				}
-			}*/
+				
+			}
 			/*static bool once = false;
 			if (target_ply != nullptr && !once) {
 
@@ -52,10 +59,10 @@ void ClientUpdate_hk(BasePlayer* player) {
 						printf("%ls || idx: %d\n", arr2->get(i)->buffer, i);
 					}
 				}
-					 
+
 				once = true;
 			}*/
-			players::gamethread_loop( );
+			//players::gamethread_loop( );
 
 			if (settings::lightning != 0) {
 				auto list = TOD_Sky::instances( );
@@ -266,7 +273,6 @@ void do_hooks( ) {
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
-	//hookengine::hook(BasePlayer::SendProjectileAttack_, SendProjectileAttack_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
 	hookengine::hook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);

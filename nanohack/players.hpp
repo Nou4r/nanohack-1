@@ -134,6 +134,7 @@ namespace players {
 		}
 	}
 
+	float last_shader_set = 0.f;
 	void gamethread_loop( ) {
 		auto local = LocalPlayer::Entity( );
 		if (local == nullptr || !local->isCached( )) {
@@ -152,24 +153,27 @@ namespace players {
 			return;
 		}
 
-		for (int i = 0; i < playerList->vals->size; i++) {
-			auto player = *reinterpret_cast<BasePlayer**>(std::uint64_t(playerList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
+		if (settings::chams) {
+			if (Time::time( ) >= last_shader_set) {
+				last_shader_set = Time::time( ) + 3.5f;
 
-			if (!player) continue;
-			if (!player->IsValid( )) continue;
-			if (!player->isCached( )) continue;
-			if (player->health( ) <= 0.0f) continue;
-			if (player->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
-			if (player->playerModel( )->isNpc( ) && !settings::npcs) continue;
-			if (player->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
+				for (int i = 0; i < playerList->vals->size; i++) {
+					auto player = *reinterpret_cast<BasePlayer**>(std::uint64_t(playerList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
 
-			//assets/shaders/chams.shader
-			//assets/shaders/chamslit.shader
+					if (!player) continue;
+					if (!player->IsValid( )) continue;
+					if (!player->isCached( )) continue;
+					if (player->health( ) <= 0.0f) continue;
+					if (player->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
+					if (player->playerModel( )->isNpc( ) && !settings::npcs) continue;
+					if (player->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
 
-			if (settings::chams) {
-				static auto	bundle = AssetBundle::LoadFromFile(xorstr_("C:/Users/yty/Desktop/d/EgguWare-Unturned-master/EgguWare-Unturned-master/Assets/loader.assets"));
-				static auto shader_from_bundle = (Shader*)bundle->LoadAsset(xorstr_("assets/shaders/chams.shader"), Type::Shader( ));
-				if (shader_from_bundle && bundle) {
+					//assets/shaders/chams.shader
+					//assets/shaders/chamslit.shader
+
+					//static auto	bundle = AssetBundle::LoadFromFile(xorstr_("C:/Users/yty/Desktop/EscapeFromTarkov-Trainer-master/EscapeFromTarkov-Trainer-master/Files/outline"));
+					//static auto shader_from_bundle = (Shader*)bundle->LoadAsset(xorstr_("assets/outline.shader"), Type::Shader( ));
+					//if (shader_from_bundle && bundle) {
 					auto renderer_list = player->playerModel( )->_multiMesh( )->Renderers( );
 					if (renderer_list) {
 						for (int j = 0; j < renderer_list->size; j++) {
@@ -177,13 +181,26 @@ namespace players {
 							if (!renderer)
 								continue;
 
-							if (renderer->material( )->shader( ) != shader_from_bundle) {
-								renderer->material( )->set_shader(shader_from_bundle);
-								renderer->material( )->SetColor(xorstr_("_ColorVisible"), Color::yellow( ));
-								renderer->material( )->SetColor(xorstr_("_ColorBehind"), Color::red( ));
-							}
+							auto material = renderer->material( );
+							if (!material)
+								continue;
+
+							auto shader = material->shader( );
+							if (!shader)
+								continue;
+
+							if (shader == nullptr)
+								continue;
+
+							material->set_shader(nullptr);
+
+							//material->SetColor(xorstr_("_FirstOutlineColor"), Color::yellow( ));
+							//material->SetFloat(xorstr_("_FirstOutlineWidth"), 0.02f + settings::test1);
+							//material->SetColor(xorstr_("_SecondOutlineColor"), Color::red( ));
+							//material->SetFloat(xorstr_("_SecondOutlineWidth"), 0.0025f + settings::test2);
 						}
 					}
+					//}
 				}
 			}
 		}

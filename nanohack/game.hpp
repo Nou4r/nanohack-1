@@ -567,6 +567,14 @@ public:
 		Apply_(this, vm);
 	}
 };
+class ViewmodelClothing {
+public:
+	FIELD("Assembly-CSharp::ViewmodelClothing::SkeletonSkins", SkeletonSkins, Array<uintptr_t>*);
+	static inline void(*CopyToSkeleton_)(ViewmodelClothing*, uintptr_t, GameObject*, Item*) = nullptr;
+	void CopyToSkeleton(uintptr_t skel, GameObject* parent, Item* item) {
+		CopyToSkeleton_(this, skel, parent, item);
+	}
+};
 class BaseViewModel : public Component {
 public:
 	static List<BaseViewModel*>* ActiveModels( ) {
@@ -624,6 +632,11 @@ public:
 		if (!this) return;
 		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Material::SetInt(String,Int32): Void");
 		return reinterpret_cast<void(__fastcall*)(Material*, String*, int)>(off)(this, String::New(name), value);
+	}
+	void SetFloat(char* name, float value) {
+		if (!this) return;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Material::SetFloat(String,Single): Void");
+		return reinterpret_cast<void(__fastcall*)(Material*, String*, float)>(off)(this, String::New(name), value);
 	}
 	Shader* shader( ) {
 		if (!this) return nullptr;
@@ -1406,7 +1419,6 @@ void initialize_cheat( ) {
 
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::ClientUpdate(): Void", BasePlayer::ClientUpdate_);
 	ASSIGN_HOOK("Assembly-CSharp::HitTest::BuildAttackMessage(): Attack", HitTest::BuildAttackMessage_);
-	//ASSIGN_HOOK("Assembly-CSharp::BasePlayer::SendProjectileAttack(PlayerProjectileAttack): Void", BasePlayer::SendProjectileAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerWalkMovement::HandleJumping(ModelState,Boolean,Boolean): Void", PlayerWalkMovement::HandleJumping_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::DoFirstPersonCamera(Camera): Void", PlayerEyes::DoFirstPersonCamera_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::ClientInput(InputState): Void", BasePlayer::ClientInput_);

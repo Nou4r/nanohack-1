@@ -71,7 +71,7 @@ namespace menu {
 		if (current_ > item_amount - 1)
 			current_ = 0;
 
-		Renderer::text({ 200, 400.f - 17 }, Color3(0, 127, 255), 14.f, true, true, wxorstr_(L"nanohack"));
+		Renderer::text({ 200, 400.f - 17 }, Color3(0, 127, 255), 14.f, true, true, wxorstr_(L"plusminus private"));
 
 		for (auto& entry : items) {
 

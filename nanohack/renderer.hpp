@@ -30,12 +30,14 @@ namespace Renderer {
 			D2D1_FACTORY_OPTIONS CreateOpt = { D2D1_DEBUG_LEVEL_NONE };
 			DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_pTextEngine), (IUnknown**)&m_pTextEngine);
 			D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &CreateOpt, (void**)&m_pInterface);
-			m_pTextEngine->CreateTextFormat(wxorstr_(L"Consola"), NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.f, L"", &m_pTextFormat);
+			m_pTextEngine->CreateTextFormat(wxorstr_(L"Arial"), NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.f, L"", &m_pTextFormat);
 			if (!m_pInterface || !m_pTextEngine || !m_pTextFormat) return false;
 		}
 
 		ID3D11Device* d3d_device;
-		if (SwapChain->GetDevice(IID_PPV_ARGS(&d3d_device))) return false;
+		if (SwapChain->GetDevice(IID_PPV_ARGS(&d3d_device))) 
+			return false;
+
 		WORD flagsOffset = *(WORD*)((*(uintptr_t**)d3d_device)[ 38 ] + 2);
 		int& flags = *(INT*)((uintptr_t)d3d_device + flagsOffset);
 		d3d_device->Release( );
@@ -45,12 +47,17 @@ namespace Renderer {
 			return false;
 
 		D2D1_RENDER_TARGET_PROPERTIES d2d_prop = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_HARDWARE, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED));
+
+		// set flags just for target creating,
 		flags |= 0x20;
-		HRESULT canvas_state = m_pInterface->CreateDxgiSurfaceRenderTarget(d3d_bbuf, d2d_prop, &m_pCanvas); flags &= ~0x20;
+		HRESULT canvas_state = m_pInterface->CreateDxgiSurfaceRenderTarget(d3d_bbuf, d2d_prop, &m_pCanvas); 
+		flags &= ~0x20;
+
 		d3d_bbuf->Release( );
 
 		if (canvas_state)
 			return false;
+
 		if (!m_pSolidBrush)
 			m_pCanvas->CreateSolidColorBrush({}, &m_pSolidBrush);
 
