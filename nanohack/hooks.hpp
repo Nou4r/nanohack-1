@@ -23,55 +23,6 @@ void ClientUpdate_hk(BasePlayer* player) {
 			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
 			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
 
-			/*auto held = local->GetHeldItem( );
-			if (held) {
-				std::cout << "held" << std::endl;
-				auto wearable = held->info( )->itemModWearable( )->targetWearable( );
-				if (wearable) {
-					std::cout << "wearable" << std::endl;
-					auto nigga = wearable->renderers( );
-					if (nigga) {
-						std::cout << "renderers: " << (int)nigga->size << std::endl;
-						for (int i = 0; i < nigga->size; i++) {
-							auto renderer = reinterpret_cast<Renderer_*>(nigga->get(i));
-							if (!renderer)
-								continue;
-
-							if (renderer->material( )->shader( ) != nullptr)
-								renderer->material( )->set_shader(nullptr);
-						}
-					}
-					auto nigga2 = wearable->skinnedRenderers( );
-					if (nigga2) {
-						std::cout << "skinnedrenderers: " << (int)nigga2->size << std::endl;
-						for (int i = 0; i < nigga2->size; i++) {
-							auto renderer = reinterpret_cast<Renderer_*>(nigga2->get(i));
-							if (!renderer)
-								continue;
-
-							if (renderer->material( )->shader( ) != nullptr)
-								renderer->material( )->set_shader(nullptr);
-						}
-					}
-				}
-			}*/
-			/*static bool once = false;
-			if (target_ply != nullptr && !once) {
-
-				auto arr = target_ply->model( )->boneTransforms( );
-				auto arr2 = target_ply->model( )->boneNames( );
-				if (arr) {
-					for (int i = 0; i < arr->size( ); i++) {
-						auto transform = reinterpret_cast<Transform*>(arr->get(i));
-						if (!transform)
-							return;
-
-						printf("%ls || idx: %d\n", arr2->get(i)->buffer, i);
-					}
-				}
-
-				once = true;
-			}*/
 			players::gamethread_loop( );
 
 			if (settings::lightning != 0) {
@@ -121,11 +72,21 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 
 	if (settings::h_override == 1) {
 		ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
-		ret->hitPositionWorld( ) = entity->bones( )->spine4->position;
+		//ret->hitPositionWorld( ) = entity->bones( )->spine4->position;
 	}
 	else if (settings::h_override == 2) {
 		ret->hitBone( ) = StringPool::Get(xorstr_("head"));
-		ret->hitPositionWorld( ) = entity->bones( )->head->position;
+		//ret->hitPositionWorld( ) = entity->bones( )->head->position;
+	}
+	if (settings::bigger_bullets) {
+		if (entity->bones( )->head->position.distance( ret->hitPositionWorld( ) ) < 1.f)
+			ret->hitPositionWorld( ) = entity->bones( )->head->position;
+		else if (entity->bones( )->spine4->position.distance( ret->hitPositionWorld( ) ) < 1.f)
+			ret->hitPositionWorld( ) = entity->bones( )->spine4->position;
+		else if( entity->bones( )->r_knee->position.distance( ret->hitPositionWorld( ) ) < 1.f )
+			ret->hitPositionWorld( ) = entity->bones( )->r_knee->position;
+		else
+			ret->hitPositionWorld( ) = entity->bones( )->l_foot->position;
 	}
 
 	return ret;
@@ -185,7 +146,7 @@ void HandleJumping_hk(PlayerWalkMovement* a1, ModelState* state, bool wantsJump,
 		a1->jumping( ) = true;
 		state->set_jumped(true);
 		a1->jumpTime( ) = Time::time( );
-		a1->ladder( ) = NULL;
+		a1->ladder( ) = nullptr;
 
 		Vector3 curVel = a1->body( )->velocity( );
 		a1->body( )->set_velocity({ curVel.x, 10, curVel.z });
@@ -214,11 +175,12 @@ void DoMovement_hk(Projectile* pr, float deltaTime) {
 	return pr->DoMovement(deltaTime);
 }
 void ProjectileUpdate_hk(Projectile* pr) {
-	if (target_ply != nullptr) {
-		if (!target_ply->is_visible())
-			if (GetAsyncKeyState(0x43))
-				return;
-	}
+	if (pr->isAuthoritative( ))
+		if (pr->traveledDistance( ) > 1.f)
+			if (target_ply != nullptr)
+					if (GetAsyncKeyState( 0x43 ))
+						return;
+	
 
 	pr->Update( );
 }
@@ -261,7 +223,7 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	return prj->DoHit(test, point, normal);
 }
 void SetEffectScale_hk(Projectile* self, float eScale) {
-	return self->SetEffectScale(settings::psilent ? settings::test1 : eScale);
+	return self->SetEffectScale(settings::psilent ? 1.f : eScale);
 }
 System::Object* StartCoroutine_hk(MonoBehaviour* a1, System::Object* un2) {
 	if (settings::fastloot) {

@@ -359,7 +359,7 @@ public:
 	FIELD("Assembly-CSharp::PlayerWalkMovement::grounded", grounded, bool);
 	FIELD("Assembly-CSharp::PlayerWalkMovement::jumping", jumping, bool);
 	FIELD("Assembly-CSharp::PlayerWalkMovement::swimming", swimming, bool);
-	FIELD("Assembly-CSharp::PlayerWalkMovement::ladder", ladder, uintptr_t);
+	FIELD("Assembly-CSharp::PlayerWalkMovement::ladder", ladder, void*);
 	static inline void(*UpdateVelocity_)(PlayerWalkMovement*) = nullptr;
 	void UpdateVelocity( ) {
 		return UpdateVelocity_(this);

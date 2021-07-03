@@ -26,3 +26,9 @@ nanohack/x64/Release/nanohack.vcxproj.FileListAbsolute.txt
 .vs/nanohack/v16/ipch/AutoPCH/b89437614bc58878/ENTRY.ipch
 .vs/nanohack/v16/ipch/ad2a963483ea293e.ipch
 .vs/nanohack/v16/ipch/AutoPCH/b708cf2d456721e1/HOOKS.ipch
+nanohack/x64/Debug/nanohack.log
+nanohack/x64/Debug/nanohack.tlog/CL.command.1.tlog
+nanohack/x64/Debug/nanohack.tlog/nanohack.lastbuildstate
+nanohack/x64/Debug/nanohack.tlog/unsuccessfulbuild
+nanohack/x64/Release/nanohack.iobj
+nanohack/x64/Release/nanohack.ipdb
