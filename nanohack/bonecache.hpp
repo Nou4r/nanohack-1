@@ -78,7 +78,7 @@ namespace bonecache {
 
 
 			if (player->userID( ) != LocalPlayer::Entity( )->userID( )) {
-				box_bounds bo = get_bounds(player, 4.f);
+				box_bounds bo = get_bounds(player, 2.f);
 				if (!bo.empty( ))
 					cache->bounds = bo;
 

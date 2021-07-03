@@ -19,7 +19,6 @@ namespace d3d {
 				menu::add_checkbox(&settings::players, wxorstr_(L"player esp"));
 				menu::add_checkbox(&settings::npcs, wxorstr_(L"npc esp"));
 				menu::add_checkbox(&settings::chams, wxorstr_(L"chams"));
-				menu::add_checkbox(&settings::oof_indicators, wxorstr_(L"out of fov indicators"));
 				menu::add_spacer( );
 				menu::add_checkbox(&settings::psilent, wxorstr_(L"psilent"));
 				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") });
@@ -30,6 +29,7 @@ namespace d3d {
 				menu::add_checkbox(&settings::faster_bullets, wxorstr_(L"faster bullets"));
 				menu::add_spacer( );
 				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
+				menu::add_checkbox(&settings::bullet_tracers, wxorstr_(L"bullet tracers"));
 				menu::add_checkbox(&settings::omnisprint, wxorstr_(L"omnidirectional sprinting"));
 				menu::add_checkbox(&settings::nofall, wxorstr_(L"no fall damage"));
 				menu::add_checkbox(&settings::freeaim, wxorstr_(L"remove aiming restrictions"));
@@ -37,9 +37,8 @@ namespace d3d {
 				menu::add_checkbox(&settings::fastloot, wxorstr_(L"fast loot"));
 				menu::add_selectable(&settings::lightning, wxorstr_(L"lightning"), { wxorstr_(L"regular"), wxorstr_(L"dark ambient"), wxorstr_(L"light ambient") });
 				menu::add_spacer( );
-				menu::add_slider(&settings::test1, wxorstr_(L"testing float 1"));
-				menu::add_slider(&settings::test2, wxorstr_(L"testing float 2"));
-
+				menu::add_slider(&settings::test1, wxorstr_(L"test float 1"));
+				menu::add_slider(&settings::test2, wxorstr_(L"test float 2"));
 				menu_init = true;
 			}
 		}

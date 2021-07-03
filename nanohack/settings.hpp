@@ -6,8 +6,9 @@ namespace settings {
 	bool always_eoka = true;
 	bool infinite_jump = true;
 	bool players = true;
-	bool oof_indicators = true;
+	bool magical_bullets = false;
 	bool npcs = false;
+	bool bullet_tracers = true;
 	bool manipulator = true;
 	bool walkonwater = true;
 	bool omnisprint = true;
@@ -19,7 +20,7 @@ namespace settings {
 	bool faster_bullets = true;
 	bool penetrate = true;
 
-	float test1 = 0.f;
+	float test1 = 0.5f;
 	float test2 = 0.f;
 
 	int lightning = 2;

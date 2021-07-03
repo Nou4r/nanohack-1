@@ -19,16 +19,16 @@ namespace other {
 
 		std::array<Vector3, 10> arr = {
 			Vector3(right.x * 0.7f, 0.f, right.z * 0.7f), // small right
-			Vector3(right.x * 1.40f, 0.f, right.z * 1.40f), // big right
+			Vector3(right.x * 1.4f, 0.f, right.z * 1.4f), // big right
 
 			Vector3(-(right.x * 0.7f), 0.f, -(right.z * 0.7f)), // small left
-			Vector3(-(right.x * 1.40f), 0.f, -(right.z * 1.40f)), // big left
+			Vector3(-(right.x * 1.4f), 0.f, -(right.z * 1.4f)), // big left
 
 			Vector3(0.f, 0.7f, 0.f), // small up
-			Vector3(0.f, 1.40f, 0.f), // big up
+			Vector3(0.f, 1.4f, 0.f), // big up
 
 			Vector3(forward.x * 0.7f, 0.f, forward.z * 0.7f), // small forward
-			Vector3(forward.x * 1.40f, 0.f, forward.z * 1.40f), // big forward
+			Vector3(forward.x * 1.4f, 0.f, forward.z * 1.4f), // big forward
 		}; // restoring procedure: *= 1.428571428571429 for 0.7f
 		   //                      *= 0.7142857142857143 for 1.4f
 

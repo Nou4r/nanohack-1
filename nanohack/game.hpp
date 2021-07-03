@@ -178,6 +178,7 @@ class Networkable {
 public:
 	FIELD("Facepunch.Network::Network::Networkable::ID", ID, uint32_t);
 };
+class BaseEntity;
 class BaseNetworkable : public Component {
 public:
 	class EntityRealm {
@@ -214,6 +215,7 @@ public:
 	}
 
 	FIELD("Assembly-CSharp::BaseNetworkable::net", net, Networkable*);
+	FIELD("Assembly-CSharp::BaseNetworkable::parentEntity", parentEntity, BaseEntity*);
 };
 class Model;
 class BaseEntity : public BaseNetworkable {
@@ -375,10 +377,26 @@ public:
 		return (*reinterpret_cast<String**>(this + off))->buffer;
 	}
 };
+class Renderer_;
+class SkinnedMeshRenderer;
+class Wearable : public Component {
+public:
+	FIELD("Assembly-CSharp::Wearable::renderers", renderers, List<Renderer_*>*);
+	FIELD("Assembly-CSharp::Wearable::skinnedRenderers", skinnedRenderers, List<SkinnedMeshRenderer*>*);
+};
+class ItemModWearable {
+public:
+	Wearable* targetWearable( ) {
+		if (!this) return nullptr;
+		static auto off = METHOD("Assembly-CSharp::ItemModWearable::get_targetWearable(): Wearable");
+		return reinterpret_cast<Wearable*(__fastcall*)(ItemModWearable*)>(off)(this);
+	}
+};
 class ItemDefinition : public Component {
 public:
 	FIELD("Assembly-CSharp::ItemDefinition::displayName", displayName, Phrase*);
 	FIELD("Assembly-CSharp::ItemDefinition::itemid", itemid, int);
+	FIELD("Assembly-CSharp::ItemDefinition::<ItemModWearable>k__BackingField", itemModWearable, ItemModWearable*);
 	const wchar_t* shortname( ) {
 		if (!this) return L"";
 		static auto off = OFFSET("Assembly-CSharp::ItemDefinition::shortname");
@@ -540,7 +558,18 @@ public:
 		static auto off = METHOD("Rust.Data::ModelState::set_ducked(Boolean): Void");
 		return reinterpret_cast<void(__fastcall*)(ModelState*, bool)>(off)(this, value);
 	}
+	void set_mounted(bool value) {
+		if (!this) return;
+		static auto off = METHOD("Rust.Data::ModelState::set_mounted(Boolean): Void");
+		return reinterpret_cast<void(__fastcall*)(ModelState*, bool)>(off)(this, value);
+	}
+	FIELD("Rust.Data::ModelState::poseType", poseType, int);
 
+	bool mounted( ) {
+		if (!this) return false;
+		static auto ptr = METHOD("Rust.Data::ModelState::get_mounted(): Boolean");
+		return reinterpret_cast<bool(*)(ModelState*)>(ptr)(this);
+	}
 	static inline void(*set_flying_)(ModelState*, bool) = nullptr;
 	void set_flying(bool state) {
 		set_flying_(this, state);
@@ -751,6 +780,14 @@ public:
 	static inline void(*DoMovement_)(Projectile*, float) = nullptr;
 	void DoMovement(float deltaTime) {
 		return DoMovement_(this, deltaTime);
+	}
+	static inline void(*Update_)(Projectile*) = nullptr;
+	void Update( ) {
+		return Update_(this);
+	}
+	static inline void(*SetEffectScale_)(Projectile*, float) = nullptr;
+	void SetEffectScale(float sca) {
+		return SetEffectScale_(this, sca);
 	}
 	static inline bool(*DoHit_)(Projectile*, HitTest*, Vector3, Vector3) = nullptr;
 	bool DoHit(HitTest* test, Vector3 point, Vector3 world) {
@@ -1160,7 +1197,7 @@ public:
 		if (!this->isCached( ))
 			return true;
 
-		return this->bones( )->dfc.distance_2d(screen_center) > 1000.f;
+		return this->bones( )->dfc.distance(screen_center) > 1000.f;
 	}
 	bool is_visible( ) {
 		if (!this->isCached( ))
@@ -1427,9 +1464,12 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::ViewmodelBob::Apply(CachedTransform<BaseViewModel>&,Single): Void", ViewmodelBob::Apply_);
 	ASSIGN_HOOK("Assembly-CSharp::ViewmodelLower::Apply(CachedTransform<BaseViewModel>&): Void", ViewmodelLower::Apply_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::DoHit(HitTest,Vector3,Vector3): Boolean", Projectile::DoHit_);
+	ASSIGN_HOOK("Assembly-CSharp::Projectile::SetEffectScale(Single): Void", Projectile::SetEffectScale_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
+	ASSIGN_HOOK("Assembly-CSharp::Projectile::Update(): Void", Projectile::Update_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);
+	ASSIGN_HOOK("Assembly-CSharp::BaseProjectile::CreateProjectile(String,Vector3,Vector3,Vector3): Projectile", BaseProjectile::CreateProjectile_);
 	ASSIGN_HOOK("UnityEngine.CoreModule::UnityEngine::MonoBehaviour::StartCoroutine(Collections.IEnumerator): Coroutine", MonoBehaviour::StartCoroutine_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerWalkMovement::UpdateVelocity(): Void", PlayerWalkMovement::UpdateVelocity_);
 	ASSIGN_HOOK("Assembly-CSharp::ItemModProjectile::GetRandomVelocity(): Single", ItemModProjectile::GetRandomVelocity_);

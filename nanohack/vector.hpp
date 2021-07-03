@@ -433,13 +433,13 @@ public:
 class Color3
 {
 public:
-	int r, g, b, a;
+	float r, g, b, a;
 
 	Color3( ) {
 		r = g = b = a = 0;
 	}
 
-	Color3(int r, int g, int b, int a = 255) {
+	Color3(float r, float g, float b, float a = 255) {
 		this->r = r;
 		this->g = g;
 		this->b = b;
@@ -455,11 +455,11 @@ public:
 		return Color3{ r - input.r, g - input.g, b - input.b,a - input.a };
 	}
 
-	Color3 operator/(int input) const {
+	Color3 operator/(float input) const {
 		return Color3{ r / input, g / input, b / input,a / input };
 	}
 
-	Color3 operator*(int input) const {
+	Color3 operator*(float input) const {
 		return Color3{ r * input, g * input, b * input,a * input };
 	}
 
@@ -481,7 +481,7 @@ public:
 		return *this;
 	}
 
-	Color3& operator/=(int input) {
+	Color3& operator/=(float input) {
 		r /= input;
 		g /= input;
 		b /= input;
@@ -490,7 +490,7 @@ public:
 		return *this;
 	}
 
-	Color3& operator*=(int input) {
+	Color3& operator*=(float input) {
 		r *= input;
 		g *= input;
 		b *= input;

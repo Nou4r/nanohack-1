@@ -30,7 +30,7 @@ namespace Renderer {
 			D2D1_FACTORY_OPTIONS CreateOpt = { D2D1_DEBUG_LEVEL_NONE };
 			DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_pTextEngine), (IUnknown**)&m_pTextEngine);
 			D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &CreateOpt, (void**)&m_pInterface);
-			m_pTextEngine->CreateTextFormat(wxorstr_(L"Arial"), NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.f, L"", &m_pTextFormat);
+			m_pTextEngine->CreateTextFormat(wxorstr_(L"Smallest Pixel-7"), NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 7.f, L"", &m_pTextFormat);
 			if (!m_pInterface || !m_pTextEngine || !m_pTextFormat) return false;
 		}
 
@@ -79,44 +79,23 @@ namespace Renderer {
 		}
 	}
 
-	void get_text_size(std::wstring text, int& textW, int& textH, float sz) {
-		const auto str = text;
-		const auto str_len = static_cast<std::uint32_t>(str.size( ));
-
-		IDWriteTextLayout* dwrite_layout = nullptr;
-		RET_CHK(m_pTextEngine->CreateTextLayout(str.c_str( ), str_len, m_pTextFormat, screen_size.x, screen_size.y, &dwrite_layout));
-
-		const DWRITE_TEXT_RANGE range
-		{
-			0,
-			str_len
-		};
-
-		dwrite_layout->SetFontSize(sz, range);
-		DWRITE_TEXT_METRICS metrics;
-		dwrite_layout->GetMetrics(&metrics);
-
-		textW = metrics.width;
-		textH = metrics.height;
-	}
-
 	void rectangle_filled(Vector2 pos, Vector2 size, const Color3 color) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), color.a / 255.f));
+		m_pSolidBrush->SetColor(D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
 		m_pCanvas->FillRectangle(D2D1::RectF(pos.x, pos.y, pos.x + size.x, pos.y + size.y), m_pSolidBrush);
 	}
 
 	void rectangle(Vector2 pos, Vector2 size, const Color3 color, float thickness = 1.2f) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), 1.f));
+		m_pSolidBrush->SetColor(D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
 		m_pCanvas->DrawRectangle(D2D1::RectF(pos.x, pos.y, pos.x + size.x, pos.y + size.y), m_pSolidBrush, thickness, nullptr);
 	}
 
 	void rectangle_filled(Square2 rec, const Color3 color) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), color.a / 255.f));
+		m_pSolidBrush->SetColor(D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
 		m_pCanvas->FillRectangle(D2D1::RectF(rec.pos.x, rec.pos.y, rec.pos.x + rec.size.x, rec.pos.y + rec.size.y), m_pSolidBrush);
 	}
 
 	void rectangle(Square2 rec, const Color3 color, float thickness = 1.2f) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), 1.f));
+		m_pSolidBrush->SetColor(D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
 		m_pCanvas->DrawRectangle(D2D1::RectF(rec.pos.x, rec.pos.y, rec.pos.x + rec.size.x, rec.pos.y + rec.size.y), m_pSolidBrush, thickness, nullptr);
 	}
 
@@ -125,12 +104,12 @@ namespace Renderer {
 			m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(0, 0, 0, 255), 1.f));
 			m_pCanvas->DrawLine({ start.x, start.y }, { end.x, end.y }, m_pSolidBrush, thickness * 2);
 		}
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), 1.f));
+		m_pSolidBrush->SetColor(D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
 		m_pCanvas->DrawLine({ start.x, start.y }, { end.x, end.y }, m_pSolidBrush, thickness);
 	}
 
 	void circle(const Vector2 start, Color3 color, float radius, float thickness) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), 1.f));
+		m_pSolidBrush->SetColor(D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
 		m_pCanvas->DrawEllipse({ { start.x, start.y }, radius, radius }, m_pSolidBrush, thickness);
 	}
 
@@ -140,9 +119,9 @@ namespace Renderer {
 		ID2D1LinearGradientBrush* m_pLinearGradientBrush;
 
 		D2D1_GRADIENT_STOP gradientStops[ 2 ];
-		gradientStops[ 0 ].color = D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, 255), color.a / 255.f);
+		gradientStops[ 0 ].color = D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f);
 		gradientStops[ 0 ].position = 0.0f;
-		gradientStops[ 1 ].color = D2D1::ColorF(D3DCOLOR_RGBA(color_2.r, color_2.g, color_2.b, 255), color_2.a / 255.f);
+		gradientStops[ 1 ].color = D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f);
 		gradientStops[ 1 ].position = 1.0f;
 
 		RET_CHK(m_pCanvas->CreateGradientStopCollection(
@@ -166,7 +145,7 @@ namespace Renderer {
 	}
 
 	void filled_circle(const Vector2 start, Color3 color, float radius) {
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(color.r, color.g, color.b, color.a)));
+		m_pSolidBrush->SetColor(D2D1::ColorF(color.r / 255.f, color.g / 255.f, color.b / 255.f, color.a / 255.f));
 		m_pCanvas->FillEllipse({ { start.x, start.y}, radius,radius }, m_pSolidBrush);
 	}
 
@@ -206,7 +185,7 @@ namespace Renderer {
 				m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y + 1), dwrite_layout, m_pSolidBrush);
 			}
 
-			m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, clr.a)));
+			m_pSolidBrush->SetColor(D2D1::ColorF(clr.r / 255.f, clr.g / 255.f, clr.b / 255.f, clr.a / 255.f));
 
 			m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y), dwrite_layout, m_pSolidBrush);
 			dwrite_layout->Release( );
@@ -226,7 +205,7 @@ namespace Renderer {
 			m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y + 1), dwrite_layout, m_pSolidBrush);
 		}
 
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, clr.a)));
+		m_pSolidBrush->SetColor(D2D1::ColorF(clr.r / 255.f, clr.g / 255.f, clr.b / 255.f, clr.a / 255.f));
 		m_pCanvas->DrawTextLayout(D2D1::Point2F(pos.x, pos.y), dwrite_layout, m_pSolidBrush);
 		dwrite_layout->Release( );
 	}
@@ -267,7 +246,7 @@ namespace Renderer {
 				m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y + 1), dwrite_layout, m_pSolidBrush);
 			}
 
-			m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, 255)));
+			m_pSolidBrush->SetColor(D2D1::ColorF(clr.r / 255.f, clr.g / 255.f, clr.b / 255.f, clr.a / 255.f));
 
 			m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y), dwrite_layout, m_pSolidBrush);
 			dwrite_layout->Release( );
@@ -287,7 +266,7 @@ namespace Renderer {
 			m_pCanvas->DrawTextLayout(D2D1::Point2F(x, y + 1), dwrite_layout, m_pSolidBrush);
 		}
 
-		m_pSolidBrush->SetColor(D2D1::ColorF(D3DCOLOR_RGBA(clr.r, clr.g, clr.b, 255)));
+		m_pSolidBrush->SetColor(D2D1::ColorF(clr.r / 255.f, clr.g / 255.f, clr.b / 255.f, clr.a / 255.f));
 		m_pCanvas->DrawTextLayout(D2D1::Point2F(pos.x, pos.y), dwrite_layout, m_pSolidBrush);
 		dwrite_layout->Release( );
 	}

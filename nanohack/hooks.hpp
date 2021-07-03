@@ -23,28 +23,38 @@ void ClientUpdate_hk(BasePlayer* player) {
 			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
 			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
 
-			auto held = local->GetHeldEntity( );
+			/*auto held = local->GetHeldItem( );
 			if (held) {
-				auto nigga = BaseViewModel::ActiveModels( );
-				if (nigga) {
-					for (int i = 0; i < nigga->size; i++) {
-						auto renderer_list = reinterpret_cast<BaseViewModel*>(nigga->get(i))->GetComponentsInChildren<SkinnedMeshRenderer>(Type::SkinnedMeshRenderer( ));
-						if (renderer_list) {
+				std::cout << "held" << std::endl;
+				auto wearable = held->info( )->itemModWearable( )->targetWearable( );
+				if (wearable) {
+					std::cout << "wearable" << std::endl;
+					auto nigga = wearable->renderers( );
+					if (nigga) {
+						std::cout << "renderers: " << (int)nigga->size << std::endl;
+						for (int i = 0; i < nigga->size; i++) {
+							auto renderer = reinterpret_cast<Renderer_*>(nigga->get(i));
+							if (!renderer)
+								continue;
 
-							for (int j = 0; j < renderer_list->size( ); j++) {
-								auto renderer = (Renderer_*)renderer_list->get(j);
-								if (!renderer)
-									continue;
+							if (renderer->material( )->shader( ) != nullptr)
+								renderer->material( )->set_shader(nullptr);
+						}
+					}
+					auto nigga2 = wearable->skinnedRenderers( );
+					if (nigga2) {
+						std::cout << "skinnedrenderers: " << (int)nigga2->size << std::endl;
+						for (int i = 0; i < nigga2->size; i++) {
+							auto renderer = reinterpret_cast<Renderer_*>(nigga2->get(i));
+							if (!renderer)
+								continue;
 
-								if (renderer->material( )->shader( ) != nullptr) {
-									renderer->material( )->set_shader(nullptr);
-								}
-							}
+							if (renderer->material( )->shader( ) != nullptr)
+								renderer->material( )->set_shader(nullptr);
 						}
 					}
 				}
-				
-			}
+			}*/
 			/*static bool once = false;
 			if (target_ply != nullptr && !once) {
 
@@ -62,7 +72,7 @@ void ClientUpdate_hk(BasePlayer* player) {
 
 				once = true;
 			}*/
-			//players::gamethread_loop( );
+			players::gamethread_loop( );
 
 			if (settings::lightning != 0) {
 				auto list = TOD_Sky::instances( );
@@ -89,16 +99,17 @@ void ClientUpdate_hk(BasePlayer* player) {
 }
 Vector3 GetModifiedAimConeDirection_hk(float aimCone, Vector3 inputVec, bool anywhereInside = true) {
 	if (settings::psilent && target_ply != nullptr && target_ply->isCached( )) {
-		inputVec = (aimutils::get_prediction( ) - LocalPlayer::Entity( )->eyes( )->position_e( )).normalized( );
-		aimCone = 0.f;
+		return (aimutils::get_prediction( ) - LocalPlayer::Entity( )->eyes( )->position_e( )).normalized( );
 	}
 
 	return AimConeUtil::GetModifiedAimConeDirection(aimCone, inputVec, anywhereInside);
 }
 Attack* BuildAttackMessage_hk(HitTest* self) {
-	auto ret = self->BuildAttackMessage( );
+    auto ret = self->BuildAttackMessage( );
 
-	DDraw::Line(LocalPlayer::Entity( )->eyes( )->position_e( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
+	if (settings::bullet_tracers)
+		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == LocalPlayer::Entity( )->userID( ))
+			DDraw::Line(LocalPlayer::Entity( )->eyes( )->position_e( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
 
 	auto entity = BaseNetworkable::clientEntities( )->Find<BasePlayer*>(ret->hitID( ));
 
@@ -116,9 +127,6 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 		ret->hitBone( ) = StringPool::Get(xorstr_("head"));
 		ret->hitPositionWorld( ) = entity->bones( )->head->position;
 	}
-
-	//Vector3 re_p = LocalPlayer::Entity( )->transform( )->position( ) + LocalPlayer::Entity( )->transform( )->up( ) * (PlayerEyes::EyeOffset( ).y + LocalPlayer::Entity( )->eyes( )->viewOffset( ).y);
-	//ret->pointStart( ) = re_p;
 
 	return ret;
 }
@@ -157,7 +165,7 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 	if (settings::omnisprint) {
 		Vector3 vel = self->TargetMovement( );
 
-		float max_speed = self->Ducking( ) > 0.5 ? 1.7f : 5.6f;
+		float max_speed = (self->swimming() || self->Ducking( ) > 0.5) ? 1.7f : 5.6f;
 		float target_speed = std::max(max_speed, vel.length( ));
 		if (vel.length( ) > 0.f) {
 			Vector3 target_vel = Vector3(vel.x / vel.length( ) * target_speed, vel.y, vel.z / vel.length( ) * target_speed);
@@ -199,9 +207,20 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 void DoMovement_hk(Projectile* pr, float deltaTime) {
 	if (pr->isAuthoritative( ))
 		if (settings::bigger_bullets)
-			pr->thickness( ) = 1.0f + settings::test1;
+			pr->thickness( ) = 1.0f;
+		else
+			pr->thickness( ) = 0.1f;
 
 	return pr->DoMovement(deltaTime);
+}
+void ProjectileUpdate_hk(Projectile* pr) {
+	if (target_ply != nullptr) {
+		if (!target_ply->is_visible())
+			if (GetAsyncKeyState(0x43))
+				return;
+	}
+
+	pr->Update( );
 }
 float GetRandomVelocity_hk(ItemModProjectile* self) {
 	float modifier = 1.f;
@@ -241,6 +260,9 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	}
 	return prj->DoHit(test, point, normal);
 }
+void SetEffectScale_hk(Projectile* self, float eScale) {
+	return self->SetEffectScale(settings::psilent ? settings::test1 : eScale);
+}
 System::Object* StartCoroutine_hk(MonoBehaviour* a1, System::Object* un2) {
 	if (settings::fastloot) {
 		static auto v = METHOD("Assembly-CSharp::ItemIcon::SetTimedLootAction(UInt32,Action): Void");
@@ -269,6 +291,7 @@ void do_hooks( ) {
 	hookengine::hook(BasePlayer::CanAttack_, CanAttack_hk);
 	hookengine::hook(BasePlayer::OnLand_, OnLand_hk);
 	hookengine::hook(Projectile::DoMovement_, DoMovement_hk);
+	hookengine::hook(Projectile::Update_, ProjectileUpdate_hk); 
 	hookengine::hook(FlintStrikeWeapon::DoAttack_, DoAttack_hk);
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);
@@ -276,6 +299,7 @@ void do_hooks( ) {
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
 	hookengine::hook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);
+	hookengine::hook(Projectile::SetEffectScale_, SetEffectScale_hk);
 	hookengine::hook(BasePlayer::ClientInput_, ClientInput_hk);
 	hookengine::hook(ItemModProjectile::GetRandomVelocity_, GetRandomVelocity_hk);
 	hookengine::hook(PlayerEyes::BodyLeanOffset_, BodyLeanOffset_hk);

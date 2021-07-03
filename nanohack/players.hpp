@@ -85,9 +85,10 @@ namespace players {
 				Vector2 footPos = { bounds.left + (box_width / 2), bounds.bottom + 7.47f };
 				Vector2 headPos = { bounds.left + (box_width / 2), bounds.top - 9.54f };
 
-				Color3 col = player->is_target( ) ? Color3(255, 0, 0) : player->playerModel( )->isNpc( ) ? Color3(71, 209, 255) : Color3(255, 255, 255);
+				Color3 col_c = player->is_target( ) ? player->is_visible() ? Color3(255, 0, 0) : Color3(184, 0, 0) : player->playerModel( )->isNpc( ) ? Color3(71, 209, 255) : player->is_visible() ? Color3(255, 255, 255) : Color3(186, 186, 186);
+				Color3 col = Color3(col_c.r, col_c.g, col_c.b, 255 - (player->bones()->head->position.distance(local->bones()->head->position) / 2.5));
 
-				Renderer::text(headPos, col, 13.f, true, true, wxorstr_(L"%s [%dhp %dm]"), player->_displayName( ), (int)ceil(player->health( )), (int)ceil(player->bones( )->head->position.distance(local->bones( )->head->position)));
+				Renderer::text(headPos, col, 12.f, true, true, wxorstr_(L"%s [%dhp %dm]"), player->_displayName( ), (int)ceil(player->health( )), (int)ceil(player->bones( )->head->position.distance(local->bones( )->head->position)));
 
 				/*Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);*/
 				Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
@@ -102,7 +103,7 @@ namespace players {
 				Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
 				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
 
-				if (settings::oof_indicators) {
+				/*if (settings::oof_indicators) {
 					if (player->out_of_fov( )) {
 						Vector3 local_pos = local->bones( )->head->position;
 						float y = local_pos.x - player->bones( )->head->position.x;
@@ -114,14 +115,14 @@ namespace players {
 						Renderer::filled_circle(point, Color3(43, 43, 43, 200), 9.f);
 						Renderer::circle(point, col, 9.f, 0.5f);
 					}
-				}
+				}*/
 
 				if (player->GetHeldItem( )) {
-					Renderer::text(footPos, col, 13.f, true, true, player->GetHeldItem( )->info( )->shortname( ));
+					Renderer::text(footPos, col, 12.f, true, true, player->GetHeldItem( )->info( )->displayName( )->english( ));
 					y_ += 16;
 				}
 				if (player->HasPlayerFlag(PlayerFlags::Wounded)) {
-					Renderer::text(footPos + Vector2(0, y_), Color3(255, 0, 0, 128), 13.f, true, true, wxorstr_(L"*wounded*"));
+					Renderer::text(footPos + Vector2(0, y_), Color3(255, 0, 0, 128), 12.f, true, true, wxorstr_(L"*wounded*"));
 					y_ += 16;
 				}
 
@@ -155,7 +156,7 @@ namespace players {
 
 		if (settings::chams) {
 			if (Time::time( ) >= last_shader_set) {
-				last_shader_set = Time::time( ) + 3.5f;
+				last_shader_set = Time::time( ) + 1.0f;
 
 				for (int i = 0; i < playerList->vals->size; i++) {
 					auto player = *reinterpret_cast<BasePlayer**>(std::uint64_t(playerList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
@@ -193,14 +194,8 @@ namespace players {
 								continue;
 
 							material->set_shader(nullptr);
-
-							//material->SetColor(xorstr_("_FirstOutlineColor"), Color::yellow( ));
-							//material->SetFloat(xorstr_("_FirstOutlineWidth"), 0.02f + settings::test1);
-							//material->SetColor(xorstr_("_SecondOutlineColor"), Color::red( ));
-							//material->SetFloat(xorstr_("_SecondOutlineWidth"), 0.0025f + settings::test2);
 						}
 					}
-					//}
 				}
 			}
 		}
