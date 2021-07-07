@@ -205,3 +205,49 @@ struct Line {
 		return (pos - this->ClosestPoint(pos)).magnitude( );
 	}
 };
+struct projectile_info {
+	float desyncTime;
+	Vector3 firstPosition;
+
+	projectile_info(float dT, Vector3 fP) {
+		this->desyncTime = dT;
+		this->firstPosition = fP;
+	}
+};
+std::map<int, float> queueableProjectiles = std::map<int, float>( );
+std::map<int, float> finishedProjectiles = std::map<int, float>( );
+//void SimulateProjectile(Vector3 position, Vector3 velocity, float partialTime, float travelTime, Vector3 gravity, float drag, Vector3& prevPosition, Vector3& prevVelocity) 	{
+//	float num = 0.03125f;
+//	prevPosition = position;
+//	prevVelocity = velocity;
+//	if (partialTime > FLT_MIN) 		{
+//		float num2 = num - partialTime;
+//		if (travelTime < num2) 			{
+//			prevPosition = position;
+//			prevVelocity = velocity;
+//			position += velocity * travelTime;
+//			partialTime += travelTime;
+//			return;
+//		}
+//		prevPosition = position;
+//		prevVelocity = velocity;
+//		position += velocity * num2;
+//		velocity += gravity * num;
+//		velocity -= velocity * drag * num;
+//		travelTime -= num2;
+//	}
+//	int num3 = std::floor(travelTime / num);
+//	for (int i = 0; i < num3; i++) 		{
+//		prevPosition = position;
+//		prevVelocity = velocity;
+//		position += velocity * num;
+//		velocity += gravity * num;
+//		velocity -= velocity * drag * num;
+//	}
+//	partialTime = travelTime - num * (float)num3;
+//	if (partialTime > FLT_MIN) 		{
+//		prevPosition = position;
+//		prevVelocity = velocity;
+//		position += velocity * partialTime;
+//	}
+//}

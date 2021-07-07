@@ -19,6 +19,154 @@ public:
 		}
 	}
 };
+enum class KeyCode : int {
+	None = 0,
+	Backspace = 8,
+	Delete = 127,
+	Tab = 9,
+	Clear = 12,
+	Return = 13,
+	Pause = 19,
+	Escapee = 27,
+	Space = 32,
+	Keypad0 = 256,
+	Keypad1 = 257,
+	Keypad2 = 258,
+	Keypad3 = 259,
+	Keypad4 = 260,
+	Keypad5 = 261,
+	Keypad6 = 262,
+	Keypad7 = 263,
+	Keypad8 = 264,
+	Keypad9 = 265,
+	KeypadPeriod = 266,
+	KeypadDivide = 267,
+	KeypadMultiply = 268,
+	KeypadMinus = 269,
+	KeypadPlus = 270,
+	KeypadEnter = 271,
+	KeypadEquals = 272,
+	UpArrow = 273,
+	DownArrow = 274,
+	RightArrow = 275,
+	LeftArrow = 276,
+	Insert = 277,
+	Home = 278,
+	End = 279,
+	PageUp = 280,
+	PageDown = 281,
+	F1 = 282,
+	F2 = 283,
+	F3 = 284,
+	F4 = 285,
+	F5 = 286,
+	F6 = 287,
+	F7 = 288,
+	F8 = 289,
+	F9 = 290,
+	F10 = 291,
+	F11 = 292,
+	F12 = 293,
+	F13 = 294,
+	F14 = 295,
+	F15 = 296,
+	Alpha0 = 48,
+	Alpha1 = 49,
+	Alpha2 = 50,
+	Alpha3 = 51,
+	Alpha4 = 52,
+	Alpha5 = 53,
+	Alpha6 = 54,
+	Alpha7 = 55,
+	Alpha8 = 56,
+	Alpha9 = 57,
+	Exclaim = 33,
+	DoubleQuote = 34,
+	Hash = 35,
+	Dollar = 36,
+	Percent = 37,
+	Ampersand = 38,
+	Quote = 39,
+	LeftParen = 40,
+	RightParen = 41,
+	Asterisk = 42,
+	Plus = 43,
+	Comma = 44,
+	Minus = 45,
+	Period = 46,
+	Slash = 47,
+	Colon = 58,
+	Semicolon = 59,
+	Less = 60,
+	Equals = 61,
+	Greater = 62,
+	Question = 63,
+	At = 64,
+	LeftBracket = 91,
+	Backslash = 92,
+	RightBracket = 93,
+	Caret = 94,
+	Underscore = 95,
+	BackQuote = 96,
+	A = 97,
+	B = 98,
+	C = 99,
+	D = 100,
+	E = 101,
+	F = 102,
+	G = 103,
+	H = 104,
+	I = 105,
+	J = 106,
+	K = 107,
+	L = 108,
+	M = 109,
+	N = 110,
+	O = 111,
+	P = 112,
+	Q = 113,
+	R = 114,
+	S = 115,
+	T = 116,
+	U = 117,
+	V = 118,
+	W = 119,
+	X = 120,
+	Y = 121,
+	Z = 122,
+	LeftCurlyBracket = 123,
+	Pipe = 124,
+	RightCurlyBracket = 125,
+	Tilde = 126,
+	Numlock = 300,
+	CapsLock = 301,
+	ScrollLock = 302,
+	RightShift = 303,
+	LeftShift = 304,
+	RightControl = 305,
+	LeftControl = 306,
+	RightAlt = 307,
+	LeftAlt = 308,
+	LeftCommand = 310,
+	LeftApple = 310,
+	LeftWindows = 311,
+	RightCommand = 309,
+	RightApple = 309,
+	RightWindows = 312,
+	AltGr = 313,
+	Help = 315,
+	Print = 316,
+	SysReq = 317,
+	Break = 318,
+	Menu = 319,
+	Mouse0 = 323,
+	Mouse1 = 324,
+	Mouse2 = 325,
+	Mouse3 = 326,
+	Mouse4 = 327,
+	Mouse5 = 328,
+	Mouse6 = 329
+};
 class Object {
 public:
 
@@ -434,7 +582,7 @@ public:
 		static auto clazz = CLASS("Assembly-CSharp::PlayerEyes");
 		return *reinterpret_cast<Vector3*>(std::uint64_t(clazz->static_fields));
 	}
-	Vector3 position_e( ) {
+	Vector3 position( ) {
 		if (!this) return Vector3::Zero( );
 		static auto off = METHOD("Assembly-CSharp::PlayerEyes::get_position(): Vector3");
 		return reinterpret_cast<Vector3(__fastcall*)(PlayerEyes*)>(off)(this);
@@ -705,6 +853,7 @@ public:
 	FIELD("Assembly-CSharp::ItemModProjectile::numProjectiles", numProjectiles, int);
 	FIELD("Assembly-CSharp::ItemModProjectile::projectileVelocity", projectileVelocity, float);
 	FIELD("Assembly-CSharp::ItemModProjectile::projectileSpread", projectileSpread, float);
+	FIELD("Assembly-CSharp::ItemModProjectile::ammoType", ammoType, int);
 	FIELD("Assembly-CSharp::ItemModProjectile::projectileVelocitySpread", projectileVelocitySpread, float);
 };
 class StringPool {
@@ -762,10 +911,18 @@ public:
 		return reinterpret_cast<void(*)(int, int, bool)>(il2cpp_resolve_icall(xorstr_("UnityEngine.Physics::IgnoreLayerCollision")))(layer1, layer2, ignore);
 	}
 };
+class Input {
+public:
+	STATIC_FUNCTION("UnityEngine.InputLegacyModule::UnityEngine::Input::GetKeyDown(KeyCode): Boolean", GetKeyDown, bool(KeyCode));
+	STATIC_FUNCTION("UnityEngine.InputLegacyModule::UnityEngine::Input::GetKey(KeyCode): Boolean", GetKey, bool(KeyCode));
+};
 class Projectile : public Component {
 public:
+	FIELD("Assembly-CSharp::Projectile::swimRandom", swimRandom, float);
 	FIELD("Assembly-CSharp::Projectile::drag", drag, float);
 	FIELD("Assembly-CSharp::Projectile::thickness", thickness, float);
+	FIELD("Assembly-CSharp::Projectile::projectileID", projectileID, int);
+	FIELD("Assembly-CSharp::Projectile::mod", mod, ItemModProjectile*);
 	FIELD("Assembly-CSharp::Projectile::traveledDistance", traveledDistance, float);
 	FIELD("Assembly-CSharp::Projectile::initialDistance", initialDistance, float);
 	FIELD("Assembly-CSharp::Projectile::ricochetChance", ricochetChance, float);
@@ -785,6 +942,14 @@ public:
 	void Update( ) {
 		return Update_(this);
 	}
+	static inline void(*Retire_)(Projectile*) = nullptr;
+	void Retire( ) {
+		return Retire_(this);
+	}
+	static inline bool(*Refract_)(Projectile*, uint64_t&, Vector3, Vector3, float) = nullptr;
+	bool Refract( uint64_t& seed, Vector3 point, Vector3 normal, float resistance) {
+		return Refract_(this, seed, point, normal, resistance);
+	}
 	static inline void(*SetEffectScale_)(Projectile*, float) = nullptr;
 	void SetEffectScale(float sca) {
 		return SetEffectScale_(this, sca);
@@ -797,6 +962,11 @@ public:
 	bool isAuthoritative( ) {
 		if (!this) return false;
 		static auto off = METHOD("Assembly-CSharp::Projectile::get_isAuthoritative(): Boolean");
+		return reinterpret_cast<bool(__fastcall*)(Projectile*)>(off)(this);
+	}
+	bool isAlive( ) {
+		if (!this) return false;
+		static auto off = METHOD("Assembly-CSharp::Projectile::get_isAlive(): Boolean");
 		return reinterpret_cast<bool(__fastcall*)(Projectile*)>(off)(this);
 	}
 };
@@ -1029,6 +1199,7 @@ public:
 	FIELD("Rust.Data::ProtoBuf::PlayerProjectileAttack::playerAttack", playerAttack, PlayerAttack*);
 };
 std::map<uint64_t, BoneCache*> cachedBones = std::map<uint64_t, BoneCache*>( );
+
 class BasePlayer;
 BasePlayer* target_ply = nullptr;
 class BasePlayer : public BaseCombatEntity {
@@ -1269,6 +1440,7 @@ public:
 class DDraw {
 public:
 	STATIC_FUNCTION("Assembly-CSharp::UnityEngine::DDraw::Line(Vector3,Vector3,Color,Single,Boolean,Boolean): Void", Line, void(Vector3, Vector3, Color, float, bool, bool));
+	STATIC_FUNCTION("Assembly-CSharp::UnityEngine::DDraw::Sphere(Vector3,Single,Color,Single,Boolean): Void", Sphere, void(Vector3, float, Color, float, bool));
 };
 class AssetBundle {
 public:
@@ -1288,6 +1460,9 @@ public:
 		return reinterpret_cast<AssetBundle * (*)(String*)>(off)(String::New(path));
 	}
 };
+std::array<int, 20> valid_bones = {
+		1, 2, 3, 5, 6, 14, 15, 17, 18, 21, 23, 24, 25, 26, 27, 48, 55, 56, 57, 76
+};
 class Model : public Component {
 public:
 	FIELD("Assembly-CSharp::Model::boneTransforms", boneTransforms, Array<Transform*>*);
@@ -1306,38 +1481,43 @@ public:
 			auto bone_transform = bone_transforms->get(i);
 			if (!bone_name || !bone_transform) continue;
 
-			if (RUNTIME_CRC32_W(bone_name->buffer) == hash/*wcscmp(bone_name->buffer, name) == 0*/)
-				return new Bone(bone_transform->position( ), LineOfSight(bone_transform->position( ), LocalPlayer::Entity( )->eyes( )->position_e( )), bone_transform);
+			if (RUNTIME_CRC32_W(bone_name->buffer) == hash)                      // forth and back - thanks server
+				return new Bone(bone_transform->position( ), (LineOfSight(bone_transform->position( ), LocalPlayer::Entity( )->eyes( )->position( )) &&
+															  LineOfSight(LocalPlayer::Entity( )->eyes( )->position( ), bone_transform->position( ))), bone_transform);
 		}
 
 		return nullptr;
 	}
+	
 	std::pair<Transform*, bool> find_bone(Vector3 from) {
-		std::pair<Transform*, bool> ret = std::pair<Transform*, bool>( );
+		std::pair<Transform*, bool> ret = std::pair<Transform*, bool>(nullptr, false);
 
 		if (!this)
 			return ret;
-
+		
 		std::vector<std::pair<Transform*, float>> distances = std::vector<std::pair<Transform*, float>>( );
 
 		auto arr = this->boneTransforms( );
-		if (arr) {
-			for (int j = 0; j < arr->size( ); j++) {
-				auto bone = arr->get(j);
-				if (!bone)
-					continue;
+		if (!arr)
+			return ret;
 
-				float dist = bone->position( ).distance(from);
+		for (auto j : valid_bones) {
+			auto bone = arr->get(j);
+			if (!bone)
+				continue;
 
-				distances.push_back({ bone, dist });
-			}
+			float dist = bone->position( ).distance(from);
+
+			distances.push_back({ bone, dist });
 		}
+		
 
 		// find smallest from float (second)
-		std::pair<Transform*, float> temp = distances[ 0 ];
+		std::pair<Transform*, float> temp = { nullptr, 99999.f };
 		for (int i = 0; i < distances.size( ); i++) {
-			if (temp.second > distances[ i ].second) {
+			if (distances[ i ].second < temp.second) {
 				temp.first = distances[ i ].first;
+				temp.second = distances[ i ].second;
 			}
 		}
 
@@ -1468,6 +1648,8 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::Update(): Void", Projectile::Update_);
+	ASSIGN_HOOK("Assembly-CSharp::Projectile::Retire(): Void", Projectile::Retire_);
+	//ASSIGN_HOOK("Assembly-CSharp::Projectile::Refract(UInt32&,Vector3,Vector3,Single): Boolean", Projectile::Refract_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseProjectile::CreateProjectile(String,Vector3,Vector3,Vector3): Projectile", BaseProjectile::CreateProjectile_);
 	ASSIGN_HOOK("UnityEngine.CoreModule::UnityEngine::MonoBehaviour::StartCoroutine(Collections.IEnumerator): Coroutine", MonoBehaviour::StartCoroutine_);

@@ -52,4 +52,24 @@ namespace other {
 		m_manipulate = choice;
 		m_last_manipulate_time = Time::time( );
 	}
+	void test_bundle(AssetBundle* bundle) {
+		if (!bundle) {
+			std::cout << "bundle nfound\n";
+			return;
+		}
+
+		auto arr = bundle->GetAllAssetNames( );
+		if (!arr) {
+			std::cout << "arr nfound\n";
+			return;
+		}
+
+		for (int j = 0; j < arr->size( ); j++) {
+			auto name = arr->get(j);
+
+			printf("%ls\n", name->buffer);
+		}
+
+		std::cout << "bundletest - success\n";
+	}
 }

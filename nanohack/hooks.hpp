@@ -1,9 +1,6 @@
 #include <intrin.h>
 #define CALLED_BY(func,off) (reinterpret_cast<std::uint64_t>(_ReturnAddress()) > func && reinterpret_cast<std::uint64_t>(_ReturnAddress()) < func + off)
 
-Shader* shader;
-int propertyF;
-
 void ClientUpdate_hk(BasePlayer* player) {
 	auto local = LocalPlayer::Entity( );
 	if (local) {
@@ -22,6 +19,18 @@ void ClientUpdate_hk(BasePlayer* player) {
 			Physics::IgnoreLayerCollision(4, 12, !settings::walkonwater);
 			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
 			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
+
+			/*if (Input::GetKey(KeyCode::F))
+				std::cout << "getkey" << std::endl;
+
+			if (Input::GetKeyDown(KeyCode::F))
+				std::cout << "getkeydown" << std::endl;*/
+			static bool once = false;
+			if (!once) {
+				auto bundle = AssetBundle::LoadFromFile(xorstr_("C:/Users/sduihfoqawhf/Downloads/shadersbundle"));
+				other::test_bundle(bundle);
+				once = true;
+			}
 
 			players::gamethread_loop( );
 
@@ -50,43 +59,51 @@ void ClientUpdate_hk(BasePlayer* player) {
 }
 Vector3 GetModifiedAimConeDirection_hk(float aimCone, Vector3 inputVec, bool anywhereInside = true) {
 	if (settings::psilent && target_ply != nullptr && target_ply->isCached( )) {
-		return (aimutils::get_prediction( ) - LocalPlayer::Entity( )->eyes( )->position_e( )).normalized( );
+		return (aimutils::get_prediction( ) - LocalPlayer::Entity( )->eyes( )->position( )).normalized( );
 	}
 
 	return AimConeUtil::GetModifiedAimConeDirection(aimCone, inputVec, anywhereInside);
 }
 Attack* BuildAttackMessage_hk(HitTest* self) {
-    auto ret = self->BuildAttackMessage( );
+	auto ret = self->BuildAttackMessage( );
 
-	if (settings::bullet_tracers)
-		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == LocalPlayer::Entity( )->userID( ))
-			DDraw::Line(LocalPlayer::Entity( )->eyes( )->position_e( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
+	auto localPlayer = LocalPlayer::Entity( );
+	if (localPlayer) {
+		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == localPlayer->userID( )) { // isAuthoritative
+			if (settings::bullet_tracers) {
+				DDraw::Line(localPlayer->eyes( )->position( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
+				DDraw::Sphere(ret->pointEnd( ), 0.05f, Color(1, 0, 0, 1), 1.5f, false);
+			}
 
-	auto entity = BaseNetworkable::clientEntities( )->Find<BasePlayer*>(ret->hitID( ));
+			auto entity = BaseNetworkable::clientEntities( )->Find<BasePlayer*>(ret->hitID( ));
+			if (entity) {
+				if (entity->IsPlayer( )) {
+					if (entity->isCached( )) {
+						if (settings::h_override != 0) {
+							if (localPlayer->isCached( )) {
+								// trajectory_end = ~1 meter
+								// player_distance = 0.2 meter
+								// profit $$$$$$
 
-	if (settings::h_override == 0 || !entity || !entity->IsPlayer( ))
-		return ret;
+								if (settings::bigger_bullets) {
+									auto bone = entity->model( )->find_bone(ret->hitPositionWorld( ));
+									if (bone.second) { // f
+										if (settings::bullet_tracers) 
+											DDraw::Line(ret->hitPositionWorld( ), bone.first->position( ), Color(1, 0, 0, 1), 1.5f, false, true);
 
-	if (!LocalPlayer::Entity( )->isCached( ) || !entity->isCached( ))
-		return ret;
-
-	if (settings::h_override == 1) {
-		ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
-		//ret->hitPositionWorld( ) = entity->bones( )->spine4->position;
-	}
-	else if (settings::h_override == 2) {
-		ret->hitBone( ) = StringPool::Get(xorstr_("head"));
-		//ret->hitPositionWorld( ) = entity->bones( )->head->position;
-	}
-	if (settings::bigger_bullets) {
-		if (entity->bones( )->head->position.distance( ret->hitPositionWorld( ) ) < 1.f)
-			ret->hitPositionWorld( ) = entity->bones( )->head->position;
-		else if (entity->bones( )->spine4->position.distance( ret->hitPositionWorld( ) ) < 1.f)
-			ret->hitPositionWorld( ) = entity->bones( )->spine4->position;
-		else if( entity->bones( )->r_knee->position.distance( ret->hitPositionWorld( ) ) < 1.f )
-			ret->hitPositionWorld( ) = entity->bones( )->r_knee->position;
-		else
-			ret->hitPositionWorld( ) = entity->bones( )->l_foot->position;
+										ret->hitPositionWorld( ) = bone.first->position( );
+									}
+								}
+								if (settings::h_override == 1) 
+									ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
+								else if (settings::h_override == 2) 
+									ret->hitBone( ) = StringPool::Get(xorstr_("head"));
+							}
+						}
+					}
+				}
+			} 
+		}
 	}
 
 	return ret;
@@ -126,7 +143,7 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 	if (settings::omnisprint) {
 		Vector3 vel = self->TargetMovement( );
 
-		float max_speed = (self->swimming() || self->Ducking( ) > 0.5) ? 1.7f : 5.6f;
+		float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
 		float target_speed = std::max(max_speed, vel.length( ));
 		if (vel.length( ) > 0.f) {
 			Vector3 target_vel = Vector3(vel.x / vel.length( ) * target_speed, vel.y, vel.z / vel.length( ) * target_speed);
@@ -162,26 +179,61 @@ void OnLand_hk(BasePlayer* ply, float vel) {
 void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 	plly->ClientInput(state);
 
+	// after network 
+
 	if (settings::omnisprint)
 		LocalPlayer::Entity( )->add_modelstate_flag(ModelState::Flags::Sprinting);
 }
 void DoMovement_hk(Projectile* pr, float deltaTime) {
 	if (pr->isAuthoritative( ))
 		if (settings::bigger_bullets)
-			pr->thickness( ) = 1.0f;
+			pr->thickness( ) = settings::test1;
 		else
 			pr->thickness( ) = 0.1f;
 
 	return pr->DoMovement(deltaTime);
 }
-void ProjectileUpdate_hk(Projectile* pr) {
-	if (pr->isAuthoritative( ))
-		if (pr->traveledDistance( ) > 1.f)
-			if (target_ply != nullptr)
-					if (GetAsyncKeyState( 0x43 ))
-						return;
-	
+//bool ProjectileRefract_hk(Projectile* prj, uint64_t& seed, Vector3 point, Vector3 normal, float resistance) {
+//	auto hitTest = prj->hitTest( );
+//
+//	if (target_ply != nullptr) {
+//		prj->currentVelocity( ) = (target_ply->bones( )->head->position - prj->currentPosition( )) * settings::test1;
+//
+//		return true;
+//	}
+//
+//	//return true;
+//	return prj->Refract( seed, point, normal, resistance);
+//}
+void ProjectileRetire_hk(Projectile* pr) {
+	queueableProjectiles.erase(pr->projectileID( ));
+	finishedProjectiles.erase(pr->projectileID( ));
 
+	return pr->Retire( );
+}
+void ProjectileUpdate_hk(Projectile* pr) {
+	// black man code inc
+	
+	if (settings::delay_shot) {
+		if (pr->isAuthoritative( )) {
+			if (!map_contains_key(finishedProjectiles, pr->projectileID( ))) {
+
+				if (!map_contains_key(queueableProjectiles, pr->projectileID( )))
+					queueableProjectiles.insert(std::make_pair(pr->projectileID( ), 0.f));
+
+				if (queueableProjectiles[ pr->projectileID( ) ] <= 1.f) {
+					queueableProjectiles[ pr->projectileID( ) ] += 0.01f; // optimal
+					return;
+				}
+
+				finishedProjectiles.insert(std::make_pair(pr->projectileID( ), 0.f));
+				queueableProjectiles.erase(pr->projectileID( ));
+			}
+			else
+				queueableProjectiles.erase(pr->projectileID( ));
+		}
+	}
+	
 	pr->Update( );
 }
 float GetRandomVelocity_hk(ItemModProjectile* self) {
@@ -196,6 +248,14 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	if (prj->isAuthoritative( )) {
 		auto lol = test->HitEntity( );
 		auto go = test->gameObject( );
+
+		if (lol->class_name_hash( ) == STATIC_CRC32("TreeEntity") && target_ply != nullptr) {
+			prj->DoHit(test, point, normal);
+
+			prj->currentPosition( ) = (target_ply->bones( )->head->position - prj->currentPosition( )) * settings::test2;
+
+			return false;
+		}
 
 		if (settings::penetrate) {
 			if (go) {
@@ -223,7 +283,7 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	return prj->DoHit(test, point, normal);
 }
 void SetEffectScale_hk(Projectile* self, float eScale) {
-	return self->SetEffectScale(settings::psilent ? 1.f : eScale);
+	return self->SetEffectScale((settings::psilent && self->isAuthoritative( )) ? 1.5f : eScale);
 }
 System::Object* StartCoroutine_hk(MonoBehaviour* a1, System::Object* un2) {
 	if (settings::fastloot) {
@@ -253,7 +313,9 @@ void do_hooks( ) {
 	hookengine::hook(BasePlayer::CanAttack_, CanAttack_hk);
 	hookengine::hook(BasePlayer::OnLand_, OnLand_hk);
 	hookengine::hook(Projectile::DoMovement_, DoMovement_hk);
-	hookengine::hook(Projectile::Update_, ProjectileUpdate_hk); 
+	hookengine::hook(Projectile::Update_, ProjectileUpdate_hk);
+	hookengine::hook(Projectile::Retire_, ProjectileRetire_hk);
+	//hookengine::hook(Projectile::Refract_, ProjectileRefract_hk);
 	hookengine::hook(FlintStrikeWeapon::DoAttack_, DoAttack_hk);
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);

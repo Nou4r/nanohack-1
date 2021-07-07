@@ -32,6 +32,20 @@ namespace players {
 			return;
 		}
 
+		int y_pos = 0;
+		Renderer::text({ screen_size.x - 250, screen_size.y / 2 - 15 }, Color3(255, 255, 0), 12.f, true, true, wxorstr_(L"queueableProjectiles"));
+		for (auto& [id, time] : queueableProjectiles) {
+			Renderer::text({ screen_size.x - 250, screen_size.y / 2 + y_pos }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"%d | %.2f"), id, time);
+			y_pos += 15;
+		}
+
+		int y_pos2 = 0;
+		Renderer::text({ screen_size.x - 100, screen_size.y / 2 - 15 }, Color3(0, 0, 255), 12.f, true, true, wxorstr_(L"finishedProjectiles"));
+		for (auto& [id, time] : finishedProjectiles) {
+			Renderer::text({ screen_size.x - 100, screen_size.y / 2 + y_pos2 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"%d | %.2f"), id, time);
+			y_pos2 += 15;
+		}
+
 		if (target_ply != nullptr) {
 			if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
 				target_ply = nullptr;
@@ -86,11 +100,13 @@ namespace players {
 				Vector2 headPos = { bounds.left + (box_width / 2), bounds.top - 9.54f };
 
 				Color3 col_c = player->is_target( ) ? player->is_visible() ? Color3(255, 0, 0) : Color3(184, 0, 0) : player->playerModel( )->isNpc( ) ? Color3(71, 209, 255) : player->is_visible() ? Color3(255, 255, 255) : Color3(186, 186, 186);
-				Color3 col = Color3(col_c.r, col_c.g, col_c.b, 255 - (player->bones()->head->position.distance(local->bones()->head->position) / 2.5));
+				Color3 col = Color3(col_c.r, col_c.g, col_c.b/*, 255 - (player->bones()->head->position.distance(local->bones()->head->position) / 2.5)*/);
 
-				Renderer::text(headPos, col, 12.f, true, true, wxorstr_(L"%s [%dhp %dm]"), player->_displayName( ), (int)ceil(player->health( )), (int)ceil(player->bones( )->head->position.distance(local->bones( )->head->position)));
+				Renderer::text(headPos, col, 12.f, true, true, wxorstr_(L"%s [%dhp]"), player->_displayName( ), (int)ceil(player->health( )));
 
-				/*Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);*/
+				if (settings::look_dir) 
+					Renderer::line( player->bones( )->dfc, player->bones( )->forward, col, true );
+				
 				Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
 				Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
 
@@ -103,26 +119,12 @@ namespace players {
 				Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
 				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
 
-				/*if (settings::oof_indicators) {
-					if (player->out_of_fov( )) {
-						Vector3 local_pos = local->bones( )->head->position;
-						float y = local_pos.x - player->bones( )->head->position.x;
-						float x = local_pos.z - player->bones( )->head->position.z;
-						Vector3 eulerAngles = math::euler_angles(local->bones( )->e_rot);
-						float num = atan2(y, x) * 57.29578f - 180.f - eulerAngles.y;
-						Vector2 point = math::calculate_rotation_point(num, 5.f, screen_center.x, screen_center.y, 200.f);
-
-						Renderer::filled_circle(point, Color3(43, 43, 43, 200), 9.f);
-						Renderer::circle(point, col, 9.f, 0.5f);
-					}
-				}*/
-
 				if (player->GetHeldItem( )) {
 					Renderer::text(footPos, col, 12.f, true, true, player->GetHeldItem( )->info( )->displayName( )->english( ));
 					y_ += 16;
 				}
 				if (player->HasPlayerFlag(PlayerFlags::Wounded)) {
-					Renderer::text(footPos + Vector2(0, y_), Color3(255, 0, 0, 128), 12.f, true, true, wxorstr_(L"*wounded*"));
+					Renderer::boldtext(footPos + Vector2(0, y_), Color3(255, 0, 0, 255), 12.f, true, true, wxorstr_(L"*wounded*"));
 					y_ += 16;
 				}
 
@@ -169,12 +171,6 @@ namespace players {
 					if (player->playerModel( )->isNpc( ) && !settings::npcs) continue;
 					if (player->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
 
-					//assets/shaders/chams.shader
-					//assets/shaders/chamslit.shader
-
-					//static auto	bundle = AssetBundle::LoadFromFile(xorstr_("C:/Users/yty/Desktop/EscapeFromTarkov-Trainer-master/EscapeFromTarkov-Trainer-master/Files/outline"));
-					//static auto shader_from_bundle = (Shader*)bundle->LoadAsset(xorstr_("assets/outline.shader"), Type::Shader( ));
-					//if (shader_from_bundle && bundle) {
 					auto renderer_list = player->playerModel( )->_multiMesh( )->Renderers( );
 					if (renderer_list) {
 						for (int j = 0; j < renderer_list->size; j++) {

@@ -1,11 +1,8 @@
 namespace bonecache {
-	std::array<int, 20> bones = {
-		1, 2, 3, 5, 6, 14, 15, 17, 18, 21, 23, 24, 25, 26, 27, 48, 55, 56, 57, 76
-	};
 	box_bounds get_bounds(BasePlayer* player, float expand = 0) {
 		box_bounds ret = { FLT_MAX, FLT_MIN, FLT_MAX, FLT_MIN };
 
-		for (auto j : bones) {
+		for (auto j : valid_bones) {
 			auto arr = player->model( )->boneTransforms( );
 			if (arr) {
 				auto transform = player->model( )->boneTransforms( )->gett(j);

@@ -55,15 +55,15 @@ namespace aimutils {
 		if (bullet_speed == 0.f)
 			return target;
 
-		float distance = target.distance(LocalPlayer::Entity( )->eyes()->position_e());
+		float distance = target.distance(LocalPlayer::Entity( )->eyes()->position());
 		float travel_time = distance / bullet_speed;
 		Vector3 vel = Vector3(targetvel.x, 0, targetvel.z) * 0.75f;
 		Vector3 predicted_velocity = vel * travel_time;
 
 		target.x += predicted_velocity.x;
 		target.z += predicted_velocity.z;
-		double height = target.y - LocalPlayer::Entity( )->eyes( )->position_e( ).y;
-		Vector3 dir = target - LocalPlayer::Entity( )->eyes( )->position_e( );
+		double height = target.y - LocalPlayer::Entity( )->eyes( )->position( ).y;
+		Vector3 dir = target - LocalPlayer::Entity( )->eyes( )->position( );
 		float DepthPlayerTarget = sqrt((dir.x * dir.x) + (dir.z * dir.z));
 		float drop = get_bullet_drop(height, DepthPlayerTarget, bullet_speed, get_held_gravity( ));
 		target.y += drop;

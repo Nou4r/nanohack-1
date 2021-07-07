@@ -5,9 +5,10 @@ namespace settings {
 	bool nofall = true;
 	bool always_eoka = true;
 	bool infinite_jump = true;
+	bool delay_shot = false;
 	bool players = true;
-	bool magical_bullets = false;
 	bool npcs = false;
+	bool look_dir = true;
 	bool bullet_tracers = true;
 	bool manipulator = true;
 	bool walkonwater = true;
@@ -15,12 +16,12 @@ namespace settings {
 	bool freeaim = true;
 	bool psilent = true;
 	bool bigger_bullets = true;
-	bool chams = false;
+	bool chams = true;
 	bool fastloot = true;
 	bool faster_bullets = true;
 	bool penetrate = true;
 
-	float test1 = 0.5f;
+	float test1 = 1.f;
 	float test2 = 0.f;
 
 	int lightning = 2;

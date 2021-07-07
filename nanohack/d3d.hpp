@@ -19,8 +19,10 @@ namespace d3d {
 				menu::add_checkbox(&settings::players, wxorstr_(L"player esp"));
 				menu::add_checkbox(&settings::npcs, wxorstr_(L"npc esp"));
 				menu::add_checkbox(&settings::chams, wxorstr_(L"chams"));
+				menu::add_checkbox(&settings::look_dir, wxorstr_(L"draw looking direction"));
 				menu::add_spacer( );
 				menu::add_checkbox(&settings::psilent, wxorstr_(L"psilent"));
+				menu::add_checkbox(&settings::delay_shot, wxorstr_(L"delay shot"));
 				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") });
 				menu::add_checkbox(&settings::manipulator, wxorstr_(L"manipulator"));
 				menu::add_checkbox(&settings::always_eoka, wxorstr_(L"1 hit eoka"));
@@ -56,6 +58,10 @@ namespace d3d {
 			if (settings::players && settings::cheat_init)
 				players::loop( );
 
+			/*if (LocalPlayer::Entity( )) {
+				Renderer::text({ screen_center.x, screen_center.y - 50 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)LocalPlayer::Entity( )->modelState( )->flags( ));
+			}*/
+
 			if (settings::menu)
 				menu::draw( );
 
@@ -68,13 +74,13 @@ namespace d3d {
 	HRESULT resize_hook(IDXGISwapChain* swapChain, UINT bufferCount, UINT width, UINT height, DXGI_FORMAT newFormat, UINT swapChainFlags) {
 		Renderer::reset_canvas( );
 
-		if (render_target_view) 
+		if (render_target_view)
 			render_target_view->Release( );
 
-		if (immediate_context) 
+		if (immediate_context)
 			immediate_context->Release( );
 
-		if (device) 
+		if (device)
 			device->Release( );
 
 		device = nullptr;
