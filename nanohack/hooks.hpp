@@ -14,25 +14,22 @@ void ClientUpdate_hk(BasePlayer* player) {
 			if (settings::manipulator && target_ply != nullptr)
 				other::find_manipulate_angle( );
 			else
-				other::m_manipulate = Vector3::Zero( );
+				if (!other::m_manipulate.empty( ))
+					other::m_manipulate = Vector3::Zero( );
 
 			Physics::IgnoreLayerCollision(4, 12, !settings::walkonwater);
 			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
 			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
 
-			/*if (Input::GetKey(KeyCode::F))
-				std::cout << "getkey" << std::endl;
+			ConVar::Graphics::_fov( ) = settings::camera_fov;
+			
+			if (!settings::delay_shot)
+				if (!queueableProjectiles.empty( ))
+					queueableProjectiles.clear( );
 
-			if (Input::GetKeyDown(KeyCode::F))
-				std::cout << "getkeydown" << std::endl;*/
-			static bool once = false;
-			if (!once) {
-				auto bundle = AssetBundle::LoadFromFile(xorstr_("C:/Users/sduihfoqawhf/Downloads/shadersbundle"));
-				other::test_bundle(bundle);
-				once = true;
-			}
-
-			players::gamethread_loop( );
+			if (settings::weapon_spam)
+				if (local->GetHeldEntity( ))
+					local->GetHeldEntity( )->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
 
 			if (settings::lightning != 0) {
 				auto list = TOD_Sky::instances( );
@@ -98,6 +95,38 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 									ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
 								else if (settings::h_override == 2) 
 									ret->hitBone( ) = StringPool::Get(xorstr_("head"));
+								else if (settings::h_override == 3) {
+									int num = rand( ) % 100;
+									if (num > 90)
+										ret->hitBone( ) = StringPool::Get(xorstr_("head"));
+									else if (num < 90 && num > 80)
+										ret->hitBone( ) = StringPool::Get(xorstr_("neck"));
+									else if (num < 80 && num > 70)
+										ret->hitBone( ) = StringPool::Get(xorstr_("l_clavicle"));
+									else if (num < 70 && num > 60)
+										ret->hitBone( ) = StringPool::Get(xorstr_("pelvis"));
+									else if (num < 60 && num > 50)
+										ret->hitBone( ) = StringPool::Get(xorstr_("r_hip"));
+									else if (num < 50 && num > 40)
+										ret->hitBone( ) = StringPool::Get(xorstr_("r_foot"));
+									else if (num < 40 && num > 30)
+										ret->hitBone( ) = StringPool::Get(xorstr_("spine1"));
+									else if (num < 30 && num > 20)
+										ret->hitBone( ) = StringPool::Get(xorstr_("l_hand"));
+									else if (num < 20 && num > 10)
+										ret->hitBone( ) = StringPool::Get(xorstr_("r_upperarm"));
+									else if (num < 10)
+										ret->hitBone( ) = StringPool::Get(xorstr_("l_knee"));
+									else
+										ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
+								}
+								else if (settings::h_override == 4) {
+									int yeet = rand( ) % 100;
+									if (yeet > 50)
+										ret->hitBone( ) = StringPool::Get(xorstr_("head"));
+									else
+										ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
+								}
 							}
 						}
 					}
@@ -144,9 +173,8 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 		Vector3 vel = self->TargetMovement( );
 
 		float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
-		float target_speed = std::max(max_speed, vel.length( ));
 		if (vel.length( ) > 0.f) {
-			Vector3 target_vel = Vector3(vel.x / vel.length( ) * target_speed, vel.y, vel.z / vel.length( ) * target_speed);
+			Vector3 target_vel = Vector3(vel.x / vel.length( ) * max_speed, vel.y, vel.z / vel.length( ) * max_speed);
 			self->TargetMovement( ) = target_vel;
 		}
 	}
@@ -177,9 +205,11 @@ void OnLand_hk(BasePlayer* ply, float vel) {
 		ply->OnLand(vel);
 }
 void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
-	plly->ClientInput(state);
+	players::gamethread( );
 
-	// after network 
+	plly->ClientInput(state);
+	
+	// before network 
 
 	if (settings::omnisprint)
 		LocalPlayer::Entity( )->add_modelstate_flag(ModelState::Flags::Sprinting);
@@ -187,24 +217,12 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 void DoMovement_hk(Projectile* pr, float deltaTime) {
 	if (pr->isAuthoritative( ))
 		if (settings::bigger_bullets)
-			pr->thickness( ) = settings::test1;
+			pr->thickness( ) = 1.f;
 		else
 			pr->thickness( ) = 0.1f;
 
 	return pr->DoMovement(deltaTime);
 }
-//bool ProjectileRefract_hk(Projectile* prj, uint64_t& seed, Vector3 point, Vector3 normal, float resistance) {
-//	auto hitTest = prj->hitTest( );
-//
-//	if (target_ply != nullptr) {
-//		prj->currentVelocity( ) = (target_ply->bones( )->head->position - prj->currentPosition( )) * settings::test1;
-//
-//		return true;
-//	}
-//
-//	//return true;
-//	return prj->Refract( seed, point, normal, resistance);
-//}
 void ProjectileRetire_hk(Projectile* pr) {
 	queueableProjectiles.erase(pr->projectileID( ));
 	finishedProjectiles.erase(pr->projectileID( ));
@@ -245,19 +263,11 @@ float GetRandomVelocity_hk(ItemModProjectile* self) {
 	return self->GetRandomVelocity( ) * modifier;
 }
 bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
-	if (prj->isAuthoritative( )) {
-		auto lol = test->HitEntity( );
-		auto go = test->gameObject( );
+	if (settings::penetrate) {
+		if (prj->isAuthoritative( )) {
+			auto lol = test->HitEntity( );
+			auto go = test->gameObject( );
 
-		if (lol->class_name_hash( ) == STATIC_CRC32("TreeEntity") && target_ply != nullptr) {
-			prj->DoHit(test, point, normal);
-
-			prj->currentPosition( ) = (target_ply->bones( )->head->position - prj->currentPosition( )) * settings::test2;
-
-			return false;
-		}
-
-		if (settings::penetrate) {
 			if (go) {
 				if (go->layer( ) == 0 || go->layer( ) == 24) {
 					return false;
@@ -278,6 +288,9 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 					return false;
 				}
 			}
+
+			finishedProjectiles.erase(prj->projectileID( ));
+			queueableProjectiles.erase(prj->projectileID( ));
 		}
 	}
 	return prj->DoHit(test, point, normal);
@@ -315,7 +328,6 @@ void do_hooks( ) {
 	hookengine::hook(Projectile::DoMovement_, DoMovement_hk);
 	hookengine::hook(Projectile::Update_, ProjectileUpdate_hk);
 	hookengine::hook(Projectile::Retire_, ProjectileRetire_hk);
-	//hookengine::hook(Projectile::Refract_, ProjectileRefract_hk);
 	hookengine::hook(FlintStrikeWeapon::DoAttack_, DoAttack_hk);
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);

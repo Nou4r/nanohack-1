@@ -1,4 +1,5 @@
 namespace menu {
+
 	class item {
 	public:
 		bool* val;
@@ -56,6 +57,9 @@ namespace menu {
 	}
 	void add_spacer( ) {
 		add_item(0, wxorstr_(L""), 3);
+	}
+	void add_keybind(int* key, std::wstring label) {
+		add_item(0, label, 4, 0, 0, {}, key);
 	}
 	int current_ = 0;
 	void draw( ) {
@@ -129,6 +133,21 @@ namespace menu {
 			}
 			else if (entry.type == 3) {
 				// nothing lol
+			}
+			else if (entry.type == 4) {
+				Color3 col = this_is_active ? Color3(255, 255, 181) : Color3(255, 255, 0);
+				
+
+				if (this_is_active) {
+					if (GetAsyncKeyState(VK_LEFT) & 1)
+						*entry.f_val -= entry.power;
+					else if (GetAsyncKeyState(VK_RIGHT) & 1)
+						*entry.f_val += entry.power;
+				}
+				if (this_is_active)
+					Renderer::text({ 200, 400.f + y_pos }, col, 14.f, true, true, wxorstr_(L"-> %s [%.1f] <-"), entry.label.c_str( ), *entry.f_val);
+				else
+					Renderer::text({ 200, 400.f + y_pos }, col, 14.f, true, true, wxorstr_(L"%s [%.1f]"), entry.label.c_str( ), *entry.f_val);
 			}
 			y_pos += 17;
 		}

@@ -38,6 +38,12 @@ public:
 		this->transform = traa;
 	}
 	bool visible_(Vector3 from) {
+		if (this->position.empty( ))
+			return false;
+
+		if (!this->transform)
+			return false;
+
 		return LineOfSight(this->position, from);
 	}
 };
@@ -116,7 +122,7 @@ public:
 	char pad_0000[ 0x10 ];
 	void* buffer;
 	uint32_t size;
-
+	 
 	T* get(uint32_t idx) {
 		if (!this) return nullptr;
 

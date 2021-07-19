@@ -9,7 +9,7 @@ namespace other {
 
 		Vector3 choice = Vector3::Zero( );
 
-		if (LineOfSight(re_p, target_ply->find_mpv_bone( )->position)) {
+		if (LineOfSight(re_p, target_ply->find_mpv_bone( )->position) || !target_ply->isCached()) {
 			m_manipulate = Vector3::Zero( );
 			return;
 		}
@@ -38,7 +38,7 @@ namespace other {
 			if (!LineOfSight(point, re_p))
 				continue;
 
-			if (!target_ply->find_mpv_bone( )->visible_(point))
+			if (!target_ply->bones( )->head->visible_(point))
 				continue;
 
 			choice = s;
@@ -72,4 +72,7 @@ namespace other {
 
 		std::cout << "bundletest - success\n";
 	}
+}
+void dispatch_keybind(KeyCode& s) {
+
 }

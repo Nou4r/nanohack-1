@@ -52,6 +52,10 @@ namespace aimutils {
 			return target;
 
 		float bullet_speed = (itemModProjectile->GetRandomVelocity( ) * (settings::faster_bullets ? 1.4f : 1.f)) * base_projectile->projectileVelocityScale( );
+
+		if (base_projectile->class_name_hash() == STATIC_CRC32("CompoundBowWeapon"))
+			bullet_speed = (itemModProjectile->GetRandomVelocity( ) * (settings::faster_bullets ? 1.4f : 1.f)) * reinterpret_cast<CompoundBowWeapon*>(base_projectile)->GetProjectileVelocityScale( );
+
 		if (bullet_speed == 0.f)
 			return target;
 

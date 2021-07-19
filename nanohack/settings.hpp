@@ -6,10 +6,12 @@ namespace settings {
 	bool always_eoka = true;
 	bool infinite_jump = true;
 	bool delay_shot = false;
+	bool weapon_spam = false;
 	bool players = true;
 	bool npcs = false;
 	bool look_dir = true;
 	bool bullet_tracers = true;
+	float camera_fov = 100.f;
 	bool manipulator = true;
 	bool walkonwater = true;
 	bool omnisprint = true;

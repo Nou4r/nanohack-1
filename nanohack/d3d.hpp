@@ -23,7 +23,7 @@ namespace d3d {
 				menu::add_spacer( );
 				menu::add_checkbox(&settings::psilent, wxorstr_(L"psilent"));
 				menu::add_checkbox(&settings::delay_shot, wxorstr_(L"delay shot"));
-				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") });
+				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") , wxorstr_(L"randomized (all)"), wxorstr_(L"randomized (head & body)") });
 				menu::add_checkbox(&settings::manipulator, wxorstr_(L"manipulator"));
 				menu::add_checkbox(&settings::always_eoka, wxorstr_(L"1 hit eoka"));
 				menu::add_checkbox(&settings::penetrate, wxorstr_(L"pierce"));
@@ -31,16 +31,15 @@ namespace d3d {
 				menu::add_checkbox(&settings::faster_bullets, wxorstr_(L"faster bullets"));
 				menu::add_spacer( );
 				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
+				menu::add_checkbox(&settings::weapon_spam, wxorstr_(L"fake shots"));
 				menu::add_checkbox(&settings::bullet_tracers, wxorstr_(L"bullet tracers"));
+				menu::add_slider(&settings::camera_fov, wxorstr_(L"camera fov"));
 				menu::add_checkbox(&settings::omnisprint, wxorstr_(L"omnidirectional sprinting"));
 				menu::add_checkbox(&settings::nofall, wxorstr_(L"no fall damage"));
 				menu::add_checkbox(&settings::freeaim, wxorstr_(L"remove aiming restrictions"));
 				menu::add_checkbox(&settings::infinite_jump, wxorstr_(L"remove jumping restrictions"));
 				menu::add_checkbox(&settings::fastloot, wxorstr_(L"fast loot"));
 				menu::add_selectable(&settings::lightning, wxorstr_(L"lightning"), { wxorstr_(L"regular"), wxorstr_(L"dark ambient"), wxorstr_(L"light ambient") });
-				menu::add_spacer( );
-				menu::add_slider(&settings::test1, wxorstr_(L"test float 1"));
-				menu::add_slider(&settings::test2, wxorstr_(L"test float 2"));
 				menu_init = true;
 			}
 		}
@@ -88,14 +87,14 @@ namespace d3d {
 		return resize_original(swapChain, bufferCount, width, height, newFormat, swapChainFlags);
 	}
 
-	void init( ) {
+	bool init( ) {
 		unity_player = (uintptr_t)GetModuleHandleA(xorstr_("UnityPlayer.dll"));
 		game_assembly = (uintptr_t)GetModuleHandleA(xorstr_("GameAssembly.dll"));
 
 		auto addr = mem::find_pattern(unity_player, (PBYTE)"\x48\x83\xEC\x28\xE8\x00\x00\x00\x00\x48\x8B\x80\xA0\x03\x00\x00", xorstr_("xxxxx????xxxxxxx"));
 
 		if (!addr)
-			return;
+			return false;
 
 		auto swapchain = reinterpret_cast<IDXGISwapChain * (__fastcall*)()>(addr)();
 
@@ -106,6 +105,9 @@ namespace d3d {
 
 			hookengine::hook(present_original, present_hook);
 			hookengine::hook(resize_original, resize_hook);
+
+			return true;
 		}
+		return false;
 	}
 }

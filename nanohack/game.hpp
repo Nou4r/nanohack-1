@@ -424,7 +424,9 @@ public:
 	STATIC_FUNCTION("Assembly-CSharp::GamePhysics::CheckCapsule(Vector3,Vector3,Single,Int32,QueryTriggerInteraction): Boolean", CheckCapsule, bool(Vector3, Vector3, float, int, QueryTriggerInteraction));
 };
 bool LineOfSight(Vector3 a, Vector3 b) {
-	bool result = GamePhysics::LineOfSight(a, b, 10551296, 0.f);
+	int mask = settings::penetrate ? 10551296 : 1503731969; // projectile los, flyhack mask
+
+	bool result = GamePhysics::LineOfSight(a, b, mask, 0.f) && GamePhysics::LineOfSight(b, a, mask, 0.f);
 	return result;
 }
 class Time {
@@ -833,6 +835,11 @@ public:
 		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Renderer::get_material(): Material");
 		return reinterpret_cast<Material * (__fastcall*)(Renderer_*)>(off)(this);
 	}
+	void set_material(Material* value) {
+		if (!this) return;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Renderer::set_material(Material): Void");
+		return reinterpret_cast<void (__fastcall*)(Renderer_*, Material*)>(off)(this, value);
+	}
 	Array<Material*>* materials( ) {
 		if (!this) return nullptr;
 		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Renderer::get_materials(): Material[]");
@@ -910,6 +917,10 @@ public:
 	static void IgnoreLayerCollision(int layer1, int layer2, bool ignore) {
 		return reinterpret_cast<void(*)(int, int, bool)>(il2cpp_resolve_icall(xorstr_("UnityEngine.Physics::IgnoreLayerCollision")))(layer1, layer2, ignore);
 	}
+};
+class unk {
+public:
+
 };
 class Input {
 public:
@@ -1015,6 +1026,23 @@ public:
 		return ret;
 	}
 };
+namespace ConVar {
+	class Graphics {
+	public:
+		static float& _fov( ) 		{
+			static auto clazz = CLASS("Assembly-CSharp::ConVar::Graphics");
+			return *reinterpret_cast<float*>(std::uint64_t(clazz->static_fields) + 0x18);
+		}
+	};
+}
+class CompoundBowWeapon {
+public:
+	float GetProjectileVelocityScale(bool getmax = false) {
+		if (!this) return 0.f;
+		static auto off = METHOD("Assembly-CSharp::CompoundBowWeapon::GetProjectileVelocityScale(Boolean): Single");
+		return reinterpret_cast<float(__fastcall*)(CompoundBowWeapon*, bool)>(off)(this, getmax);
+	}
+};
 class FlintStrikeWeapon : public BaseProjectile {
 public:
 	FIELD("Assembly-CSharp::FlintStrikeWeapon::successFraction", successFraction, float);
@@ -1034,6 +1062,16 @@ public:
 		return *reinterpret_cast<List<Renderer_*>**>(this + off);
 	}
 };
+class SkinSet {
+public:
+	FIELD("Assembly-CSharp::SkinSet::BodyMaterial", BodyMaterial, Material*);
+	FIELD("Assembly-CSharp::SkinSet::HeadMaterial", HeadMaterial, Material*);
+	FIELD("Assembly-CSharp::SkinSet::EyeMaterial", EyeMaterial, Material*);
+};
+class SkinSetCollection {
+public:
+	FIELD("Assembly-CSharp::SkinSetCollection::Skins", Skins, Array<SkinSet*>*);
+};
 class PlayerModel {
 public:
 	Vector3 newVelocity( ) {
@@ -1047,6 +1085,8 @@ public:
 		return *reinterpret_cast<bool*>(this + off);
 	}
 	FIELD("Assembly-CSharp::PlayerModel::_multiMesh", _multiMesh, SkinnedMultiMesh*);
+	FIELD("Assembly-CSharp::PlayerModel::MaleSkin", MaleSkin, SkinSetCollection*);
+	FIELD("Assembly-CSharp::PlayerModel::FemaleSkin", FemaleSkin, SkinSetCollection*);
 };
 class TOD_AtmosphereParameters {
 public:
@@ -1453,7 +1493,7 @@ public:
 	T* LoadAsset(char* name, Type* type) {
 		if (!this) return {};
 		static auto off = METHOD("UnityEngine.AssetBundleModule::UnityEngine::AssetBundle::LoadAsset(String,Type): Object");
-		return reinterpret_cast<Object * (*)(AssetBundle*, String*, Type*)>(off)(this, String::New(name), type);
+		return reinterpret_cast<T * (*)(AssetBundle*, String*, Type*)>(off)(this, String::New(name), type);
 	}
 	static AssetBundle* LoadFromFile(char* path) {
 		static auto off = METHOD("UnityEngine.AssetBundleModule::UnityEngine::AssetBundle::LoadFromFile(String): AssetBundle");
@@ -1482,8 +1522,7 @@ public:
 			if (!bone_name || !bone_transform) continue;
 
 			if (RUNTIME_CRC32_W(bone_name->buffer) == hash)                      // forth and back - thanks server
-				return new Bone(bone_transform->position( ), (LineOfSight(bone_transform->position( ), LocalPlayer::Entity( )->eyes( )->position( )) &&
-															  LineOfSight(LocalPlayer::Entity( )->eyes( )->position( ), bone_transform->position( ))), bone_transform);
+				return new Bone(bone_transform->position( ), LineOfSight(bone_transform->position( ), LocalPlayer::Entity( )->eyes( )->position( )), bone_transform);
 		}
 
 		return nullptr;
