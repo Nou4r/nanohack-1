@@ -1239,7 +1239,21 @@ public:
 	FIELD("Rust.Data::ProtoBuf::PlayerProjectileAttack::playerAttack", playerAttack, PlayerAttack*);
 };
 std::map<uint64_t, BoneCache*> cachedBones = std::map<uint64_t, BoneCache*>( );
-
+class InputMessage {
+public:
+	int& buttons() {
+		return *reinterpret_cast<int*>(this + 0x14);
+	}
+};
+class InputState {
+public:
+	FIELD("Assembly-CSharp::InputState::current", current, InputMessage*);
+	FIELD("Assembly-CSharp::InputState::previous", previous, InputMessage*);
+};
+class PlayerInput {
+public:
+	FIELD("Assembly-CSharp::PlayerInput::state", state, InputState*);
+};
 class BasePlayer;
 BasePlayer* target_ply = nullptr;
 class BasePlayer : public BaseCombatEntity {
@@ -1277,12 +1291,15 @@ public:
 	FIELD("Assembly-CSharp::BasePlayer::movement", movement, PlayerWalkMovement*);
 	FIELD("Assembly-CSharp::BasePlayer::modelState", modelState, ModelState*);
 	FIELD("Assembly-CSharp::BasePlayer::playerModel", playerModel, PlayerModel*);
+	FIELD("Assembly-CSharp::BasePlayer::input", input, PlayerInput*);
 	FIELD("Assembly-CSharp::BasePlayer::playerFlags", playerFlags, PlayerFlags);
 	FIELD("Assembly-CSharp::BasePlayer::inventory", inventory, PlayerInventory*);
 	FIELD("Assembly-CSharp::BasePlayer::clActiveItem", clActiveItem, uint32_t);
 	FIELD("Assembly-CSharp::BasePlayer::maxProjectileID", maxProjectileID, int);
 	FIELD("Assembly-CSharp::BasePlayer::eyes", eyes, PlayerEyes*);
 	FIELD("Assembly-CSharp::BasePlayer::lastHeadshotSoundTime", lastHeadshotSoundTime, float);
+	FIELD("Assembly-CSharp::BasePlayer::lastSentTickTime", lastSentTickTime, float);
+	FIELD("Assembly-CSharp::BasePlayer::clientTickInterval", clientTickInterval, float);
 
 	bool IsDucked( ) {
 		if (!this) return false;
@@ -1365,6 +1382,11 @@ public:
 	float GetJumpHeight( ) {
 		if (!this) return 0.f;
 		static auto off = METHOD("Assembly-CSharp::BasePlayer::GetJumpHeight(): Single");
+		return reinterpret_cast<float(__fastcall*)(BasePlayer*)>(off)(this);
+	}
+	float GetMaxSpeed( ) {
+		if (!this) return 0.f;
+		static auto off = METHOD("Assembly-CSharp::BasePlayer::GetMaxSpeed(): Single");
 		return reinterpret_cast<float(__fastcall*)(BasePlayer*)>(off)(this);
 	}
 	float GetHeight(bool ducked) {

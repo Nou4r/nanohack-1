@@ -2,6 +2,8 @@ namespace other {
 	Vector3 m_manipulate = Vector3::Zero( );
 	float m_last_manipulate_time = 0.f;
 
+	float m_max_eye = 0.f;
+
 	void find_manipulate_angle( ) {
 		auto loco = LocalPlayer::Entity( );
 		Vector3 re_p = loco->transform( )->position( ) + loco->transform( )->up( ) * (PlayerEyes::EyeOffset( ).y + loco->eyes( )->viewOffset( ).y);
@@ -14,21 +16,23 @@ namespace other {
 			return;
 		}
 
+		float mm_max_eye = 2.5f;
+
 		auto right = loco->eyes( )->MovementRight( );
 		auto forward = loco->eyes( )->MovementForward( );
 
-		std::array<Vector3, 10> arr = {
-			Vector3(right.x * 0.7f, 0.f, right.z * 0.7f), // small right
-			Vector3(right.x * 1.4f, 0.f, right.z * 1.4f), // big right
+		std::array<Vector3, 8> arr = {
+			Vector3(right.x * (mm_max_eye / 2), 0.f, right.z * (mm_max_eye / 2)), // small right
+			Vector3(right.x * mm_max_eye, 0.f, right.z * mm_max_eye), // big right
 
-			Vector3(-(right.x * 0.7f), 0.f, -(right.z * 0.7f)), // small left
-			Vector3(-(right.x * 1.4f), 0.f, -(right.z * 1.4f)), // big left
+			Vector3(-(right.x * (mm_max_eye / 2)), 0.f, -(right.z * (mm_max_eye / 2))), // small left
+			Vector3(-(right.x * mm_max_eye), 0.f, -(right.z * mm_max_eye)), // big left
 
-			Vector3(0.f, 0.7f, 0.f), // small up
-			Vector3(0.f, 1.4f, 0.f), // big up
+			Vector3(0.f, (mm_max_eye / 2), 0.f), // small up
+			Vector3(0.f, mm_max_eye, 0.f), // big up
 
-			Vector3(forward.x * 0.7f, 0.f, forward.z * 0.7f), // small forward
-			Vector3(forward.x * 1.4f, 0.f, forward.z * 1.4f), // big forward
+			Vector3(forward.x * (mm_max_eye / 2), 0.f, forward.z * (mm_max_eye / 2)), // small forward
+			Vector3(forward.x * mm_max_eye, 0.f, forward.z * mm_max_eye), // big forward
 		}; // restoring procedure: *= 1.428571428571429 for 0.7f
 		   //                      *= 0.7142857142857143 for 1.4f
 

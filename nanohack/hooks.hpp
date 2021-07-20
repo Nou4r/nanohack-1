@@ -7,50 +7,6 @@ void ClientUpdate_hk(BasePlayer* player) {
 		if (settings::players) {
 			bonecache::cachePlayer(player);
 		}
-		if (player->userID( ) == local->userID( )) {
-			GLOBAL_TIME = Time::time( );
-			viewMatrix = Camera::getViewMatrix( );
-
-			if (settings::manipulator && target_ply != nullptr)
-				other::find_manipulate_angle( );
-			else
-				if (!other::m_manipulate.empty( ))
-					other::m_manipulate = Vector3::Zero( );
-
-			Physics::IgnoreLayerCollision(4, 12, !settings::walkonwater);
-			Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
-			Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
-
-			ConVar::Graphics::_fov( ) = settings::camera_fov;
-			
-			if (!settings::delay_shot)
-				if (!queueableProjectiles.empty( ))
-					queueableProjectiles.clear( );
-
-			if (settings::weapon_spam)
-				if (local->GetHeldEntity( ))
-					local->GetHeldEntity( )->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
-
-			if (settings::lightning != 0) {
-				auto list = TOD_Sky::instances( );
-				if (list) {
-					for (int j = 0; j < list->size; j++) {
-						auto sky = (TOD_Sky*)list->get(j);
-						if (!sky)
-							continue;
-
-						float amb = 1.f;
-						if (settings::lightning == 1)
-							amb = 4.f;
-						else if (settings::lightning == 2)
-							amb = 6.f;
-
-						sky->Day( )->AmbientMultiplier( ) = amb == 4.f ? 0.2f : 1.f;
-						sky->Night( )->AmbientMultiplier( ) = amb;
-					}
-				}
-			}
-		}
 	}
 	return player->ClientUpdate( );
 }
@@ -144,9 +100,9 @@ void DoAttack_hk(FlintStrikeWeapon* weapon) {
 	return weapon->DoAttack( );
 }
 Vector3 BodyLeanOffset_hk(PlayerEyes* a1) {
-	if (settings::manipulator) {
+	if (settings::manipulator && !(settings::desync && Input::GetKey(KeyCode::C))) {
 		if (target_ply != nullptr) {
-			if (other::m_manipulate.empty( ))
+			if (other::m_manipulate.empty( ) || !LocalPlayer::Entity( )->GetHeldEntity( ))
 				return a1->BodyLeanOffset( );
 
 			return other::m_manipulate;
@@ -169,13 +125,20 @@ bool CanAttack_hk(BasePlayer* self) {
 	return self->CanAttack( );
 }
 void UpdateVelocity_hk(PlayerWalkMovement* self) {
-	if (settings::omnisprint) {
+	if (!self->flying( )) {
 		Vector3 vel = self->TargetMovement( );
-
-		float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
-		if (vel.length( ) > 0.f) {
-			Vector3 target_vel = Vector3(vel.x / vel.length( ) * max_speed, vel.y, vel.z / vel.length( ) * max_speed);
-			self->TargetMovement( ) = target_vel;
+		if (settings::omnisprint) {
+			float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
+			if (vel.length( ) > 0.f) {
+				Vector3 target_vel = Vector3(vel.x / vel.length( ) * max_speed, vel.y, vel.z / vel.length( ) * max_speed);
+				self->TargetMovement( ) = target_vel;
+			}
+		}
+		if (settings::desync && Input::GetKey(KeyCode::C)) {
+			float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
+			if (vel.length( ) > 0.f) {
+				self->TargetMovement( ) = Vector3::Zero( );
+			}
 		}
 	}
 
@@ -205,7 +168,68 @@ void OnLand_hk(BasePlayer* ply, float vel) {
 		ply->OnLand(vel);
 }
 void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
-	players::gamethread( );
+	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
+		players::gamethread( );
+
+		if (settings::manipulator && !(settings::desync && Input::GetKey(KeyCode::C)))
+			plly->clientTickInterval( ) = 0.4f;
+		else if (settings::desync && Input::GetKey(KeyCode::C))
+			plly->clientTickInterval( ) = 0.95f;
+		else
+			plly->clientTickInterval( ) = 0.05f;
+
+		settings::tr::desyncing = settings::desync && Input::GetKey(KeyCode::C);
+
+		if (settings::desync && Input::GetKey(KeyCode::C)) {
+			float desyncTime = (Time::realtimeSinceStartup( ) - plly->lastSentTickTime( )) - 0.03125 * 3;
+			float max_eye_value = 0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * plly->GetMaxSpeed( );
+
+			plly->eyes( )->viewOffset( ) = Vector3(0, max_eye_value, 0);
+		}
+
+		GLOBAL_TIME = Time::time( );
+		viewMatrix = Camera::getViewMatrix( );
+
+		if (settings::manipulator && target_ply != nullptr && !(settings::desync && Input::GetKey(KeyCode::C)))
+			other::find_manipulate_angle( );
+		else
+			if (!other::m_manipulate.empty( ))
+				other::m_manipulate = Vector3::Zero( );
+
+		Physics::IgnoreLayerCollision(4, 12, !settings::walkonwater);
+		Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
+		Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
+
+		ConVar::Graphics::_fov( ) = settings::camera_fov;
+
+		if (!settings::delay_shot)
+			if (!queueableProjectiles.empty( ))
+				queueableProjectiles.clear( );
+
+		if (settings::weapon_spam)
+			if (plly->GetHeldEntity( ))
+				plly->GetHeldEntity( )->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
+
+		if (settings::lightning != 0) {
+			auto list = TOD_Sky::instances( );
+			if (list) {
+				for (int j = 0; j < list->size; j++) {
+					auto sky = (TOD_Sky*)list->get(j);
+					if (!sky)
+						continue;
+
+					float amb = 1.f;
+					if (settings::lightning == 1)
+						amb = 4.f;
+					else if (settings::lightning == 2)
+						amb = 6.f;
+
+					sky->Day( )->AmbientMultiplier( ) = amb == 4.f ? 0.2f : 1.f;
+					sky->Night( )->AmbientMultiplier( ) = amb;
+				}
+			}
+		}
+	}
 
 	plly->ClientInput(state);
 	
@@ -268,7 +292,7 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 			auto lol = test->HitEntity( );
 			auto go = test->gameObject( );
 
-			if (go) {
+			if (go && !lol) {
 				if (go->layer( ) == 0 || go->layer( ) == 24) {
 					return false;
 				}
@@ -301,8 +325,9 @@ void SetEffectScale_hk(Projectile* self, float eScale) {
 System::Object* StartCoroutine_hk(MonoBehaviour* a1, System::Object* un2) {
 	if (settings::fastloot) {
 		static auto v = METHOD("Assembly-CSharp::ItemIcon::SetTimedLootAction(UInt32,Action): Void");
-		if (CALLED_BY(v, 0x656))
+		if (CALLED_BY(v, 0x656)) {
 			*reinterpret_cast<float*>(un2 + 0x28) = -0.2f;
+		}
 	}
 
 	return a1->StartCoroutine(un2);

@@ -20,12 +20,12 @@ namespace aimutils {
 		}
 	}
 
-	double get_bullet_drop(double height, double DepthPlayerTarget, float velocity, float gravity) {
-		double pitch = std::atan2(height, DepthPlayerTarget);
-		double BulletVelocityXY = velocity * std::cos(pitch);
-		double Time = DepthPlayerTarget / BulletVelocityXY;
-		double TotalVerticalDrop = (0.4905f * gravity * Time * Time);
-		return TotalVerticalDrop * 10;
+	double get_bullet_drop(double height, double aaaa, float speed, float gravity) {
+		double pitch = std::atan2(height, aaaa);
+		double vel_double = speed * std::cos(pitch);
+		double t = aaaa / vel_double;
+		double y = (0.4905f * gravity * t * t);
+		return y * 10;
 	}
 	Vector3 get_prediction( ) {
 		Vector3 target = target_ply->find_mpv_bone( )->position;
@@ -68,8 +68,8 @@ namespace aimutils {
 		target.z += predicted_velocity.z;
 		double height = target.y - LocalPlayer::Entity( )->eyes( )->position( ).y;
 		Vector3 dir = target - LocalPlayer::Entity( )->eyes( )->position( );
-		float DepthPlayerTarget = sqrt((dir.x * dir.x) + (dir.z * dir.z));
-		float drop = get_bullet_drop(height, DepthPlayerTarget, bullet_speed, get_held_gravity( ));
+		float astronaut = sqrt((dir.x * dir.x) + (dir.z * dir.z));
+		float drop = get_bullet_drop(height, astronaut, bullet_speed, get_held_gravity( ));
 		target.y += drop;
 
 		return target;

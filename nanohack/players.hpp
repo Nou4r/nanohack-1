@@ -64,9 +64,10 @@ namespace players {
 						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
-
-					//Renderer::boldtext({ screen_center.x + 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[%.2f, %.2f]"), target_ply->bones()->dfc.x, target_ply->bones( )->dfc.y);
 				}
+		}
+		if (settings::tr::desyncing) {
+			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 15.f, true, true, wxorstr_(L"desync'ed"));
 		}
 
 		auto held = local->GetHeldEntity<BaseProjectile>( );

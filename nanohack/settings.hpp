@@ -13,6 +13,7 @@ namespace settings {
 	bool bullet_tracers = true;
 	float camera_fov = 100.f;
 	bool manipulator = true;
+	bool desync = false;
 	bool walkonwater = true;
 	bool omnisprint = true;
 	bool freeaim = true;
@@ -28,6 +29,10 @@ namespace settings {
 
 	int lightning = 2;
 	int h_override = 2;
+
+	namespace tr {
+		bool desyncing = false;
+	}
 }
 
 uintptr_t game_assembly = 0;
