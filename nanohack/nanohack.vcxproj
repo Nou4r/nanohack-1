@@ -157,26 +157,26 @@
     <ClCompile Include="entry.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aimutils.hpp" />
-    <ClInclude Include="bonecache.hpp" />
-    <ClInclude Include="crc32.hpp" />
-    <ClInclude Include="d3d.hpp" />
-    <ClInclude Include="dissector.hpp" />
-    <ClInclude Include="math.hpp" />
-    <ClInclude Include="other.hpp" />
-    <ClInclude Include="players.hpp" />
-    <ClInclude Include="game.hpp" />
-    <ClInclude Include="hookengine.hpp" />
-    <ClInclude Include="hooks.hpp" />
-    <ClInclude Include="mem.hpp" />
-    <ClInclude Include="menu.hpp" />
-    <ClInclude Include="renderer.hpp" />
+    <ClInclude Include="core\main\aimutils.hpp" />
+    <ClInclude Include="core\main\bonecache.hpp" />
+    <ClInclude Include="core\sdk\utils\crc32.hpp" />
+    <ClInclude Include="core\drawing\d3d.hpp" />
+    <ClInclude Include="core\sdk\il2cpp\dissector.hpp" />
+    <ClInclude Include="core\sdk\utils\math.hpp" />
+    <ClInclude Include="core\main\other.hpp" />
+    <ClInclude Include="core\main\players.hpp" />
+    <ClInclude Include="core\sdk\game.hpp" />
+    <ClInclude Include="core\sdk\utils\hookengine.hpp" />
+    <ClInclude Include="core\main\hooks.hpp" />
+    <ClInclude Include="core\sdk\mem.hpp" />
+    <ClInclude Include="core\drawing\menu.hpp" />
+    <ClInclude Include="core\drawing\renderer.hpp" />
     <ClInclude Include="settings.hpp" />
-    <ClInclude Include="stdafx.hpp" />
-    <ClInclude Include="structs.hpp" />
-    <ClInclude Include="vector.hpp" />
-    <ClInclude Include="wrapper.hpp" />
-    <ClInclude Include="xorstr.hpp" />
+    <ClInclude Include="core\stdafx.hpp" />
+    <ClInclude Include="core\sdk\structs.hpp" />
+    <ClInclude Include="core\sdk\vector.hpp" />
+    <ClInclude Include="core\sdk\il2cpp\wrapper.hpp" />
+    <ClInclude Include="core\sdk\utils\xorstr.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -30,26 +30,28 @@
 
 #pragma warning ( disable : 4172 )
 
-#include "xorstr.hpp"
+#include "core/sdk/utils/xorstr.hpp"
 #include "settings.hpp"
-#include "vector.hpp"
-#include "stdafx.hpp"
-#include "renderer.hpp"
-#include "hookengine.hpp"
-#include "mem.hpp"
-#include "menu.hpp"
-#include "crc32.hpp"
-#include "wrapper.hpp"
-#include "dissector.hpp"
-#include "structs.hpp"
-#include "game.hpp"
-#include "bonecache.hpp"
-#include "other.hpp"
-#include "math.hpp"
-#include "players.hpp"
-#include "d3d.hpp"
-#include "aimutils.hpp"
-#include "hooks.hpp"
+#include "core/sdk/vector.hpp"
+#include "core/stdafx.hpp"
+#include "core/drawing/renderer.hpp"
+#include "core/sdk/utils/hookengine.hpp"
+#include "core/sdk/mem.hpp"
+#include "core/drawing/menu.hpp"
+#include "core/sdk/utils/crc32.hpp"
+#include "core/sdk/il2cpp/wrapper.hpp"
+#include "core/sdk/il2cpp/dissector.hpp"
+#include "core/sdk/structs.hpp"
+#include "core/sdk/game.hpp"
+#include "core/main/bonecache.hpp"
+#include "core/main/other.hpp"
+#include "core/sdk/utils/math.hpp"
+#include "core/main/players.hpp"
+#include "core/drawing/d3d.hpp"
+#include "core/main/aimutils.hpp"
+#include "core/main/hooks.hpp"
+
+// #define auth
 
 void entry_thread( ) {
 	d3d::init( );
@@ -67,6 +69,7 @@ bool DllMain(HMODULE hMod, uint32_t call_reason, void*) {
 	if (call_reason != DLL_PROCESS_ATTACH)
 		return false;
 
+#ifdef auth
 	HW_PROFILE_INFO hwProfileInfo;
 	GetCurrentHwProfile(&hwProfileInfo);
 	WCHAR* guid = hwProfileInfo.szHwProfileGuid;
@@ -97,6 +100,11 @@ bool DllMain(HMODULE hMod, uint32_t call_reason, void*) {
 		if (handle != NULL)
 			CloseHandle(handle);
 	}
+#else
+	const auto handle = CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry_thread), 0, 0, nullptr);
+	if (handle != NULL)
+		CloseHandle(handle);
+#endif
 
 	return true;
 }
