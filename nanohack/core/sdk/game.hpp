@@ -528,6 +528,9 @@ public:
 			static auto off = METHOD("Facepunch.Console::Option::get_Client(): Option");
 			return reinterpret_cast<Option * (__fastcall*)()>(off)();
 		}
+		bool IsFromServer( ) {
+			return *reinterpret_cast<bool*>(this + 0x6);
+		}
 	};
 
 	static inline String* (*Run_)(Option*, String*, Array<System::Object_*>*) = nullptr;
@@ -1855,8 +1858,6 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnAttacked(HitInfo): Void", BaseCombatEntity::OnAttacked_);
-	ASSIGN_HOOK("Assembly-CSharp::Projectile::Update(): Void", Projectile::Update_);
-	ASSIGN_HOOK("Assembly-CSharp::Projectile::Retire(): Void", Projectile::Retire_);
 	ASSIGN_HOOK("Assembly-CSharp::InputState::IsDown(BUTTON): Boolean", InputState::IsDown_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseProjectile::CreateProjectile(String,Vector3,Vector3,Vector3): Projectile", BaseProjectile::CreateProjectile_);

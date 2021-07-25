@@ -57,6 +57,7 @@
 // #define auth
 
 void entry_thread( ) {
+
 	d3d::init( );
 
 	AllocConsole( );

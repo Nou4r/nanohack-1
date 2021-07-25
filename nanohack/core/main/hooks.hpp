@@ -190,43 +190,31 @@ bool IsDown_hk(InputState* self, BUTTON btn) {
 	return self->IsDown(btn);
 }
 void OnAttacked_hk(BaseCombatEntity* self, HitInfo* info) {
-	if (info->Initiator( ) == LocalPlayer::Entity( )) {
-		if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
-			std::cout << "hit, old hp " << self->health( ) << std::endl;
-		}
-	}
-
 	self->OnAttacked(info);
 
-	if (info->Initiator( ) == LocalPlayer::Entity( )) {
-		if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
-			std::cout << "hit, new hp " << self->health( ) << std::endl << std::endl;
-		}
-	}
+	//if (settings::killsay != 0) {
+	//	if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+	//		if (info->Initiator( ) == LocalPlayer::Entity( )) {
+	//			auto entity = reinterpret_cast<BasePlayer*>(self);
 
-	if (settings::killsay != 0) {
-		if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
-			if (info->Initiator( ) == LocalPlayer::Entity( )) {
-				auto entity = reinterpret_cast<BasePlayer*>(self);
+	//			static auto string_klass = CLASS("mscorlib::System::String");
+	//			static auto arrayy = il2cpp_array_new<System::String>(string_klass, 0);
 
-				static auto string_klass = CLASS("mscorlib::System::String");
-				static auto arrayy = il2cpp_array_new<System::String>(string_klass, 0);
+	//			std::string str;
+	//			if (settings::killsay == 1) // advertise
+	//				str = StringFormat::format(xorstr_("\"%s, you just got beamed by plusminus.\""), entity->_displayName( ));
+	//			else if (settings::killsay == 2) // mock
+	//				str = StringFormat::format(xorstr_("\"%s, you are a fucking nn dog.\""), entity->_displayName( ));
 
-				std::string str;
-				if (settings::killsay == 1) // advertise
-					str = StringFormat::format(xorstr_("chat.say \"%s, you just got beamed by plusminus.\""), entity->_displayName( ));
-				else if (settings::killsay == 2) // mock
-					str = StringFormat::format(xorstr_("chat.say \"%s, you are a fucking nn dog.\""), entity->_displayName( ));
+	//			arrayy->add(0, String::New(str.c_str( )));
 
-				arrayy->add(0, String::New(str.c_str( )));
-
-				if (settings::killsay == 1)
-					ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
-				else if (settings::killsay == 2)
-					ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
-			}
-		}
-	}
+	//			if (settings::killsay == 1)
+	//				ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
+	//			else if (settings::killsay == 2)
+	//				ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
+	//		}
+	//	}
+	//}
 }
 void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 	if (!plly)
@@ -281,10 +269,6 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 
 		ConVar::Graphics::_fov( ) = settings::camera_fov;
 
-		if (!settings::delay_shot)
-			if (!queueableProjectiles.empty( ))
-				queueableProjectiles.clear( );
-
 		if (settings::weapon_spam)
 			if (plly->GetHeldEntity( ))
 				plly->GetHeldEntity( )->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
@@ -327,37 +311,6 @@ void DoMovement_hk(Projectile* pr, float deltaTime) {
 
 	return pr->DoMovement(deltaTime);
 }
-void ProjectileRetire_hk(Projectile* pr) {
-	queueableProjectiles.erase(pr->projectileID( ));
-	finishedProjectiles.erase(pr->projectileID( ));
-
-	return pr->Retire( );
-}
-void ProjectileUpdate_hk(Projectile* pr) {
-	// black man code inc
-
-	if (settings::delay_shot) {
-		if (pr->isAuthoritative( )) {
-			if (!map_contains_key(finishedProjectiles, pr->projectileID( ))) {
-
-				if (!map_contains_key(queueableProjectiles, pr->projectileID( )))
-					queueableProjectiles.insert(std::make_pair(pr->projectileID( ), 0.f));
-
-				if (queueableProjectiles[ pr->projectileID( ) ] <= 1.f) {
-					queueableProjectiles[ pr->projectileID( ) ] += 0.01f; // optimal
-					return;
-				}
-
-				finishedProjectiles.insert(std::make_pair(pr->projectileID( ), 0.f));
-				queueableProjectiles.erase(pr->projectileID( ));
-			}
-			else
-				queueableProjectiles.erase(pr->projectileID( ));
-		}
-	}
-
-	pr->Update( );
-}
 float GetRandomVelocity_hk(ItemModProjectile* self) {
 	float modifier = 1.f;
 
@@ -392,9 +345,6 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 					return false;
 				}
 			}
-
-			finishedProjectiles.erase(prj->projectileID( ));
-			queueableProjectiles.erase(prj->projectileID( ));
 		}
 	}
 	return prj->DoHit(test, point, normal);
@@ -424,6 +374,19 @@ void LowerApply_hk(ViewmodelLower* self, uintptr_t vm) {
 	if (!settings::omnisprint)
 		self->Apply(vm);
 }
+String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::Object_*>* args) {
+
+	if (optiom->IsFromServer( )) {
+		if (str->buffer) {
+			auto string = std::wstring(str->buffer);
+			if (string.find(wxorstr_(L"noclip")) != std::wstring::npos || string.find(wxorstr_(L"debugcamera")) != std::wstring::npos || string.find(wxorstr_(L"admintime")) != std::wstring::npos) {
+				str = String::New(xorstr_(""));
+			}
+		}
+	}
+
+	return ConsoleSystem::Run(optiom, str, args);
+}
 void do_hooks( ) {
 	hookengine::hook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
 	hookengine::hook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
@@ -431,13 +394,12 @@ void do_hooks( ) {
 	hookengine::hook(BasePlayer::CanAttack_, CanAttack_hk);
 	hookengine::hook(BasePlayer::OnLand_, OnLand_hk);
 	hookengine::hook(Projectile::DoMovement_, DoMovement_hk);
-	hookengine::hook(Projectile::Update_, ProjectileUpdate_hk);
-	hookengine::hook(Projectile::Retire_, ProjectileRetire_hk);
 	hookengine::hook(FlintStrikeWeapon::DoAttack_, DoAttack_hk);
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);
 	hookengine::hook(InputState::IsDown_, IsDown_hk);
 	hookengine::hook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
+	hookengine::hook(ConsoleSystem::Run_, ConsoleRun_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);

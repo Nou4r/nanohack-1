@@ -34,7 +34,7 @@ namespace d3d {
 				menu::add_spacer( );
 				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
 				menu::add_checkbox(&settings::weapon_spam, wxorstr_(L"fake shots"));
-				menu::add_selectable(&settings::killsay, wxorstr_(L"killsay"), { wxorstr_(L"none"), wxorstr_(L"advertise"), wxorstr_(L"mock") });
+				// menu::add_selectable(&settings::killsay, wxorstr_(L"killsay"), { wxorstr_(L"none"), wxorstr_(L"advertise"), wxorstr_(L"mock") });
 				menu::add_checkbox(&settings::bullet_tracers, wxorstr_(L"bullet tracers"));
 				menu::add_slider(&settings::camera_fov, wxorstr_(L"camera fov"));
 				menu::add_checkbox(&settings::omnisprint, wxorstr_(L"omnidirectional sprinting"));

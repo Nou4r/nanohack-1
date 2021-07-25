@@ -187,8 +187,6 @@ struct projectile_info {
 		this->firstPosition = fP;
 	}
 };
-std::map<int, float> queueableProjectiles = std::map<int, float>( );
-std::map<int, float> finishedProjectiles = std::map<int, float>( );
 //void SimulateProjectile(Vector3 position, Vector3 velocity, float partialTime, float travelTime, Vector3 gravity, float drag, Vector3& prevPosition, Vector3& prevVelocity) 	{
 //	float num = 0.03125f;
 //	prevPosition = position;
