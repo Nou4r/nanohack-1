@@ -1,25 +1,4 @@
 namespace aimutils {
-	float get_held_gravity( ) {
-		int ammoid = LocalPlayer::Entity( )->GetHeldItem( )->heldEntity<BaseProjectile>( )->primaryMagazine( )->ammoType( )->itemid( );
-
-		switch (ammoid) {
-		case 14241751:
-			return 1.f;
-		case -1234735557:
-			return 0.75f;
-		case 215754713:
-			return 0.75f;
-		case -1023065463:
-			return 0.5f;
-		case -2097376851:
-			return 0.75f;
-		case -1321651331:
-			return 1.25f;
-		default:
-			return 1.f;
-		}
-	}
-
 	double get_bullet_drop(double height, double aaaa, float speed, float gravity) {
 		double pitch = std::atan2(height, aaaa);
 		double vel_double = speed * std::cos(pitch);
@@ -28,7 +7,13 @@ namespace aimutils {
 		return y * 10;
 	}
 	Vector3 get_prediction( ) {
-		Vector3 target = target_ply->find_mpv_bone( )->position;
+		auto mpv = target_ply->find_mpv_bone( );
+		Vector3 target;
+		if (mpv != nullptr)
+			target = mpv->position;
+		else
+			target = target_ply->bones( )->head->position;
+
 		Vector3 targetvel = target_ply->playerModel( )->newVelocity( );
 
 		auto base_projectile = LocalPlayer::Entity( )->GetHeldEntity<BaseProjectile>( );
@@ -59,6 +44,11 @@ namespace aimutils {
 		if (bullet_speed == 0.f)
 			return target;
 
+		Projectile* projectile = itemModProjectile->projectileObject( )->Get( )->GetComponent<Projectile>(Type::Projectile());
+
+		if (projectile == nullptr)
+			return target;
+
 		float distance = target.distance(LocalPlayer::Entity( )->eyes()->position());
 		float travel_time = distance / bullet_speed;
 		Vector3 vel = Vector3(targetvel.x, 0, targetvel.z) * 0.75f;
@@ -69,7 +59,7 @@ namespace aimutils {
 		double height = target.y - LocalPlayer::Entity( )->eyes( )->position( ).y;
 		Vector3 dir = target - LocalPlayer::Entity( )->eyes( )->position( );
 		float astronaut = sqrt((dir.x * dir.x) + (dir.z * dir.z));
-		float drop = get_bullet_drop(height, astronaut, bullet_speed, get_held_gravity( ));
+		float drop = get_bullet_drop(height, astronaut, bullet_speed, projectile->gravityModifier( ));
 		target.y += drop;
 
 		return target;

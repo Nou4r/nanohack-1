@@ -14,6 +14,7 @@ namespace settings {
 	float camera_fov = 100.f;
 	bool manipulator = true;
 	bool desync = false;
+	bool autoshoot = false;
 	bool walkonwater = true;
 	bool omnisprint = true;
 	bool freeaim = true;
@@ -29,6 +30,7 @@ namespace settings {
 
 	int lightning = 2;
 	int h_override = 2;
+	int killsay = 0;
 
 	namespace tr {
 		bool desyncing = false;

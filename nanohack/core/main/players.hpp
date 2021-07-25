@@ -27,7 +27,7 @@ namespace players {
 		}
 
 		auto playerList = BasePlayer::visiblePlayerList( );
-		if (!playerList) {
+		if (!playerList || playerList->vals->size <= 0) {
 			target_ply = nullptr;
 			return;
 		}
@@ -67,7 +67,7 @@ namespace players {
 				}
 		}
 		if (settings::tr::desyncing) {
-			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 15.f, true, true, wxorstr_(L"desync'ed"));
+			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 13.5f, true, true, wxorstr_(L"desync'ed"));
 		}
 
 		auto held = local->GetHeldEntity<BaseProjectile>( );

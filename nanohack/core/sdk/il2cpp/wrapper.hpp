@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 auto gameAssembly = GetModuleHandleA(xorstr_("GameAssembly.dll"));
 
 #define ProcAddr(func) GetProcAddress(gameAssembly, func)
@@ -9,17 +11,57 @@ inline T call(const char* func, Args... args) {
 	return reinterpret_cast<T(__fastcall*)(Args...)>(ProcAddr(func))(args...);
 }
 
-class String
-{
-public:
-	char pad_0000[ 0x10 ];
-	int len;
-	wchar_t buffer[ 0 ];
+namespace System {
+	class Object_ {
+	public:
 
-	static String* New(const char* str) {
-		return call<String*, const char*>(xorstr_("il2cpp_string_new"), str);
-	}
-};
+	};
+	template<typename T = void*>
+	class Array {
+	public:
+		uint32_t size( ) {
+			if (!this) return 0;
+			return *reinterpret_cast<uint32_t*>(this + 0x18);
+		}
+		T get(int idx) {
+			if (!this) return T{};
+			return *reinterpret_cast<T*>(this + (0x20 + (idx * 0x8)));
+		}
+		void add(int idx, T value) {
+			if (!this) return;
+			*reinterpret_cast<T*>(this + (0x20 + (idx * 0x8))) = value;
+		}
+	};
+	class String : public Object_ {
+	public:
+		char pad_0000[ 0x10 ];
+		int len;
+		wchar_t buffer[ 0 ];
+
+		static String* New(const char* str) {
+			return call<String*, const char*>(xorstr_("il2cpp_string_new"), str);
+		}
+	};
+	template<typename T = void*>
+	struct List {
+	public:
+		char pad_0000[ 0x10 ];
+		void* buffer;
+		uint32_t size;
+
+		T* get(uint32_t idx) {
+			if (!this) return nullptr;
+
+			if (idx > this->size) return nullptr;
+
+			void* items = this->buffer;
+
+			if (!items) return nullptr;
+
+			return *reinterpret_cast<T**>((uint64_t)items + (0x20 + (idx * 0x8)));
+		}
+	};
+}
 
 class Il2CppType
 {
@@ -98,10 +140,10 @@ public:
 		return call<Il2CppClass*, Il2CppImage*, uint64_t>(xorstr_("il2cpp_image_get_class"), this, idx);
 	}
 }; //Size: 0x0010
-
-template<typename T = uint64_t>
-T il2cpp_array_new(Il2CppClass* klazz, uint64_t length) {
-	return call<T, Il2CppClass*, uint64_t>(xorstr_("il2cpp_array_new"), klazz, length);
+template<typename T = System::Object_>
+System::Array<T*>* il2cpp_array_new(Il2CppClass* klazz, uint64_t length) {
+	auto ret = call<System::Array<T*>*, Il2CppClass*, uint64_t>(xorstr_("il2cpp_array_new"), klazz, length);
+	return ret;
 }
 
 class Il2CppAssembly {

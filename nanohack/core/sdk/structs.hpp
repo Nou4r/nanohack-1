@@ -116,25 +116,7 @@ public:
 		return this->index < this->points.size( );
 	}
 };
-template<typename T = void*>
-struct List {
-public:
-	char pad_0000[ 0x10 ];
-	void* buffer;
-	uint32_t size;
-	 
-	T* get(uint32_t idx) {
-		if (!this) return nullptr;
 
-		if (idx > this->size) return nullptr;
-
-		void* items = this->buffer;
-
-		if (!items) return nullptr;
-
-		return *reinterpret_cast<T**>((uint64_t)items + (0x20 + (idx * 0x8)));
-	}
-};
 class CBounds {
 public:
 	Vector3 center;
@@ -172,22 +154,7 @@ public:
 	static Color yellow( ) { return { 1, 1, 0, 1 }; }
 	static Color white( ) { return { 1, 1, 1, 1 }; }
 };
-template<typename T = void*>
-class Array {
-public:
-	uint32_t size( ) {
-		if (!this) return 0;
-		return *reinterpret_cast<uint32_t*>(this + 0x18);
-	}
-	T get(int idx) {
-		if (!this) return T{};
-		return *reinterpret_cast<T*>(this + (0x20 + (idx * 0x8)));
-	}
-	T gett(int idx) {
-		if (!this) return T{};
-		return *reinterpret_cast<T*>(this + 0x20 + idx * 0x8);
-	}
-};
+
 struct Line {
 	Vector3 point0;
 	Vector3 point1;

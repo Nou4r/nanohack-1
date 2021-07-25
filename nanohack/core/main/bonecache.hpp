@@ -5,7 +5,7 @@ namespace bonecache {
 		for (auto j : valid_bones) {
 			auto arr = player->model( )->boneTransforms( );
 			if (arr) {
-				auto transform = player->model( )->boneTransforms( )->gett(j);
+				auto transform = player->model( )->boneTransforms( )->get(j);
 				if (transform) {
 					Vector2 sc;
 					auto world_pos = transform->position( );

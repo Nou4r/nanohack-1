@@ -87,5 +87,6 @@
     <ClInclude Include="core\sdk\utils\math.hpp">
       <Filter>Source Files\core\utils</Filter>
     </ClInclude>
+    <ClInclude Include="core\sdk\utils\string.hpp" />
   </ItemGroup>
 </Project>

@@ -26,6 +26,7 @@ namespace d3d {
 				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") , wxorstr_(L"randomized (all)"), wxorstr_(L"randomized (head & body)") });
 				menu::add_checkbox(&settings::manipulator, wxorstr_(L"manipulator"));
 				menu::add_checkbox(&settings::desync, wxorstr_(L"desync (C)"));
+				menu::add_checkbox(&settings::autoshoot, wxorstr_(L"autoshoot"));
 				menu::add_checkbox(&settings::always_eoka, wxorstr_(L"1 hit eoka"));
 				menu::add_checkbox(&settings::penetrate, wxorstr_(L"pierce"));
 				menu::add_checkbox(&settings::bigger_bullets, wxorstr_(L"expand hitboxes"));
@@ -33,6 +34,7 @@ namespace d3d {
 				menu::add_spacer( );
 				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
 				menu::add_checkbox(&settings::weapon_spam, wxorstr_(L"fake shots"));
+				menu::add_selectable(&settings::killsay, wxorstr_(L"killsay"), { wxorstr_(L"none"), wxorstr_(L"advertise"), wxorstr_(L"mock") });
 				menu::add_checkbox(&settings::bullet_tracers, wxorstr_(L"bullet tracers"));
 				menu::add_slider(&settings::camera_fov, wxorstr_(L"camera fov"));
 				menu::add_checkbox(&settings::omnisprint, wxorstr_(L"omnidirectional sprinting"));

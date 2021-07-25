@@ -19,6 +19,9 @@ public:
 		}
 	}
 };
+
+using namespace System;
+
 enum class KeyCode : int {
 	None = 0,
 	Backspace = 8,
@@ -190,20 +193,12 @@ public:
 		Type* type = GetType(xorstr_("UnityEngine.Shader, UnityEngine.CoreModule"));
 		return type;
 	}
+	static Type* Projectile( ) {
+		Type* type = GetType(xorstr_("Projectile, Assembly-CSharp"));
+		return type;
+	}
 };
-namespace System {
-	class Object {
-	public:
 
-	};
-	class File {
-	public:
-		static Array<byte>* ReadAllBytes(const char* path) {
-			static auto ptr = METHOD("System.IO.FileSystem::System.IO::File::ReadAllBytes(String): Byte[]");
-			return reinterpret_cast<Array<byte>*(__cdecl*)(String*)>(ptr)(String::New(path));
-		}
-	};
-}
 class GameObject;
 class Component {
 public:
@@ -268,6 +263,12 @@ public:
 		if (!this) return 0;
 		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::GameObject::get_tag(): String");
 		return reinterpret_cast<String * (__fastcall*)(GameObject*)>(off)(this)->buffer;
+	}
+	template<typename T = GameObject>
+	T* GetComponent(Type* type) {
+		if (!this || !type) return nullptr;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::GameObject::GetComponent(Type): Component");
+		return SafeExecution::Execute<T*>(off, nullptr, this, type);
 	}
 };
 class Transform : public Component {
@@ -335,7 +336,25 @@ public:
 			static auto off = METHOD("Assembly-CSharp::EntityRealm::Find(UInt32): BaseNetworkable");
 			return reinterpret_cast<T(__fastcall*)(EntityRealm*, uint32_t)>(off)(this, uid);
 		}
+		template<typename T = BaseNetworkable*> 
+		T FindClosest(uint32_t hash, BaseNetworkable* targetEnt, float dist)         {
+			T ent = nullptr;
 
+			auto entityList = this->entityList( );
+			if (entityList)             {
+				for (int i = 1; i < entityList->vals->size; i++)                 {
+					auto baseNetworkable = *reinterpret_cast<BaseNetworkable**>(std::uint64_t(entityList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
+					if (!baseNetworkable) continue;
+
+					if (baseNetworkable->class_name_hash( ) == hash && baseNetworkable->transform( )->position( ).distance(targetEnt->transform( )->position( )) <= dist)                     {
+						ent = reinterpret_cast<T>(baseNetworkable);
+						break;
+					}
+				}
+			}
+
+			return ent;
+		}
 		FIELD("Assembly-CSharp::EntityRealm::entityList", entityList, ListDictionary*);
 	};
 
@@ -361,7 +380,7 @@ public:
 		static auto off = METHOD("Assembly-CSharp::BaseNetworkable::get_ShortPrefabName(): String");
 		return reinterpret_cast<String * (__fastcall*)(BaseNetworkable*)>(off)(this)->buffer;
 	}
-
+	FIELD("Assembly-CSharp::BaseNetworkable::<JustCreated>k__BackingField", JustCreated, bool);
 	FIELD("Assembly-CSharp::BaseNetworkable::net", net, Networkable*);
 	FIELD("Assembly-CSharp::BaseNetworkable::parentEntity", parentEntity, BaseEntity*);
 };
@@ -445,14 +464,76 @@ public:
 	STATIC_FUNCTION("UnityEngine.CoreModule::UnityEngine::Time::get_renderedFrameCount(): Int32", renderedFrameCount, int( ));
 	STATIC_FUNCTION("UnityEngine.CoreModule::UnityEngine::Time::get_realtimeSinceStartup(): Single", realtimeSinceStartup, float( ));
 };
+class DamageTypeList {
+public:
+	float Total( ) 	{
+		if (!this) return false;
+		static auto off = METHOD("Assembly-CSharp::Rust::DamageTypeList::Total(): Single");
+		return reinterpret_cast<float(__fastcall*)(DamageTypeList*)>(off)(this);
+	}
+};
+class HitInfo {
+public:
+	FIELD("Assembly-CSharp::HitInfo::Initiator", Initiator, BaseEntity*);
+	FIELD("Assembly-CSharp::HitInfo::WeaponPrefab", WeaponPrefab, BaseEntity*);
+	FIELD("Assembly-CSharp::HitInfo::DoHitEffects", DoHitEffects, bool);
+	FIELD("Assembly-CSharp::HitInfo::DoDecals", DoDecals, bool);
+	FIELD("Assembly-CSharp::HitInfo::IsPredicting", IsPredicting, bool);
+	FIELD("Assembly-CSharp::HitInfo::UseProtection", UseProtection, bool);
+	FIELD("Assembly-CSharp::HitInfo::DidHit", DidHit, bool);
+	FIELD("Assembly-CSharp::HitInfo::HitEntity", HitEntity, BaseEntity*);
+	FIELD("Assembly-CSharp::HitInfo::HitBone", HitBone, uint32_t);
+	FIELD("Assembly-CSharp::HitInfo::HitPart", HitPart, uint32_t);
+	FIELD("Assembly-CSharp::HitInfo::HitMaterial", HitMaterial, uint32_t);
+	FIELD("Assembly-CSharp::HitInfo::HitPositionWorld", HitPositionWorld, Vector3);
+	FIELD("Assembly-CSharp::HitInfo::HitPositionLocal", HitPositionLocal, Vector3);
+	FIELD("Assembly-CSharp::HitInfo::HitNormalWorld", HitNormalWorld, Vector3);
+	FIELD("Assembly-CSharp::HitInfo::HitNormalLocal", HitNormalLocal, Vector3);
+	FIELD("Assembly-CSharp::HitInfo::PointStart", PointStart, Vector3);
+	FIELD("Assembly-CSharp::HitInfo::PointEnd", PointEnd, Vector3);
+	FIELD("Assembly-CSharp::HitInfo::ProjectileID", ProjectileID, int);
+	FIELD("Assembly-CSharp::HitInfo::ProjectileDistance", ProjectileDistance, float);
+	FIELD("Assembly-CSharp::HitInfo::ProjectileVelocity", ProjectileVelocity, Vector3);
+	FIELD("Assembly-CSharp::HitInfo::damageTypes", damageTypes, DamageTypeList*);
+
+	bool isHeadshot( ) 	{
+		if (!this) return false;
+		static auto off = METHOD("Assembly-CSharp::HitInfo::get_isHeadshot(): Boolean");
+		return reinterpret_cast<bool(__fastcall*)(HitInfo*)>(off)(this);
+	}
+};
 float GLOBAL_TIME = 0.f;
 class BaseCombatEntity : public BaseEntity {
 public:
+	enum Lifestate {
+		Alive = 0,
+		Dead = 1
+	};
 	FIELD("Assembly-CSharp::BaseCombatEntity::_health", health, float);
 	FIELD("Assembly-CSharp::BaseCombatEntity::_maxHealth", maxHealth, float);
 	FIELD("Assembly-CSharp::BaseCombatEntity::sendsHitNotification", sendsHitNotification, bool);
 	FIELD("Assembly-CSharp::BaseCombatEntity::sendsMeleeHitNotification", sendsMeleeHitNotification, bool);
 	FIELD("Assembly-CSharp::BaseCombatEntity::sendsMeleeHitNotification", lastNotifyFrame, int);
+	FIELD("Assembly-CSharp::BaseCombatEntity::lifestate", lifestate, Lifestate);
+
+	static inline void(*OnAttacked_)(BaseCombatEntity*, HitInfo*) = nullptr;
+	void OnAttacked(HitInfo* info) {
+		return OnAttacked_(this, info);
+	}
+};
+class ConsoleSystem {
+public:
+	struct Option {
+		static Option* Client( ) {
+			static auto off = METHOD("Facepunch.Console::Option::get_Client(): Option");
+			return reinterpret_cast<Option * (__fastcall*)()>(off)();
+		}
+	};
+
+	static inline String* (*Run_)(Option*, String*, Array<System::Object_*>*) = nullptr;
+	static String* Run(Option* option, String* command, Array<System::Object_*>* args) {
+		return Run_(option, command, args);
+	}
 };
 class BaseMountable : public BaseCombatEntity {
 public:
@@ -846,6 +927,25 @@ public:
 		return reinterpret_cast<Array<Material*>*(__fastcall*)(Renderer_*)>(off)(this);
 	}
 };
+class GameManifest
+{
+public:
+	static Object* GUIDToObject(String* guid) {
+		static auto ptr = METHOD("Assembly-CSharp::GameManifest::GUIDToObject(String): Object");
+		return reinterpret_cast<Object * (__fastcall*)(String*)>(ptr)(guid);
+	}
+};
+template<typename T = Object>
+class ResourceRef {
+public:
+	T* Get( ) {
+		if (!this) return nullptr;
+		String* guid = *reinterpret_cast<String**>(this + 0x10);
+		T* _cachedObject = (T*)GameManifest::GUIDToObject(guid);
+
+		return _cachedObject;
+	}
+};
 class SkinnedMeshRenderer : public Renderer_ {
 public:
 
@@ -862,6 +962,7 @@ public:
 	FIELD("Assembly-CSharp::ItemModProjectile::projectileSpread", projectileSpread, float);
 	FIELD("Assembly-CSharp::ItemModProjectile::ammoType", ammoType, int);
 	FIELD("Assembly-CSharp::ItemModProjectile::projectileVelocitySpread", projectileVelocitySpread, float);
+	FIELD("Assembly-CSharp::ItemModProjectile::projectileObject", projectileObject, ResourceRef<GameObject>*);
 };
 class StringPool {
 public:
@@ -1005,6 +1106,11 @@ public:
 	FIELD("Assembly-CSharp::BaseProjectile::aimSway", aimSway, float);
 	FIELD("Assembly-CSharp::BaseProjectile::aimSwaySpeed", aimSwaySpeed, float);
 
+	void DoAttack() {
+		if (!this) return;
+		static auto off = METHOD("Assembly-CSharp::BaseProjectile::DoAttack(): Void");
+		return reinterpret_cast<void(__fastcall*)(BaseProjectile*)>(off)(this);
+	}
 	bool HasReloadCooldown( ) {
 		return GLOBAL_TIME < this->nextReloadTime( );
 	}
@@ -1026,6 +1132,7 @@ public:
 		return ret;
 	}
 };
+
 namespace ConVar {
 	class Graphics {
 	public:
@@ -1154,8 +1261,8 @@ public:
 
 class MonoBehaviour {
 public:
-	static inline System::Object* (*StartCoroutine_)(MonoBehaviour*, System::Object*) = nullptr;
-	System::Object* StartCoroutine(System::Object* routine) {
+	static inline System::Object_* (*StartCoroutine_)(MonoBehaviour*, System::Object_*) = nullptr;
+	System::Object_* StartCoroutine(System::Object_* routine) {
 		return StartCoroutine_(this, routine);
 	}
 };
@@ -1245,10 +1352,28 @@ public:
 		return *reinterpret_cast<int*>(this + 0x14);
 	}
 };
+enum BUTTON {
+	FORWARD = 2,
+	BACKWARD = 4,
+	LEFT = 8,
+	RIGHT = 16,
+	JUMP = 32,
+	DUCK = 64,
+	SPRINT = 128,
+	USE = 256,
+	FIRE_PRIMARY = 1024,
+	FIRE_SECONDARY = 2048,
+	RELOAD = 8192,
+	FIRE_THIRD = 134217728,
+};
 class InputState {
 public:
 	FIELD("Assembly-CSharp::InputState::current", current, InputMessage*);
 	FIELD("Assembly-CSharp::InputState::previous", previous, InputMessage*);
+	static inline bool(*IsDown_)(InputState*, BUTTON) = nullptr;
+	bool IsDown(BUTTON btn) {
+		return IsDown_(this, btn);
+	}
 };
 class PlayerInput {
 public:
@@ -1308,10 +1433,10 @@ public:
 	}
 	Bone* find_mpv_bone( ) {
 		if (!this)
-			return {};
+			return nullptr;
 
 		if (!this->isCached( ))
-			return {};
+			return nullptr;
 
 		auto bones = this->bones( );
 
@@ -1588,6 +1713,26 @@ public:
 		return ret;
 	}
 };
+namespace Network {
+	class Client {
+	public:
+		bool IsConnected( ) {
+			if (!this) return false;
+			static auto off = METHOD("Facepunch.Network::Network::Client::IsConnected(): Boolean");
+			return reinterpret_cast<bool(__fastcall*)(Client*)>(off)(this);
+		}
+		String* ConnectedAddress( ) {
+			return *reinterpret_cast<String**>(this + 0x40);
+		}
+	};
+	class Net {
+	public:
+		static Client* cl( ) {
+			static auto clazz = CLASS("Facepunch.Network::Network::Net");
+			return *reinterpret_cast<Client**>(std::uint64_t(clazz->static_fields));
+		}
+	};
+}
 class AimConeUtil {
 public:
 	static inline Vector3(*GetModifiedAimConeDirection_)(float, Vector3, bool) = nullptr;
@@ -1706,11 +1851,13 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::ViewmodelLower::Apply(CachedTransform<BaseViewModel>&): Void", ViewmodelLower::Apply_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::DoHit(HitTest,Vector3,Vector3): Boolean", Projectile::DoHit_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::SetEffectScale(Single): Void", Projectile::SetEffectScale_);
+	ASSIGN_HOOK("Facepunch.Console::ConsoleSystem::Run(Option,String,Object[]): String", ConsoleSystem::Run_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
+	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnAttacked(HitInfo): Void", BaseCombatEntity::OnAttacked_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::Update(): Void", Projectile::Update_);
 	ASSIGN_HOOK("Assembly-CSharp::Projectile::Retire(): Void", Projectile::Retire_);
-	//ASSIGN_HOOK("Assembly-CSharp::Projectile::Refract(UInt32&,Vector3,Vector3,Single): Boolean", Projectile::Refract_);
+	ASSIGN_HOOK("Assembly-CSharp::InputState::IsDown(BUTTON): Boolean", InputState::IsDown_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseProjectile::CreateProjectile(String,Vector3,Vector3,Vector3): Projectile", BaseProjectile::CreateProjectile_);
 	ASSIGN_HOOK("UnityEngine.CoreModule::UnityEngine::MonoBehaviour::StartCoroutine(Collections.IEnumerator): Coroutine", MonoBehaviour::StartCoroutine_);

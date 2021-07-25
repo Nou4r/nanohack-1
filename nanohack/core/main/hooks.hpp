@@ -41,15 +41,15 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 								if (settings::bigger_bullets) {
 									auto bone = entity->model( )->find_bone(ret->hitPositionWorld( ));
 									if (bone.second) { // f
-										if (settings::bullet_tracers) 
+										if (settings::bullet_tracers)
 											DDraw::Line(ret->hitPositionWorld( ), bone.first->position( ), Color(1, 0, 0, 1), 1.5f, false, true);
 
 										ret->hitPositionWorld( ) = bone.first->position( );
 									}
 								}
-								if (settings::h_override == 1) 
+								if (settings::h_override == 1)
 									ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
-								else if (settings::h_override == 2) 
+								else if (settings::h_override == 2)
 									ret->hitBone( ) = StringPool::Get(xorstr_("head"));
 								else if (settings::h_override == 3) {
 									int num = rand( ) % 100;
@@ -87,7 +87,7 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 						}
 					}
 				}
-			} 
+			}
 		}
 	}
 
@@ -167,7 +167,71 @@ void OnLand_hk(BasePlayer* ply, float vel) {
 	if (!settings::nofall)
 		ply->OnLand(vel);
 }
+bool IsDown_hk(InputState* self, BUTTON btn) {
+	if (btn == BUTTON::FIRE_PRIMARY) {
+		if (settings::autoshoot) {
+			auto held = LocalPlayer::Entity()->GetHeldEntity<BaseProjectile>( );
+			if (held && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
+				if (target_ply != nullptr && target_ply->isCached( )) {
+					auto mpv = target_ply->find_mpv_bone( );
+					Vector3 target;
+					if (mpv != nullptr)
+						target = mpv->position;
+					else
+						target = target_ply->bones( )->head->position;
+
+					if (LineOfSight(target, LocalPlayer::Entity( )->eyes( )->position( )))
+						return true;
+				}
+			}
+		}
+	}
+
+	return self->IsDown(btn);
+}
+void OnAttacked_hk(BaseCombatEntity* self, HitInfo* info) {
+	if (info->Initiator( ) == LocalPlayer::Entity( )) {
+		if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+			std::cout << "hit, old hp " << self->health( ) << std::endl;
+		}
+	}
+
+	self->OnAttacked(info);
+
+	if (info->Initiator( ) == LocalPlayer::Entity( )) {
+		if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+			std::cout << "hit, new hp " << self->health( ) << std::endl << std::endl;
+		}
+	}
+
+	if (settings::killsay != 0) {
+		if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+			if (info->Initiator( ) == LocalPlayer::Entity( )) {
+				auto entity = reinterpret_cast<BasePlayer*>(self);
+
+				static auto string_klass = CLASS("mscorlib::System::String");
+				static auto arrayy = il2cpp_array_new<System::String>(string_klass, 0);
+
+				std::string str;
+				if (settings::killsay == 1) // advertise
+					str = StringFormat::format(xorstr_("chat.say \"%s, you just got beamed by plusminus.\""), entity->_displayName( ));
+				else if (settings::killsay == 2) // mock
+					str = StringFormat::format(xorstr_("chat.say \"%s, you are a fucking nn dog.\""), entity->_displayName( ));
+
+				arrayy->add(0, String::New(str.c_str( )));
+
+				if (settings::killsay == 1)
+					ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
+				else if (settings::killsay == 2)
+					ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
+			}
+		}
+	}
+}
 void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
+	if (!plly)
+		return plly->ClientInput(state);
+
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
 		players::gamethread( );
 
@@ -182,15 +246,30 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 
 		if (settings::desync && Input::GetKey(KeyCode::C)) {
 			float desyncTime = (Time::realtimeSinceStartup( ) - plly->lastSentTickTime( )) - 0.03125 * 3;
-			float max_eye_value = 0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * plly->GetMaxSpeed( );
+			float max_eye_value = (0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * plly->GetMaxSpeed( )) - 0.05f;
 
 			plly->eyes( )->viewOffset( ) = Vector3(0, max_eye_value, 0);
 		}
+		if (settings::autoshoot) {
+			auto held = plly->GetHeldEntity<BaseProjectile>( );
+			if (held && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
+				if (target_ply != nullptr && target_ply->isCached( )) {
+					auto mpv = target_ply->find_mpv_bone( );
+					Vector3 target;
+					if (mpv != nullptr)
+						target = mpv->position;
+					else
+						target = target_ply->bones( )->head->position;
 
+					if (LineOfSight(target, plly->eyes( )->position( )))
+						held->DoAttack( );
+				}
+			}
+		}
 		GLOBAL_TIME = Time::time( );
 		viewMatrix = Camera::getViewMatrix( );
 
-		if (settings::manipulator && target_ply != nullptr && !(settings::desync && Input::GetKey(KeyCode::C)))
+		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && !(settings::desync && Input::GetKey(KeyCode::C)))
 			other::find_manipulate_angle( );
 		else
 			if (!other::m_manipulate.empty( ))
@@ -232,12 +311,13 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 	}
 
 	plly->ClientInput(state);
-	
+
 	// before network 
 
 	if (settings::omnisprint)
 		LocalPlayer::Entity( )->add_modelstate_flag(ModelState::Flags::Sprinting);
 }
+
 void DoMovement_hk(Projectile* pr, float deltaTime) {
 	if (pr->isAuthoritative( ))
 		if (settings::bigger_bullets)
@@ -255,7 +335,7 @@ void ProjectileRetire_hk(Projectile* pr) {
 }
 void ProjectileUpdate_hk(Projectile* pr) {
 	// black man code inc
-	
+
 	if (settings::delay_shot) {
 		if (pr->isAuthoritative( )) {
 			if (!map_contains_key(finishedProjectiles, pr->projectileID( ))) {
@@ -275,7 +355,7 @@ void ProjectileUpdate_hk(Projectile* pr) {
 				queueableProjectiles.erase(pr->projectileID( ));
 		}
 	}
-	
+
 	pr->Update( );
 }
 float GetRandomVelocity_hk(ItemModProjectile* self) {
@@ -322,7 +402,7 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 void SetEffectScale_hk(Projectile* self, float eScale) {
 	return self->SetEffectScale((settings::psilent && self->isAuthoritative( )) ? 1.5f : eScale);
 }
-System::Object* StartCoroutine_hk(MonoBehaviour* a1, System::Object* un2) {
+System::Object_* StartCoroutine_hk(MonoBehaviour* a1, System::Object_* un2) {
 	if (settings::fastloot) {
 		static auto v = METHOD("Assembly-CSharp::ItemIcon::SetTimedLootAction(UInt32,Action): Void");
 		if (CALLED_BY(v, 0x656)) {
@@ -356,6 +436,8 @@ void do_hooks( ) {
 	hookengine::hook(FlintStrikeWeapon::DoAttack_, DoAttack_hk);
 	hookengine::hook(ViewmodelBob::Apply_, BobApply_hk);
 	hookengine::hook(ViewmodelSway::Apply_, SwayApply_hk);
+	hookengine::hook(InputState::IsDown_, IsDown_hk);
+	hookengine::hook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
