@@ -29,10 +29,6 @@ namespace d3d {
 			if (settings::players && settings::cheat_init)
 				players::loop( );
 
-			/*if (LocalPlayer::Entity( )) {
-				Renderer::text({ screen_center.x, screen_center.y - 50 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)LocalPlayer::Entity( )->modelState( )->flags( ));
-			}*/
-
 			menu_framework::render( );
 
 			Renderer::end_frame( );

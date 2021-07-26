@@ -72,7 +72,7 @@
     <ClInclude Include="core\main\bonecache.hpp">
       <Filter>Source Files\core\sdk</Filter>
     </ClInclude>
-    <ClInclude Include="core\main\players.hpp">
+    <ClInclude Include="core\main\entities.hpp">
       <Filter>Source Files\core</Filter>
     </ClInclude>
     <ClInclude Include="core\main\aimutils.hpp">

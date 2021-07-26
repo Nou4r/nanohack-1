@@ -48,7 +48,7 @@
 #include "core/main/bonecache.hpp"
 #include "core/main/other.hpp"
 #include "core/sdk/utils/math.hpp"
-#include "core/main/players.hpp"
+#include "core/main/entities.hpp"
 #include "core/drawing/framework.hpp"
 #include "core/drawing/d3d.hpp"
 #include "core/main/aimutils.hpp"
@@ -60,10 +60,10 @@ void entry_thread( ) {
 
 	d3d::init( );
 
-	AllocConsole( );
+	/*AllocConsole( );
 	SetConsoleTitleA(xorstr_("dbg"));
 	freopen_s(reinterpret_cast<FILE**>(stdin), xorstr_("CONIN$"), xorstr_("r"), stdin);
-	freopen_s(reinterpret_cast<FILE**>(stdout), xorstr_("CONOUT$"), xorstr_("w"), stdout);
+	freopen_s(reinterpret_cast<FILE**>(stdout), xorstr_("CONOUT$"), xorstr_("w"), stdout);*/
 
 	initialize_cheat( );
 	do_hooks( );

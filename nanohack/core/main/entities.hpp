@@ -21,32 +21,16 @@ namespace players {
 			return;
 		}
 
-		if (!local->HasPlayerFlag(PlayerFlags::Connected)) {
-			target_ply = nullptr;
-			return;
-		}
-
 		auto playerList = BasePlayer::visiblePlayerList( );
-		if (!playerList || playerList->vals->size <= 0) {
+		if (!playerList) {
 			target_ply = nullptr;
 			return;
 		}
 
-		/*if (settings::delay_shot) {
-			int y_pos = 0;
-			Renderer::text({ screen_size.x - 250, screen_size.y / 2 - 15 }, Color3(255, 255, 0), 12.f, true, true, wxorstr_(L"queueableProjectiles"));
-			for (auto& [id, time] : queueableProjectiles) {
-				Renderer::text({ screen_size.x - 250, screen_size.y / 2 + y_pos }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"%d | %.2f"), id, time);
-				y_pos += 15;
-			}
-
-			int y_pos2 = 0;
-			Renderer::text({ screen_size.x - 100, screen_size.y / 2 - 15 }, Color3(0, 0, 255), 12.f, true, true, wxorstr_(L"finishedProjectiles"));
-			for (auto& [id, time] : finishedProjectiles) {
-				Renderer::text({ screen_size.x - 100, screen_size.y / 2 + y_pos2 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"%d | %.2f"), id, time);
-				y_pos2 += 15;
-			}
-		}*/
+		if (playerList->vals->size <= 1) {
+			target_ply = nullptr;
+			return;
+		}
 
 		if (target_ply != nullptr) {
 			if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))

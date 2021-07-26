@@ -32,25 +32,25 @@ namespace menu_framework {
 #define THEME_COLOR Color3(255, 173, 31)
 
 	namespace variables {
-		inline int x = 140, y = 140;
-		inline int w = 400, h = 300;
+		int x = 140, y = 140;
+		int w = 400, h = 300;
 	}
 
-	inline int current_tab{ 0 };
+	int current_tab{ 0 };
 
-	inline bool should_drag = false;
-	inline bool should_move = false;
+	bool should_drag = false;
+	bool should_move = false;
 
-	void group_box(std::int32_t x, std::int32_t y, std::int32_t w, std::int32_t h, const std::string string, bool show_label) {
+	void group_box(float x, float y, float w, float h, std::string string, bool show_label) {
 		Renderer::rectangle_filled(Vector2(x, y), Vector2(w, h), Color3(25, 25, 25, 255));
 
 		Renderer::rectangle(Vector2(x, y), Vector2(w, h), Color3(45, 45, 45, 255));
 
 		if (show_label)
-			Renderer::text(Vector2(x + 2, y - 12), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string));
+			Renderer::text(Vector2(variables::x + variables::w - 50, variables::y + 8), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string));
 	}
 
-	void tab(std::int32_t x, std::int32_t y, std::int32_t w, std::int32_t h, const std::string string, std::int32_t& tab, std::int32_t count, bool show_outline) {
+	void tab(float x, float y, float w, float h, std::string string, int& tab, float count, bool show_outline) {
 		GetCursorPos(&cursor);
 
 		if ((cursor.x > x) && (cursor.x < x + w) && (cursor.y > y) && (cursor.y < y + h) && (GetAsyncKeyState(VK_LBUTTON) & 1))
@@ -62,7 +62,37 @@ namespace menu_framework {
 		Renderer::text(Vector2(x - Renderer::get_text_size(StringConverter::ToUnicode(string), 12.f).x / 2 + 50, y + h / 2 - 8), show_outline ? Color3(255, 255, 255, 255) : tab == count ? THEME_COLOR : Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string));
 	}
 
-	void checkbox(std::int32_t x, std::int32_t y, std::int32_t position, const std::string string, bool& value) {
+	void selector(float x, float y, float position, std::string string, int& value, std::vector<std::string> vals) {
+		GetCursorPos(&cursor);
+
+		// for selectors, l and r
+		int w = 10, h = 10;
+
+		Vector2 str_size = Renderer::get_text_size(StringConverter::ToUnicode(string + std::string(": ") + vals[ value ]), 12.f);
+
+		// selector l
+		Renderer::line(Vector2(position, y + h / 2), Vector2(position + w, y + 1), Color3(255, 255, 255), false, 1.f);
+		Renderer::line(Vector2(position, y + h / 2), Vector2(position + w, y + h - 1), Color3(255, 255, 255), false, 1.f);
+
+		// selector r
+		
+		Renderer::line(Vector2(position + str_size.x + 23 + w, y + h / 2), Vector2(position + str_size.x + 23, y + 1), Color3(255, 255, 255), false, 1.f);
+		Renderer::line(Vector2(position + str_size.x + 23 + w, y + h / 2), Vector2(position + str_size.x + 23, y + h - 1), Color3(255, 255, 255), false, 1.f);
+
+		if ((cursor.x > position) && (cursor.x < position + w) && (cursor.y > y) && (cursor.y < y + h) && GetAsyncKeyState(VK_LBUTTON) & 1) {
+			if (value > 0)
+				value -= 1;
+		}
+		else if ((cursor.x > position + str_size.x + 23) && (cursor.x < position + w + str_size.x + 23) && (cursor.y > y) && (cursor.y < y + h) && GetAsyncKeyState(VK_LBUTTON) & 1) {
+			if (value < vals.size( ) - 1)
+				value += 1;
+		}
+				
+
+		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string + std::string(": ") + vals[ value ]));
+	}
+
+	void checkbox(float x, float y, float position, std::string string, bool& value) {
 		GetCursorPos(&cursor);
 
 		int w = 10, h = 10;
@@ -75,7 +105,7 @@ namespace menu_framework {
 		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string));
 	}
 
-	void keybind(std::int32_t x, std::int32_t y, std::int32_t position, const std::string string, int& value) {
+	void keybind(float x, float y, float position, std::string string, int& value) {
 		GetCursorPos(&cursor);
 
 		int w = 40, h = 10;
@@ -94,7 +124,7 @@ namespace menu_framework {
 		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string + std::string(": ") + keys_list[ value ].data( )));
 	}
 
-	void slider(std::int32_t x, std::int32_t y, std::int32_t position, const std::string string, float& value, float min_value, float max_value) {
+	void slider(float x, float y, float position, std::string string, float& value, float min_value, float max_value) {
 		GetCursorPos(&cursor);
 
 		int ix = x + 140;
@@ -109,7 +139,7 @@ namespace menu_framework {
 		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode((std::stringstream{ } << string << ": " << std::setprecision(3) << value).str( )));
 	}
 
-	void menu_movement(std::int32_t& x, std::int32_t& y, std::int32_t w, std::int32_t h) {
+	void menu_movement(int& x, int& y, int w, int h) {
 		GetCursorPos(&cursor);
 
 		if (GetAsyncKeyState(VK_LBUTTON) < 0 && (cursor.x > x && cursor.x < x + w && cursor.y > y && cursor.y < y + h)) {
@@ -132,62 +162,81 @@ namespace menu_framework {
 			should_move = false;
 		}
 	}
-	auto do_frame = [&](std::int32_t x, std::int32_t y, std::int32_t w, std::int32_t h, Color3 bg, Color3 header_text, Color3 header_line, const std::string& name) {
+	auto do_frame = [&](float x, float y, float w, float h, Color3 bg, Color3 header_text, Color3 header_line, std::string name) {
 		Renderer::rectangle_filled(Vector2(x, y), Vector2(w, h), bg);
 		Renderer::rectangle_filled(Vector2(x, y), Vector2(w, 30), header_text);
 		Renderer::rectangle_filled(Vector2(x, y + 30), Vector2(w, 2), header_line);
 		Renderer::text(Vector2(x + 10, y + 8), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(name));
 	};
+
 	void render( ) {
 		if (!settings::menu)
 			return;
 
-		do_frame(variables::x, variables::y, variables::w, variables::h, Color3(36, 36, 36, 255), Color3(25, 25, 25, 255), Color3(36, 36, 36, 255), "plusminus");
+		do_frame(variables::x, variables::y, variables::w, variables::h, Color3(36, 36, 36, 255), Color3(25, 25, 25, 255), Color3(36, 36, 36, 255), xorstr_("plusminus"));
 
-		menu_framework::group_box(variables::x + 5, variables::y + 35, 100, 260, "tabs", false); {
-			menu_framework::tab(variables::x + 5, variables::y + (260 / 2) - 35, 100, 30, "combat", current_tab, 0, false);
-			menu_framework::tab(variables::x + 5, variables::y + (260 / 2), 100, 30, "visuals", current_tab, 1, false);
-			menu_framework::tab(variables::x + 5, variables::y + (260 / 2) + 35, 100, 30, "misc", current_tab, 2, false);
+		menu_framework::group_box(variables::x + 5, variables::y + 35, 100, 260, xorstr_("tabs"), false); {
+			menu_framework::tab(variables::x + 5, variables::y + (260 / 2) - 52.5, 100, 30, xorstr_("combat"), current_tab, 0, false);
+			menu_framework::tab(variables::x + 5, variables::y + (260 / 2) - 17.5, 100, 30, xorstr_("visuals"), current_tab, 1, false);
+			menu_framework::tab(variables::x + 5, variables::y + (260 / 2) + 17.5, 100, 30, xorstr_("misc"), current_tab, 2, false);
+			menu_framework::tab(variables::x + 5, variables::y + (260 / 2) + 52.5, 100, 30, xorstr_("other"), current_tab, 3, false);
 		}
 
 		switch (current_tab) {
 		case 0:
-			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, "combat", false); {
+			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, xorstr_("combat"), true); {
 				int combat_y = 45;
 
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "psilent", settings::psilent); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "manipulator", settings::manipulator); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "desync", settings::desync); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("psilent"), settings::psilent); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("manipulator"), settings::manipulator); combat_y += 15;
+				menu_framework::selector(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("hitbox override"), settings::h_override, { xorstr_("none"), xorstr_("body"), xorstr_("head"), xorstr_("randomize (all)"), xorstr_("randomize (main)") }); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("desync"), settings::desync); combat_y += 15;
 
 				if (settings::desync) {
 					static float offset = 15;
-					menu_framework::keybind(variables::x + 165 + offset, variables::y + combat_y, variables::x + 120 + offset, "desync bind", settings::desync_key); combat_y += 15;
+					menu_framework::keybind(variables::x + 165 + offset, variables::y + combat_y, variables::x + 120 + offset, xorstr_("desync bind"), settings::desync_key); combat_y += 15;
 				}
 
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "autoshoot", settings::autoshoot); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "pierce", settings::penetrate); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "big bullets", settings::bigger_bullets); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "fast bullets", settings::faster_bullets); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, "insta eoka", settings::always_eoka); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("autoshoot"), settings::autoshoot); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("pierce"), settings::penetrate); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("big bullets"), settings::bigger_bullets); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("fast bullets"), settings::faster_bullets); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("insta eoka"), settings::always_eoka); combat_y += 15;
 			}
 			break;
 		case 1:
-			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, "visuals", false); {
+			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, xorstr_("visuals"), true); {
+				int visuals_y = 45;
 
+				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("players"), settings::players); visuals_y += 15;
+				if (settings::players) {
+					static float offset = 15;
+					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("npc"), settings::npcs); visuals_y += 15;
+					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("looking direction"), settings::look_dir); visuals_y += 15;
+					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("chams"), settings::chams); visuals_y += 15;
+				}
 			}
 			break;
 		case 2:
-			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, "misc", false); {
+			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, xorstr_("misc"), true); {
 				int misc_y = 45;
 
-				menu_framework::slider(variables::x + 120, variables::y + misc_y, 125, "camera fov", settings::camera_fov, 30.f, 160.f); misc_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, "bullet tracers", settings::bullet_tracers); misc_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, "fast loot", settings::fastloot); misc_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, "fake shots", settings::weapon_spam); misc_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, "no jumping restrictions", settings::infinite_jump); misc_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, "no attack restrictions", settings::freeaim); misc_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, "no sprinting restrictions", settings::omnisprint); misc_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, "no fall damage", settings::nofall); misc_y += 15;
+				menu_framework::slider(variables::x + 120, variables::y + misc_y, 125, xorstr_("camera fov"), settings::camera_fov, 30.f, 160.f); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("bullet tracers"), settings::bullet_tracers); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fast loot"), settings::fastloot); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fake shots"), settings::weapon_spam); misc_y += 15;
+				menu_framework::selector(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("lightning"), settings::lightning, { xorstr_("default"), xorstr_("dark"), xorstr_("light") }); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no jumping restrictions"), settings::infinite_jump); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no attack restrictions"), settings::freeaim); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no sprinting restrictions"), settings::omnisprint); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no fall damage"), settings::nofall); misc_y += 15;
+			}
+			break;
+		case 3:
+			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, xorstr_("other"), true); {
+				int other_y = 45;
+
+				
 			}
 			break;
 		}

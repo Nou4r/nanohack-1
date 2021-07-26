@@ -166,7 +166,7 @@
     <ClInclude Include="core\sdk\il2cpp\dissector.hpp" />
     <ClInclude Include="core\sdk\utils\math.hpp" />
     <ClInclude Include="core\main\other.hpp" />
-    <ClInclude Include="core\main\players.hpp" />
+    <ClInclude Include="core\main\entities.hpp" />
     <ClInclude Include="core\sdk\game.hpp" />
     <ClInclude Include="core\sdk\utils\hookengine.hpp" />
     <ClInclude Include="core\main\hooks.hpp" />
