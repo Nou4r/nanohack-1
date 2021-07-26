@@ -100,7 +100,7 @@ void DoAttack_hk(FlintStrikeWeapon* weapon) {
 	return weapon->DoAttack( );
 }
 Vector3 BodyLeanOffset_hk(PlayerEyes* a1) {
-	if (settings::manipulator && !(settings::desync && Input::GetKey(KeyCode::C))) {
+	if (settings::manipulator && !(settings::desync && get_key(settings::desync_key))) {
 		if (target_ply != nullptr) {
 			if (other::m_manipulate.empty( ) || !LocalPlayer::Entity( )->GetHeldEntity( ))
 				return a1->BodyLeanOffset( );
@@ -134,7 +134,7 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 				self->TargetMovement( ) = target_vel;
 			}
 		}
-		if (settings::desync && Input::GetKey(KeyCode::C)) {
+		if (settings::desync && get_key(settings::desync_key)) {
 			float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
 			if (vel.length( ) > 0.f) {
 				self->TargetMovement( ) = Vector3::Zero( );
@@ -223,16 +223,16 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
 		players::gamethread( );
 
-		if (settings::manipulator && !(settings::desync && Input::GetKey(KeyCode::C)))
+		if (settings::manipulator && !(settings::desync && get_key(settings::desync_key)))
 			plly->clientTickInterval( ) = 0.4f;
-		else if (settings::desync && Input::GetKey(KeyCode::C))
+		else if (settings::desync && get_key(settings::desync_key))
 			plly->clientTickInterval( ) = 0.95f;
 		else
 			plly->clientTickInterval( ) = 0.05f;
 
-		settings::tr::desyncing = settings::desync && Input::GetKey(KeyCode::C);
+		settings::tr::desyncing = settings::desync && get_key(settings::desync_key);
 
-		if (settings::desync && Input::GetKey(KeyCode::C)) {
+		if (settings::desync && get_key(settings::desync_key)) {
 			float desyncTime = (Time::realtimeSinceStartup( ) - plly->lastSentTickTime( )) - 0.03125 * 3;
 			float max_eye_value = (0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * plly->GetMaxSpeed( )) - 0.05f;
 
@@ -257,7 +257,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		GLOBAL_TIME = Time::time( );
 		viewMatrix = Camera::getViewMatrix( );
 
-		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && !(settings::desync && Input::GetKey(KeyCode::C)))
+		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && !(settings::desync && get_key(settings::desync_key)))
 			other::find_manipulate_angle( );
 		else
 			if (!other::m_manipulate.empty( ))

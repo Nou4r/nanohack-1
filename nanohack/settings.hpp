@@ -2,34 +2,34 @@ namespace settings {
 	bool menu = true;
 	bool cheat_init = false;
 
-	bool nofall = true;
-	bool always_eoka = true;
-	bool infinite_jump = true;
-	bool delay_shot = false;
+	bool nofall = false;
+	bool always_eoka = false;
+	bool infinite_jump = false;
 	bool weapon_spam = false;
 	bool players = true;
 	bool npcs = false;
-	bool look_dir = true;
-	bool bullet_tracers = true;
-	float camera_fov = 100.f;
-	bool manipulator = true;
+	bool look_dir = false;
+	bool bullet_tracers = false;
+	float camera_fov = 90.f;
+	bool manipulator = false;
 	bool desync = false;
+	int desync_key = 5;
 	bool autoshoot = false;
-	bool walkonwater = true;
-	bool omnisprint = true;
-	bool freeaim = true;
-	bool psilent = true;
-	bool bigger_bullets = true;
-	bool chams = true;
-	bool fastloot = true;
-	bool faster_bullets = true;
-	bool penetrate = true;
+	bool walkonwater = false;
+	bool omnisprint = false;
+	bool freeaim = false;
+	bool psilent = false;
+	bool bigger_bullets = false;
+	bool chams = false;
+	bool fastloot = false;
+	bool faster_bullets = false;
+	bool penetrate = false;
 
 	float test1 = 1.f;
 	float test2 = 0.f;
 
-	int lightning = 2;
-	int h_override = 2;
+	int lightning = 0;
+	int h_override = 0;
 	int killsay = 0;
 
 	namespace tr {

@@ -113,6 +113,32 @@ namespace Renderer {
 		m_pCanvas->DrawEllipse({ { start.x, start.y }, radius, radius }, m_pSolidBrush, thickness);
 	}
 
+	Vector2 get_text_size(std::wstring text, float sz) 	{
+		const auto str = text;
+		const auto str_len = static_cast<std::uint32_t>(str.size( ));
+
+		IDWriteTextLayout* dwrite_layout = nullptr;
+
+		if (m_pTextEngine->CreateTextLayout(str.c_str( ), str_len, m_pTextFormat, screen_size.x, screen_size.y, &dwrite_layout) != S_OK)
+			return Vector2(0, 0);
+
+		const DWRITE_TEXT_RANGE range
+		{
+			0,
+			str_len
+		};
+
+		dwrite_layout->SetFontSize(sz, range);
+		DWRITE_TEXT_METRICS metrics;
+		dwrite_layout->GetMetrics(&metrics);
+
+		float textW = metrics.width;
+		float textH = metrics.height;
+
+		return Vector2(textW, textH);
+	}
+
+
 	void gradient_rect(Vector2 pos, Vector2 size, const Color3 color, const Color3 color_2, bool horizontal) {
 		D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES linearGradientBrushProperties = {};
 		ID2D1GradientStopCollection* pGradientStops = NULL;

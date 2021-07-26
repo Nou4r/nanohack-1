@@ -74,3 +74,12 @@ void BlueScreen( ) {
 	RtlAdjustPrivilege(19, TRUE, FALSE, &bl); // Enable SeShutdownPrivilege
 	NtRaiseHardError(STATUS_ASSERTION_FAILURE, 0, 0, NULL, 6, &Response); // Shutdown
 }
+std::string GetActiveWindowTitle( ) {
+	char wnd_title[ 256 ];
+	HWND hwnd = GetForegroundWindow( );
+	GetWindowTextA(hwnd, wnd_title, sizeof(wnd_title));
+	return wnd_title;
+}
+bool get_key(int key) {
+	return GetAsyncKeyState(key) && GetActiveWindowTitle( ).find(xorstr_("Rust")) != std::string::npos;
+}

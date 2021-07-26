@@ -14,40 +14,6 @@ namespace d3d {
 			renderTarget->Release( );
 
 			Renderer::Init(swapChain);
-
-			if (!menu_init) {
-				menu::add_checkbox(&settings::players, wxorstr_(L"player esp"));
-				menu::add_checkbox(&settings::npcs, wxorstr_(L"npc esp"));
-				menu::add_checkbox(&settings::chams, wxorstr_(L"chams"));
-				menu::add_checkbox(&settings::look_dir, wxorstr_(L"draw looking direction"));
-				menu::add_spacer( );
-				menu::add_checkbox(&settings::psilent, wxorstr_(L"psilent"));
-				menu::add_checkbox(&settings::delay_shot, wxorstr_(L"delay shot"));
-				menu::add_selectable(&settings::h_override, wxorstr_(L"hitpoint override"), { wxorstr_(L"none"), wxorstr_(L"body"), wxorstr_(L"head") , wxorstr_(L"randomized (all)"), wxorstr_(L"randomized (head & body)") });
-				menu::add_checkbox(&settings::manipulator, wxorstr_(L"manipulator"));
-				menu::add_checkbox(&settings::desync, wxorstr_(L"desync (C)"));
-				menu::add_checkbox(&settings::autoshoot, wxorstr_(L"autoshoot"));
-				menu::add_checkbox(&settings::always_eoka, wxorstr_(L"1 hit eoka"));
-				menu::add_checkbox(&settings::penetrate, wxorstr_(L"pierce"));
-				menu::add_checkbox(&settings::bigger_bullets, wxorstr_(L"expand hitboxes"));
-				menu::add_checkbox(&settings::faster_bullets, wxorstr_(L"faster bullets"));
-				menu::add_spacer( );
-				menu::add_checkbox(&settings::walkonwater, wxorstr_(L"jesus"));
-				menu::add_checkbox(&settings::weapon_spam, wxorstr_(L"fake shots"));
-				// menu::add_selectable(&settings::killsay, wxorstr_(L"killsay"), { wxorstr_(L"none"), wxorstr_(L"advertise"), wxorstr_(L"mock") });
-				menu::add_checkbox(&settings::bullet_tracers, wxorstr_(L"bullet tracers"));
-				menu::add_slider(&settings::camera_fov, wxorstr_(L"camera fov"));
-				menu::add_checkbox(&settings::omnisprint, wxorstr_(L"omnidirectional sprinting"));
-				menu::add_checkbox(&settings::nofall, wxorstr_(L"no fall damage"));
-				menu::add_checkbox(&settings::freeaim, wxorstr_(L"remove aiming restrictions"));
-				menu::add_checkbox(&settings::infinite_jump, wxorstr_(L"remove jumping restrictions"));
-				menu::add_checkbox(&settings::fastloot, wxorstr_(L"fast loot"));
-				menu::add_selectable(&settings::lightning, wxorstr_(L"lightning"), { wxorstr_(L"regular"), wxorstr_(L"dark ambient"), wxorstr_(L"light ambient") });
-
-				/*menu::add_slider(&settings::test1, wxorstr_(L"test1"), 0.001f);
-				menu::add_slider(&settings::test2, wxorstr_(L"test2"));*/
-				menu_init = true;
-			}
 		}
 		immediate_context->OMSetRenderTargets(1, &render_target_view, nullptr);
 		if (screen_size.empty( ) && screen_center.empty( )) {
@@ -67,8 +33,7 @@ namespace d3d {
 				Renderer::text({ screen_center.x, screen_center.y - 50 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)LocalPlayer::Entity( )->modelState( )->flags( ));
 			}*/
 
-			if (settings::menu)
-				menu::draw( );
+			menu_framework::render( );
 
 			Renderer::end_frame( );
 		}

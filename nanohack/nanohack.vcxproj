@@ -158,6 +158,7 @@
     <ClCompile Include="entry.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="core\drawing\framework.hpp" />
     <ClInclude Include="core\main\aimutils.hpp" />
     <ClInclude Include="core\main\bonecache.hpp" />
     <ClInclude Include="core\sdk\utils\crc32.hpp" />
@@ -170,7 +171,6 @@
     <ClInclude Include="core\sdk\utils\hookengine.hpp" />
     <ClInclude Include="core\main\hooks.hpp" />
     <ClInclude Include="core\sdk\mem.hpp" />
-    <ClInclude Include="core\drawing\menu.hpp" />
     <ClInclude Include="core\drawing\renderer.hpp" />
     <ClInclude Include="core\sdk\utils\string.hpp" />
     <ClInclude Include="settings.hpp" />

@@ -33,9 +33,6 @@
     <ClInclude Include="core\drawing\renderer.hpp">
       <Filter>Source Files\core\drawing</Filter>
     </ClInclude>
-    <ClInclude Include="core\drawing\menu.hpp">
-      <Filter>Source Files\core\drawing</Filter>
-    </ClInclude>
     <ClInclude Include="core\sdk\utils\hookengine.hpp">
       <Filter>Source Files\core\utils</Filter>
     </ClInclude>
@@ -88,5 +85,6 @@
       <Filter>Source Files\core\utils</Filter>
     </ClInclude>
     <ClInclude Include="core\sdk\utils\string.hpp" />
+    <ClInclude Include="core\drawing\framework.hpp" />
   </ItemGroup>
 </Project>
