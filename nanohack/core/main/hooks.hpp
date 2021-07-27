@@ -319,6 +319,32 @@ float GetRandomVelocity_hk(ItemModProjectile* self) {
 
 	return self->GetRandomVelocity( ) * modifier;
 }
+void ProcessAttack_hk(BaseMelee* self, HitTest* hit) {
+	auto entity = hit->HitEntity( );
+
+	if (!settings::farm_assist || !entity)
+		return self->ProcessAttack(hit);
+
+	if (entity->class_name_hash( ) == STATIC_CRC32("OreResourceEntity")) {
+		BaseNetworkable* marker = BaseNetworkable::clientEntities( )->FindClosest(STATIC_CRC32("OreHotSpot"), entity, 5.0f);
+		if (marker) {
+			entity = marker;
+			hit->HitTransform( ) = marker->transform( );
+			hit->HitPoint( ) = marker->transform( )->InverseTransformPoint(marker->transform( )->position( ));
+			hit->HitMaterial( ) = String::New(xorstr_("MetalOre"));
+		}
+	}
+	else if (entity->class_name_hash( ) == STATIC_CRC32("TreeEntity")) {
+		BaseNetworkable* marker = BaseNetworkable::clientEntities( )->FindClosest(STATIC_CRC32("TreeMarker"), entity, 5.0f);
+		if (marker) {
+			hit->HitTransform( ) = marker->transform( );
+			hit->HitPoint( ) = marker->transform( )->InverseTransformPoint(marker->transform( )->position( ));
+			hit->HitMaterial( ) = String::New(xorstr_("Wood"));
+		}
+	}
+
+	return self->ProcessAttack(hit);
+}
 bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	if (settings::penetrate) {
 		if (prj->isAuthoritative( )) {
@@ -375,7 +401,6 @@ void LowerApply_hk(ViewmodelLower* self, uintptr_t vm) {
 		self->Apply(vm);
 }
 String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::Object_*>* args) {
-
 	if (optiom->IsFromServer( )) {
 		if (str->buffer) {
 			auto string = std::wstring(str->buffer);
@@ -402,6 +427,7 @@ void do_hooks( ) {
 	hookengine::hook(ConsoleSystem::Run_, ConsoleRun_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
+	hookengine::hook(BaseMelee::ProcessAttack_, ProcessAttack_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
 	hookengine::hook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);
 	hookengine::hook(Projectile::SetEffectScale_, SetEffectScale_hk);

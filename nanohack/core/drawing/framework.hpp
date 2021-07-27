@@ -170,6 +170,9 @@ namespace menu_framework {
 	};
 
 	void render( ) {
+		Renderer::rectangle_filled(Vector2(3, 3), Vector2(100, 15), Color3(25, 25, 25));
+		Renderer::text(Vector2(5, 4), Color3(255, 255, 255), 12.f, false, false, wxorstr_(L"plusminus"));
+
 		if (!settings::menu)
 			return;
 
@@ -224,6 +227,7 @@ namespace menu_framework {
 				menu_framework::slider(variables::x + 120, variables::y + misc_y, 125, xorstr_("camera fov"), settings::camera_fov, 30.f, 160.f); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("bullet tracers"), settings::bullet_tracers); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fast loot"), settings::fastloot); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("farm assist"), settings::farm_assist); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fake shots"), settings::weapon_spam); misc_y += 15;
 				menu_framework::selector(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("lightning"), settings::lightning, { xorstr_("default"), xorstr_("dark"), xorstr_("light") }); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no jumping restrictions"), settings::infinite_jump); misc_y += 15;

@@ -1089,6 +1089,13 @@ class AttackEntity : public BaseEntity {
 public:
 	FIELD("Assembly-CSharp::AttackEntity::lastTickTime", lastTickTime, float);
 };
+class BaseMelee : public AttackEntity {
+public:
+	static inline void (*ProcessAttack_)(BaseMelee*, HitTest*) = nullptr;
+	void ProcessAttack(HitTest* test) {
+		return ProcessAttack_(this, test);
+	}
+};
 class BaseProjectile : public AttackEntity {
 public:
 	class Magazine {
@@ -1857,7 +1864,8 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Facepunch.Console::ConsoleSystem::Run(Option,String,Object[]): String", ConsoleSystem::Run_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
-	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnAttacked(HitInfo): Void", BaseCombatEntity::OnAttacked_);
+	ASSIGN_HOOK("Assembly-CSharp::BaseMelee::ProcessAttack(HitTest): Void", BaseMelee::ProcessAttack_);
+	ASSIGN_HOOK("Assembly-CSharp::BaseCombatEntity::OnAttacked(HitInfo): Void", BaseCombatEntity::OnAttacked_);
 	ASSIGN_HOOK("Assembly-CSharp::InputState::IsDown(BUTTON): Boolean", InputState::IsDown_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::get_BodyLeanOffset(): Vector3", PlayerEyes::BodyLeanOffset_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseProjectile::CreateProjectile(String,Vector3,Vector3,Vector3): Projectile", BaseProjectile::CreateProjectile_);
