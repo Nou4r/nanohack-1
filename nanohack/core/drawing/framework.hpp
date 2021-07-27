@@ -89,7 +89,7 @@ namespace menu_framework {
 		}
 				
 
-		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string + std::string(": ") + vals[ value ]));
+		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string + std::string(": ") + vals[ value ]));
 	}
 
 	void checkbox(float x, float y, float position, std::string string, bool& value) {
@@ -102,7 +102,20 @@ namespace menu_framework {
 
 		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), value ? THEME_COLOR : Color3(36, 36, 36, 255));
 
-		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string));
+		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string));
+	}
+
+	bool button(float x, float y, float position, std::string string) {
+		GetCursorPos(&cursor);
+
+		int w = 50, h = 10;
+
+		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), Color3(36, 36, 36, 255));
+		Renderer::rectangle(Vector2(position, y), Vector2(w, h), Color3(36, 36, 36, 255), 0.7f);
+
+		Renderer::text(Vector2(position + w / 2, y - 3), Color3(255, 255, 255, 255), 12.f, true, false, StringConverter::ToUnicode(string));
+
+		return ((cursor.x > position) && (cursor.x < position + w) && (cursor.y > y) && (cursor.y < y + h) && GetAsyncKeyState(VK_LBUTTON) & 1);
 	}
 
 	void keybind(float x, float y, float position, std::string string, int& value) {
@@ -121,7 +134,7 @@ namespace menu_framework {
 
 		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), THEME_COLOR);
 
-		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string + std::string(": ") + keys_list[ value ].data( )));
+		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string + std::string(": ") + keys_list[ value ].data( )));
 	}
 
 	void slider(float x, float y, float position, std::string string, float& value, float min_value, float max_value) {
@@ -136,7 +149,7 @@ namespace menu_framework {
 		Renderer::rectangle_filled(Vector2(ix, yi), Vector2(position, 6), Color3(36, 36, 36, 255));
 		Renderer::rectangle_filled(Vector2(ix, yi), Vector2(value * (float(position) / float(max_value)), 6), THEME_COLOR);
 
-		Renderer::text(Vector2(x + 2, y - 1), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode((std::stringstream{ } << string << ": " << std::setprecision(3) << value).str( )));
+		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode((std::stringstream{ } << string << ": " << std::setprecision(3) << value).str( )));
 	}
 
 	void menu_movement(int& x, int& y, int w, int h) {
@@ -170,8 +183,7 @@ namespace menu_framework {
 	};
 
 	void render( ) {
-		Renderer::rectangle_filled(Vector2(3, 3), Vector2(100, 15), Color3(25, 25, 25));
-		Renderer::text(Vector2(5, 4), Color3(255, 255, 255), 12.f, false, false, wxorstr_(L"plusminus"));
+		Renderer::text(Vector2(5, 4), Color3(255, 255, 255), 14.f, false, true, wxorstr_(L"plusminus | %s | days left: %d"), settings::auth::username.c_str(), settings::auth::days_left);
 
 		if (!settings::menu)
 			return;
@@ -240,7 +252,7 @@ namespace menu_framework {
 			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, xorstr_("other"), true); {
 				int other_y = 45;
 
-				
+				menu_framework::selector(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("crosshair"), settings::crosshair, { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats") }); other_y += 15;
 			}
 			break;
 		}

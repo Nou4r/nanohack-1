@@ -32,9 +32,14 @@ namespace settings {
 	int lightning = 0;
 	int h_override = 0;
 	int killsay = 0;
+	int crosshair = 0;
 
 	namespace tr {
 		bool desyncing = false;
+	}
+	namespace auth {
+		std::wstring username = L"dev";
+		int days_left = 999;
 	}
 }
 
