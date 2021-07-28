@@ -29,11 +29,17 @@
 #include <lmcons.h>
 #include <thread>
 #include <map>
-
+#include "ThemidaSDK/ThemidaSDK.h"
 #pragma warning ( disable : 4172 )
 
 #include "core/sdk/utils/string.hpp"
 #include "core/sdk/utils/xorstr.hpp"
+#include "auth/WinReg.hpp"
+#include "auth/Fingerprint.hpp"
+#include "auth/api.hpp"
+
+Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.0"));
+
 #include "settings.hpp"
 #include "core/sdk/vector.hpp"
 #include "core/stdafx.hpp"
@@ -56,7 +62,54 @@
 
 // #define auth
 
+std::vector<std::string> split(std::string s, std::string delimiter) {
+	size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+	std::string token;
+	std::vector<std::string> res;
+
+	while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+		token = s.substr(pos_start, pos_end - pos_start);
+		pos_start = pos_end + delim_len;
+		res.push_back(token);
+	}
+
+	res.push_back(s.substr(pos_start));
+	return res;
+}
+
+
 void entry_thread( ) {
+	VM_EAGLE_BLACK_START
+
+	std::string username = xorstr_("");
+	std::string password = xorstr_("");
+
+	std::ifstream save_file(xorstr_("C:\\pml.dat"));
+	if (save_file.is_open())
+	{
+		std::string buf;
+		std::getline(save_file, buf);
+
+		std::vector<std::string> splitdat = split(buf, xorstr_(":"));
+		if (splitdat.size() >= 2)
+		{
+			username = splitdat.at(0);
+			password = splitdat.at(1);
+		}
+
+	}
+	save_file.close();
+
+	std::remove(xorstr_("C:\\pml.dat"));
+
+	api.init();
+
+	api.login(username, password);
+
+	Sleep(1000);
+	
+	settings::auth::days_left = api.days_left;
+	settings::auth::username = StringConverter::ToUnicode(username);
 
 	d3d::init( );
 
@@ -67,9 +120,10 @@ void entry_thread( ) {
 
 	initialize_cheat( );
 	do_hooks( );
+	VM_EAGLE_BLACK_END
 }
 
-bool DllMain(HMODULE hMod, uint32_t call_reason, void*) {
+bool DllMain(HMODULE hMod, uint32_t call_reason, LPVOID reserved) {
 	if (call_reason != DLL_PROCESS_ATTACH)
 		return false;
 

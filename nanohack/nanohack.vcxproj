@@ -44,14 +44,14 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -83,6 +83,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Users\sduihfoqawhf\Documents\GitHub\nanohack\nanohack\core\drawing\zgui;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -144,6 +148,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -151,13 +156,16 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>detours/detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>detours/detours.lib;ws2_32.lib;crypt32.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="entry.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="auth\api.hpp" />
+    <ClInclude Include="auth\Fingerprint.hpp" />
+    <ClInclude Include="auth\WinReg.hpp" />
     <ClInclude Include="core\drawing\framework.hpp" />
     <ClInclude Include="core\main\aimutils.hpp" />
     <ClInclude Include="core\main\bonecache.hpp" />
@@ -179,6 +187,13 @@
     <ClInclude Include="core\sdk\vector.hpp" />
     <ClInclude Include="core\sdk\il2cpp\wrapper.hpp" />
     <ClInclude Include="core\sdk\utils\xorstr.hpp" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_BorlandC_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_GNU_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_ICL_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_LCC_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_VC_inline.h" />
+    <ClInclude Include="ThemidaSDK\ThemidaSDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

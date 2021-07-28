@@ -86,5 +86,15 @@
     </ClInclude>
     <ClInclude Include="core\sdk\utils\string.hpp" />
     <ClInclude Include="core\drawing\framework.hpp" />
+    <ClInclude Include="auth\api.hpp" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_BorlandC_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_GNU_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_ICL_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_LCC_inline.h" />
+    <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_VC_inline.h" />
+    <ClInclude Include="ThemidaSDK\ThemidaSDK.h" />
+    <ClInclude Include="auth\Fingerprint.hpp" />
+    <ClInclude Include="auth\WinReg.hpp" />
   </ItemGroup>
 </Project>
