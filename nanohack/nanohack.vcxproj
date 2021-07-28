@@ -182,6 +182,7 @@
     <ClInclude Include="core\sdk\mem.hpp" />
     <ClInclude Include="core\drawing\renderer.hpp" />
     <ClInclude Include="core\sdk\utils\string.hpp" />
+    <ClInclude Include="core\sdk\utils\xorf.hpp" />
     <ClInclude Include="settings.hpp" />
     <ClInclude Include="core\stdafx.hpp" />
     <ClInclude Include="core\sdk\structs.hpp" />

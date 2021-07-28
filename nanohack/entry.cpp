@@ -34,6 +34,7 @@
 
 #include "core/sdk/utils/string.hpp"
 #include "core/sdk/utils/xorstr.hpp"
+#include "core/sdk/utils/xorf.hpp"
 #include "auth/WinReg.hpp"
 #include "auth/Fingerprint.hpp"
 #include "auth/api.hpp"

@@ -96,5 +96,6 @@
     <ClInclude Include="ThemidaSDK\ThemidaSDK.h" />
     <ClInclude Include="auth\Fingerprint.hpp" />
     <ClInclude Include="auth\WinReg.hpp" />
+    <ClInclude Include="core\sdk\utils\xorf.hpp" />
   </ItemGroup>
 </Project>
