@@ -108,7 +108,9 @@ namespace menu_framework {
 	bool button(float x, float y, float position, std::string string) {
 		GetCursorPos(&cursor);
 
-		int w = 50, h = 10;
+		Vector2 str_size = Renderer::get_text_size(StringConverter::ToUnicode(string), 12.f);
+
+		int w = str_size.x + 20, h = 10;
 
 		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), Color3(36, 36, 36, 255));
 		Renderer::rectangle(Vector2(position, y), Vector2(w, h), Color3(36, 36, 36, 255), 0.7f);
@@ -253,6 +255,12 @@ namespace menu_framework {
 				int other_y = 45;
 
 				menu_framework::selector(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("crosshair"), settings::crosshair, { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats") }); other_y += 15;
+
+				if (menu_framework::button(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("config save"))) {
+					MessageBoxA(0, "button test", 0, 0);
+				}
+				other_y += 15;
+					
 			}
 			break;
 		}

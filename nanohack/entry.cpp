@@ -61,9 +61,10 @@ Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1
 #include "core/main/aimutils.hpp"
 #include "core/main/hooks.hpp"
 
-// #define auth
+//#define authh
 
 void entry_thread( ) {
+#ifdef authh
 	VM_EAGLE_BLACK_START
 
 		std::string username = xorstr_("");
@@ -92,7 +93,7 @@ void entry_thread( ) {
 
 	settings::auth::days_left = api.days_left;
 	settings::auth::username = StringConverter::ToUnicode(username);
-
+#endif
 	d3d::init( );
 
 	/*AllocConsole( );
@@ -102,7 +103,9 @@ void entry_thread( ) {
 
 	initialize_cheat( );
 	do_hooks( );
+#ifdef authh
 	VM_EAGLE_BLACK_END
+#endif
 }
 
 bool DllMain(HMODULE hMod, uint32_t call_reason, LPVOID reserved) {
