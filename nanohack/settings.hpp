@@ -16,6 +16,7 @@ namespace settings {
 	int desync_key = 5;
 	bool autoshoot = false;
 	bool walkonwater = false;
+	bool reload_indicator = false;
 	bool farm_assist = false;
 	bool omnisprint = false;
 	bool freeaim = false;

@@ -232,6 +232,7 @@ namespace menu_framework {
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("looking direction"), settings::look_dir); visuals_y += 15;
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("chams"), settings::chams); visuals_y += 15;
 				}
+				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("reload indicator"), settings::reload_indicator); visuals_y += 15;
 			}
 			break;
 		case 2:
