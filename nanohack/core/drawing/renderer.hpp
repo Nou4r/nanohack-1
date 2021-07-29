@@ -255,7 +255,7 @@ namespace Renderer {
 		};
 
 		dwrite_layout->SetFontSize(sz, range);
-		dwrite_layout->SetFontWeight(DWRITE_FONT_WEIGHT_BOLD, range);
+		dwrite_layout->SetFontWeight(DWRITE_FONT_WEIGHT_EXTRA_BOLD, range);
 
 		if (center) {
 			m_pSolidBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Black));

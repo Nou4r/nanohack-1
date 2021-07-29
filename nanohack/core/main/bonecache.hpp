@@ -80,17 +80,25 @@ namespace bonecache {
 					cache->bounds = bo;
 
 				Vector2 footPos;
-				cache->w2s = Camera::world_to_screen(cache->head->position, footPos);
-				if (cache->w2s)
+				if (Camera::world_to_screen(cache->head->position, footPos))
 					cache->dfc = footPos;
 
 				Vector2 forwardd;
 				if (Camera::world_to_screen(cache->head->position + (player->eyes( )->BodyForward( ) * 2), forwardd)) {
 					cache->forward = forwardd;
 				}
+
+				auto mpv = player->find_mpv_bone( );
+				Vector3 target;
+				if (mpv != nullptr)
+					target = mpv->position;
+				else
+					target = player->bones( )->head->position;
+
+				cache->desyncable = LineOfSight(LocalPlayer::Entity( )->eyes( )->position( ) + Vector3(0, 7, 0), target);
 			}
 			else {
-				cache->e_rot = LocalPlayer::Entity( )->eyes( )->rotation( );
+				
 			}
 
 			if (!map_contains_key(cachedBones, player->userID( )))

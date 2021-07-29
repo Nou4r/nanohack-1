@@ -143,7 +143,7 @@ namespace menu_framework {
 		GetCursorPos(&cursor);
 
 		int ix = x + 140;
-		int yi = y /*+ 4*/;
+		int yi = y + 3;
 
 		if ((cursor.x > ix) && (cursor.x < ix + position) && (cursor.y > yi) && (cursor.y < yi + 6) && (GetAsyncKeyState(VK_LBUTTON)))
 			value = (cursor.x - ix) / (float(position) / float(max_value));
@@ -242,6 +242,7 @@ namespace menu_framework {
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("bullet tracers"), settings::bullet_tracers); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fast loot"), settings::fastloot); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("farm assist"), settings::farm_assist); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("walk on water"), settings::walkonwater); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fake shots"), settings::weapon_spam); misc_y += 15;
 				menu_framework::selector(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("lightning"), settings::lightning, { xorstr_("default"), xorstr_("dark"), xorstr_("light") }); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no jumping restrictions"), settings::infinite_jump); misc_y += 15;

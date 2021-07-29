@@ -64,8 +64,18 @@ namespace players {
 					if (settings::manipulator && !other::m_manipulate.empty( ))
 						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
 
-					if (target_ply->find_mpv_bone( )->visible)
+					auto mpv = target_ply->find_mpv_bone( );
+					Bone* target;
+					if (mpv != nullptr)
+						target = mpv;
+					else
+						target = target_ply->bones( )->head;
+
+					if (target->visible)
 						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
+
+					if (settings::desync && target_ply->bones()->desyncable)
+						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 				}

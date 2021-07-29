@@ -252,6 +252,7 @@ public:
 			!strcmp(this->class_name( ), xorstr_("NPCShopKeeper"));
 	}
 };
+class Renderer_;
 class GameObject : public Component {
 public:
 	int layer( ) {
@@ -384,6 +385,16 @@ public:
 	FIELD("Assembly-CSharp::BaseNetworkable::net", net, Networkable*);
 	FIELD("Assembly-CSharp::BaseNetworkable::parentEntity", parentEntity, BaseEntity*);
 };
+class Material;
+class Skinnable {
+public:
+	FIELD("Assembly-CSharp::Skinnable::_sourceMaterials", _sourceMaterials, Array<Material*>*);
+};
+class ItemSkin {
+public:
+	FIELD("Assembly-CSharp::ItemSkin::Skinnable", _Skinnable, Skinnable*);
+	FIELD("Assembly-CSharp::ItemSkin::Materials", Materials, Array<Material*>*);
+};
 class Model;
 class BaseEntity : public BaseNetworkable {
 public:
@@ -430,6 +441,7 @@ public:
 		return reinterpret_cast<void(__fastcall*)(BaseEntity*, Signal, String*)>(off)(this, a, String::New(str));
 	}
 	FIELD("Assembly-CSharp::BaseEntity::model", model, Model*);
+	FIELD("Assembly-CSharp::BaseEntity::itemSkin", itemSkin, ItemSkin*);
 };
 
 class GamePhysics {
@@ -1304,8 +1316,7 @@ public:
 	box_bounds bounds;
 	Vector2 dfc;
 	Vector2 forward;
-	bool w2s;
-	Quaternion e_rot;
+	bool desyncable;
 
 	BoneCache( ) {
 		head = new Bone( );
@@ -1334,8 +1345,7 @@ public:
 		bounds = { 0, 0, 0, 0 };
 		dfc = Vector2( );
 		forward = { };
-		e_rot = {};
-		w2s = false;
+		desyncable = false;
 	}
 };
 class Attack {

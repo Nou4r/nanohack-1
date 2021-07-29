@@ -216,6 +216,9 @@ void OnAttacked_hk(BaseCombatEntity* self, HitInfo* info) {
 		}
 	}
 }
+//if (settings::desync && get_key(settings::desync_key))
+//if (player->input( )->state( )->current( )->buttons( ) != player->input( )->state( )->previous( )->buttons( ))
+//return;
 void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 	if (!plly)
 		return plly->ClientInput(state);
@@ -252,6 +255,18 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 					if (LineOfSight(target, plly->eyes( )->position( )))
 						held->DoAttack( );
 				}
+				/*if (settings::camera_fov > 120) {
+					auto rend = held->model( )->gameObject( )->GetComponentsInChildren<Renderer_>(Type::Renderer( ));
+					if (rend) {
+						for (int j = 0; j < rend->size( ); j++) { auto renderer = rend->get(j); if (!renderer) continue; renderer->set_material(nullptr); }
+					}
+				}
+				else {
+					auto materials = held->itemSkin( )->Materials( );
+					if (materials) {
+						for (int j = 0; j < materials->size( ); j++) { auto material = materials->get(j); if (!material) continue; material = nullptr; }
+					}
+				}*/
 			}
 		}
 		GLOBAL_TIME = Time::time( );
