@@ -110,12 +110,12 @@ namespace menu_framework {
 
 		Vector2 str_size = Renderer::get_text_size(StringConverter::ToUnicode(string), 12.f);
 
-		int w = str_size.x + 20, h = 10;
+		int w = str_size.x + 20, h = 20;
 
 		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), Color3(36, 36, 36, 255));
 		Renderer::rectangle(Vector2(position, y), Vector2(w, h), Color3(36, 36, 36, 255), 0.7f);
 
-		Renderer::text(Vector2(position + w / 2, y - 3), Color3(255, 255, 255, 255), 12.f, true, false, StringConverter::ToUnicode(string));
+		Renderer::text(Vector2(position + w / 2, y + 10), Color3(255, 255, 255, 255), 12.f, true, false, StringConverter::ToUnicode(string));
 
 		return ((cursor.x > position) && (cursor.x < position + w) && (cursor.y > y) && (cursor.y < y + h) && GetAsyncKeyState(VK_LBUTTON) & 1);
 	}
@@ -143,7 +143,7 @@ namespace menu_framework {
 		GetCursorPos(&cursor);
 
 		int ix = x + 140;
-		int yi = y + 4;
+		int yi = y /*+ 4*/;
 
 		if ((cursor.x > ix) && (cursor.x < ix + position) && (cursor.y > yi) && (cursor.y < yi + 6) && (GetAsyncKeyState(VK_LBUTTON)))
 			value = (cursor.x - ix) / (float(position) / float(max_value));
@@ -257,9 +257,12 @@ namespace menu_framework {
 				menu_framework::selector(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("crosshair"), settings::crosshair, { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats") }); other_y += 15;
 
 				if (menu_framework::button(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("config save"))) {
-					MessageBoxA(0, "button test", 0, 0);
-				}
-				other_y += 15;
+					// save
+				} other_y += 27;
+
+				if (menu_framework::button(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("config load"))) {
+					// load
+				} other_y += 15;
 					
 			}
 			break;
