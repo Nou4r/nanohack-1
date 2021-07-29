@@ -29,7 +29,9 @@
 #include <lmcons.h>
 #include <thread>
 #include <map>
-#include "ThemidaSDK/ThemidaSDK.h"
+//#include "ThemidaSDK/ThemidaSDK.h"
+#define VM_EAGLE_BLACK_START
+#define VM_EAGLE_BLACK_END
 #pragma warning ( disable : 4172 )
 
 #include "core/sdk/utils/string.hpp"
@@ -61,13 +63,12 @@ Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1
 #include "core/main/aimutils.hpp"
 #include "core/main/hooks.hpp"
 
-//#define authh
+#define authh
 
 void entry_thread( ) {
 #ifdef authh
-	VM_EAGLE_BLACK_START
 
-		std::string username = xorstr_("");
+	std::string username = xorstr_("");
 	std::string password = xorstr_("");
 
 	std::ifstream save_file(xorstr_("C:\\pml.dat"));
@@ -94,18 +95,16 @@ void entry_thread( ) {
 	settings::auth::days_left = api.days_left;
 	settings::auth::username = StringConverter::ToUnicode(username);
 #endif
-	d3d::init( );
+
+	d3d::init();
 
 	/*AllocConsole( );
 	SetConsoleTitleA(xorstr_("dbg"));
 	freopen_s(reinterpret_cast<FILE**>(stdin), xorstr_("CONIN$"), xorstr_("r"), stdin);
 	freopen_s(reinterpret_cast<FILE**>(stdout), xorstr_("CONOUT$"), xorstr_("w"), stdout);*/
 
-	initialize_cheat( );
-	do_hooks( );
-#ifdef authh
-	VM_EAGLE_BLACK_END
-#endif
+	initialize_cheat();
+	do_hooks();
 }
 
 bool DllMain(HMODULE hMod, uint32_t call_reason, LPVOID reserved) {

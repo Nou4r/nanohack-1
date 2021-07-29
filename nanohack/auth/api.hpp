@@ -228,8 +228,6 @@ namespace Authentication {
 			enckey = encryption::sha256(encryption::iv_key());
 			if (ownerid.length() != 10 || secret.length() != 64)
 			{
-				std::cout << xorstr_("\n\n Application Not Setup Correctly");
-				Sleep(4500);
 				exit(0);
 			}
 
@@ -251,14 +249,9 @@ namespace Authentication {
 				sessionid = json[xorstr_("sessionid")];
 				// optional success message
 			}
-			else if (json[xorstr_("message")] == xorstr_("invalidver"))
-			{
-			}
+			else if (json[xorstr_("message")] == xorstr_("invalidver")) {}
 			else
 			{
-				std::cout << "\n\n ";
-				std::cout << std::string(json[xorstr_("message")]);
-				Sleep(4500);
 				exit(0);
 			}
 
@@ -319,11 +312,6 @@ namespace Authentication {
 			{
 				return json[xorstr_("message")];
 			}
-			else
-			{
-				std::cout << xorstr_("\n\n Error: ");
-				std::cout << std::string(json[xorstr_("message")]);
-			}
 			VM_EAGLE_BLACK_END
 		}
 
@@ -373,11 +361,6 @@ namespace Authentication {
 			{
 				// optional success message
 			}
-			else
-			{
-				std::cout << xorstr_("\n\n Error: ");
-				std::cout << std::string(json[xorstr_("message")]);
-			}
 			VM_EAGLE_BLACK_END
 		}
 
@@ -401,8 +384,7 @@ namespace Authentication {
 		}
 
 		static std::string req(std::string data) {
-			VM_EAGLE_BLACK_START
-				CURL* curl = curl_easy_init();
+			CURL* curl = curl_easy_init();
 
 			if (!curl)
 				return xorstr_("null");
@@ -429,8 +411,6 @@ namespace Authentication {
 
 			//if (code != CURLE_OK)
 			//	MessageBoxA(0, curl_easy_strerror(code), 0, MB_ICONERROR);
-
-			VM_EAGLE_BLACK_END
 
 			return to_return;
 		}
