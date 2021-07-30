@@ -170,6 +170,7 @@
     <ClInclude Include="core\drawing\framework.hpp" />
     <ClInclude Include="core\main\aimutils.hpp" />
     <ClInclude Include="core\main\bonecache.hpp" />
+    <ClInclude Include="core\main\config.hpp" />
     <ClInclude Include="core\sdk\utils\crc32.hpp" />
     <ClInclude Include="core\drawing\d3d.hpp" />
     <ClInclude Include="core\sdk\il2cpp\dissector.hpp" />

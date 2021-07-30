@@ -11,11 +11,15 @@ namespace settings {
 	bool look_dir = false;
 	bool bullet_tracers = false;
 	float camera_fov = 90.f;
+	float targeting_fov = 300.f;
+	float recoil_p = 100.f;
+	bool draw_fov = false;
 	bool manipulator = false;
 	bool desync = false;
 	int desync_key = 5;
 	bool autoshoot = false;
 	bool walkonwater = false;
+	int zoom_key = 6;
 	bool reload_indicator = false;
 	bool farm_assist = false;
 	bool omnisprint = false;
@@ -27,13 +31,12 @@ namespace settings {
 	bool faster_bullets = false;
 	bool penetrate = false;
 
-	float test1 = 1.f;
-	float test2 = 0.f;
-
 	int lightning = 0;
 	int h_override = 0;
 	int killsay = 0;
 	int crosshair = 0;
+
+	bool debug = false;
 
 	namespace tr {
 		bool desyncing = false;

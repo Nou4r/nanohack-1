@@ -58,6 +58,7 @@ Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1
 #include "core/main/other.hpp"
 #include "core/sdk/utils/math.hpp"
 #include "core/main/entities.hpp"
+#include  "core/main/config.hpp"
 #include "core/drawing/framework.hpp"
 #include "core/drawing/d3d.hpp"
 #include "core/main/aimutils.hpp"
@@ -96,7 +97,8 @@ void entry_thread( ) {
 	settings::auth::username = StringConverter::ToUnicode(username);
 #endif
 
-	d3d::init();
+	d3d::init( );
+	config::init( );
 
 	/*AllocConsole( );
 	SetConsoleTitleA(xorstr_("dbg"));

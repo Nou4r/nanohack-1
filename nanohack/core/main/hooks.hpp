@@ -224,7 +224,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		return plly->ClientInput(state);
 
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
-		players::gamethread( );
+		entities::gamethread( );
 
 		if (settings::manipulator && plly->movement()->TargetMovement().empty() && !(settings::desync && get_key(settings::desync_key)))
 			plly->clientTickInterval( ) = 0.4f;
@@ -282,7 +282,10 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
 		Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
 
-		ConVar::Graphics::_fov( ) = settings::camera_fov;
+		if (get_key(settings::zoom_key))
+			ConVar::Graphics::_fov( ) = 15.f;
+		else
+			ConVar::Graphics::_fov( ) = settings::camera_fov;
 
 		if (settings::weapon_spam)
 			if (plly->GetHeldEntity( ))
@@ -359,6 +362,21 @@ void ProcessAttack_hk(BaseMelee* self, HitTest* hit) {
 	}
 
 	return self->ProcessAttack(hit);
+}
+void AddPunch_hk(HeldEntity* attackEntity, Vector3 amount, float duration) 	{
+	amount *= settings::recoil_p / 100.0f;
+
+	attackEntity->AddPunch(amount, duration);
+}
+
+Vector3 MoveTowards_hk(Vector3 current, Vector3 target, float maxDelta) 	{
+	static auto ptr = METHOD("Assembly-CSharp::BaseProjectile::SimulateAimcone(): Void");
+	if (CALLED_BY(ptr, 0x800)) 		{
+		target *= settings::recoil_p / 100.0f;
+		maxDelta *= settings::recoil_p / 100.0f;
+	}
+
+	return Vector3_::MoveTowards(current, target, maxDelta);
 }
 bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	if (settings::penetrate) {
@@ -451,4 +469,6 @@ void do_hooks( ) {
 	hookengine::hook(PlayerEyes::BodyLeanOffset_, BodyLeanOffset_hk);
 	hookengine::hook(AimConeUtil::GetModifiedAimConeDirection_, GetModifiedAimConeDirection_hk);
 	hookengine::hook(PlayerEyes::DoFirstPersonCamera_, DoFirstPersonCamera_hk);
+	hookengine::hook(Vector3_::MoveTowards_, MoveTowards_hk);
+	hookengine::hook(HeldEntity::AddPunch_, AddPunch_hk);
 }

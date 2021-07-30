@@ -97,5 +97,6 @@
     <ClInclude Include="auth\Fingerprint.hpp" />
     <ClInclude Include="auth\WinReg.hpp" />
     <ClInclude Include="core\sdk\utils\xorf.hpp" />
+    <ClInclude Include="core\main\config.hpp" />
   </ItemGroup>
 </Project>

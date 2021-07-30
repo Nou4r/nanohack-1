@@ -27,7 +27,11 @@ namespace d3d {
 
 		if (Renderer::new_frame(swapChain)) {
 			if (settings::cheat_init)
-				players::loop( );
+				entities::loop( );
+
+			if (settings::draw_fov) {
+				Renderer::circle(screen_center, Color3(255, 255, 255), settings::targeting_fov, 1.f);
+			}
 
 			menu_framework::render( );
 

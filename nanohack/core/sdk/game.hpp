@@ -1644,6 +1644,14 @@ public:
 		return nullptr;
 	}
 };
+class Vector3_ {
+public:
+	static inline Vector3(*MoveTowards_)(Vector3, Vector3, float) = nullptr;
+
+	static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta) {
+		return MoveTowards_(current, target, maxDistanceDelta);
+	}
+};
 class DDraw {
 public:
 	STATIC_FUNCTION("Assembly-CSharp::UnityEngine::DDraw::Line(Vector3,Vector3,Color,Single,Boolean,Boolean): Void", Line, void(Vector3, Vector3, Color, float, bool, bool));
@@ -1884,6 +1892,8 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Assembly-CSharp::ItemModProjectile::GetRandomVelocity(): Single", ItemModProjectile::GetRandomVelocity_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::CanAttack(): Boolean", BasePlayer::CanAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::AimConeUtil::GetModifiedAimConeDirection(Single,Vector3,Boolean): Vector3", AimConeUtil::GetModifiedAimConeDirection_);
+	ASSIGN_HOOK("Assembly-CSharp::HeldEntity::AddPunch(Vector3,Single): Void", HeldEntity::AddPunch_);
+	ASSIGN_HOOK("UnityEngine.CoreModule::UnityEngine::Vector3::MoveTowards(Vector3,Vector3,Single): Vector3", Vector3_::MoveTowards_);
 
 	settings::cheat_init = true;
 }

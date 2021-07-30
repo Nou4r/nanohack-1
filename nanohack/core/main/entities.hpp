@@ -1,4 +1,4 @@
-namespace players {
+namespace entities {
 	float dfc(BasePlayer* player) {
 		if (!player)
 			return 1000.f;
@@ -73,7 +73,7 @@ namespace players {
 			}
 
 			if (target_ply != nullptr) {
-				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
+				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || dfc(target_ply) > settings::targeting_fov || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
 					target_ply = nullptr;
 				else
 					if (target_ply->isCached( )) {
@@ -105,7 +105,11 @@ namespace players {
 				auto entity = *reinterpret_cast<BaseNetworkable**>(std::uint64_t(entityList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
 				if (!entity) continue;
 
-
+				if (settings::debug) {
+					Vector2 screen;
+					if (Camera::world_to_screen(entity->transform( )->position( ), screen))
+						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name( )).c_str( ));
+				}
 
 				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
 					auto player = reinterpret_cast<BasePlayer*>(entity);
@@ -155,11 +159,13 @@ namespace players {
 							y_ += 16;
 						}
 
-						if (target_ply == nullptr)
-							target_ply = player;
-						else
-							if (dfc(target_ply) > dfc(player))
+						if (dfc(player) < settings::targeting_fov) {
+							if (target_ply == nullptr)
 								target_ply = player;
+							else
+								if (dfc(target_ply) > dfc(player))
+									target_ply = player;
+						}
 					}
 				}
 			}
