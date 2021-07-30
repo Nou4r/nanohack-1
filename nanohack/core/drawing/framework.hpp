@@ -2,7 +2,7 @@ POINT cursor;
 POINT cursor_corrected;
 
 std::string_view keys_list[ ]{
-				"Error", "Left Mouse", "Right Mouse", "Break", "Middle Mouse", "Mouse 4", "Mouse 5",
+				"press a key", "Left Mouse", "Right Mouse", "Break", "Middle Mouse", "Mouse 4", "Mouse 5",
 				"Error", "Backspace", "TAB", "Error", "Error", "Error", "ENTER", "Error", "Error", "SHIFT",
 				"CTRL", "ALT", "PAUSE", "CAPS LOCK", "Error", "Error", "Error", "Error", "Error", "Error",
 				"Error", "Error", "Error", "Error", "Error", "SPACEBAR", "PG UP", "PG DOWN", "END", "HOME", "Left",
@@ -97,11 +97,17 @@ namespace menu_framework {
 
 		int w = 10, h = 10;
 
-		if ((cursor.x > position) && (cursor.x < position + w) && (cursor.y > y) && (cursor.y < y + h) && GetAsyncKeyState(VK_LBUTTON) & 1)
-			value = !value;
+		if ((cursor.x > position) && (cursor.x < position + w) && (cursor.y > y) && (cursor.y < y + h)) { // hovered
+			if (GetAsyncKeyState(VK_LBUTTON) & 1)
+				value = !value;
+
+			int tt_w = 200, tt_h = 75; // tooltip shit
+			Renderer::rectangle_filled(Vector2(screen_center.x - tt_w / 2, 5), Vector2(tt_w, tt_h), Color3(36, 36, 36, 255));
+		}
+			
 
 		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), value ? THEME_COLOR : Color3(36, 36, 36, 255));
-
+		 
 		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string));
 	}
 
@@ -125,16 +131,20 @@ namespace menu_framework {
 
 		int w = 40, h = 10;
 
-		if ((cursor.x > position) && (cursor.x < position + w) && (cursor.y > y) && (cursor.y < y + h)) {
+		if ((cursor.x > position) && (cursor.x < position + w) && (cursor.y > y) && (cursor.y < y + h) && GetAsyncKeyState(VK_LBUTTON) & 1) {
+			value = 0;
+		}
+
+		if (value == 0) {
 			for (int i = 0; i < 256; i++) {
-				if (GetAsyncKeyState(i) && keys_list[ i ] != "Error") {
+				if (GetAsyncKeyState(i) && keys_list[ i ] != "Error" && keys_list[ i ] != "press a key" && keys_list[ i ] != "Left Mouse") {
 					value = i;
 					break;
 				}
 			}
 		}
 
-		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), THEME_COLOR);
+		Renderer::rectangle_filled(Vector2(position, y), Vector2(w, h), value == 0 ? Color3(36, 36, 36, 255) : THEME_COLOR);
 
 		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode(string + std::string(": ") + keys_list[ value ].data( )));
 	}
@@ -143,7 +153,7 @@ namespace menu_framework {
 		GetCursorPos(&cursor);
 
 		int ix = x + 140;
-		int yi = y + 3;
+		int yi = y + 2;
 
 		if ((cursor.x > ix) && (cursor.x < ix + position) && (cursor.y > yi) && (cursor.y < yi + 6) && (GetAsyncKeyState(VK_LBUTTON)))
 			value = (cursor.x - ix) / (float(position) / float(max_value));
@@ -151,7 +161,7 @@ namespace menu_framework {
 		Renderer::rectangle_filled(Vector2(ix, yi), Vector2(position, 6), Color3(36, 36, 36, 255));
 		Renderer::rectangle_filled(Vector2(ix, yi), Vector2(value * (float(position) / float(max_value)), 6), THEME_COLOR);
 
-		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255), 12.f, false, false, StringConverter::ToUnicode((std::stringstream{ } << string << ": " << std::setprecision(3) << value).str( )));
+		Renderer::text(Vector2(x + 2, y - 3), Color3(255, 255, 255), 12.f, false, false, wxorstr_(L"%s: %.2f"), StringConverter::ToUnicode(string).c_str(), value);
 	}
 
 	void menu_movement(int& x, int& y, int w, int h) {
@@ -256,7 +266,7 @@ namespace menu_framework {
 			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, xorstr_("other"), true); {
 				int other_y = 45;
 
-				menu_framework::selector(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("crosshair"), settings::crosshair, { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats") }); other_y += 15;
+				menu_framework::selector(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("crosshair"), settings::crosshair, { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats") , xorstr_("dot") }); other_y += 15;
 
 				if (menu_framework::button(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("config save"))) {
 					// save

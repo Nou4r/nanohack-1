@@ -29,59 +29,22 @@ namespace players {
 			Renderer::line(Vector2{ screen_center.x - 4, screen_center.y + 4 }, Vector2{ screen_center.x - 4 - 4, screen_center.y + 4 + 4 }, Color3(0, 0, 0), false, 0.7f);
 			break;
 		case 3:
+			Renderer::circle(screen_center, Color3(0, 0, 0), 2.f, 1.f);
+			Renderer::circle(screen_center, Color3(0, 0, 0), 4.f, 1.f);
+			Renderer::circle(screen_center, Color3(255, 255, 255), 3.f, 1.f);
 			break;
 		default:
 			break;
 		}
 		
+		if (settings::tr::desyncing) {
+			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 13.5f, true, true, wxorstr_(L"desync'ed"));
+		}
 
 		auto local = LocalPlayer::Entity( );
 		if (local == nullptr || !local->isCached( )) {
 			target_ply = nullptr;
 			return;
-		}
-
-		auto playerList = BasePlayer::visiblePlayerList( );
-		if (!playerList) {
-			target_ply = nullptr;
-			return;
-		}
-
-		if (playerList->vals->size <= 1) {
-			target_ply = nullptr;
-			return;
-		}
-
-		if (target_ply != nullptr) {
-			if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
-				target_ply = nullptr;
-			else
-				if (target_ply->isCached( )) {
-					auto bounds = target_ply->bones( )->bounds;
-					if (!bounds.empty( ))
-						Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
-
-					if (settings::manipulator && !other::m_manipulate.empty( ))
-						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
-
-					auto mpv = target_ply->find_mpv_bone( );
-					Bone* target;
-					if (mpv != nullptr)
-						target = mpv;
-					else
-						target = target_ply->bones( )->head;
-
-					if (target->visible)
-						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
-
-					if (settings::desync && target_ply->bones()->desyncable)
-						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
-
-					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
-				}
-		}
-		if (settings::tr::desyncing) {
-			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 13.5f, true, true, wxorstr_(L"desync'ed"));
 		}
 
 		if (settings::reload_indicator) {
@@ -97,62 +60,111 @@ namespace players {
 				}
 			}
 		}
-
-		for (int i = 0; i < playerList->vals->size; i++) {
-			auto player = *reinterpret_cast<BasePlayer**>(std::uint64_t(playerList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
-
-			if (!player) continue;
-			if (!player->IsValid( )) continue;
-			if (!player->isCached( )) continue;
-			if (player->health( ) <= 0.0f) continue;
-			if (player->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
-			if (player->playerModel( )->isNpc( ) && !settings::npcs) continue;
-			if (player->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
-
-			auto bounds = player->bones( )->bounds;
-			if (!bounds.empty( )) {
-				int y_ = 0;
-
-				float box_width = bounds.right - bounds.left;
-				float box_height = bounds.bottom - bounds.top;
-				Vector2 footPos = { bounds.left + (box_width / 2), bounds.bottom + 7.47f };
-				Vector2 headPos = { bounds.left + (box_width / 2), bounds.top - 9.54f };
-
-				Color3 col_c = player->is_target( ) ? player->is_visible( ) ? Color3(255, 0, 0) : Color3(184, 0, 0) : player->playerModel( )->isNpc( ) ? Color3(71, 209, 255) : player->is_visible( ) ? Color3(255, 255, 255) : Color3(186, 186, 186);
-				Color3 col = Color3(col_c.r, col_c.g, col_c.b/*, 255 - (player->bones()->head->position.distance(local->bones()->head->position) / 2.5)*/);
-
-				Renderer::text(headPos, col, 12.f, true, true, wxorstr_(L"%s [%dhp]"), player->_displayName( ), (int)ceil(player->health( )));
-
-				if (settings::look_dir)
-					Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);
-
-				Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
-				Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
-
-				Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
-				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
-
-				Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
-				Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
-
-				Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
-				Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
-
-				if (player->GetHeldItem( )) {
-					Renderer::text(footPos, col, 12.f, true, true, player->GetHeldItem( )->info( )->displayName( )->english( ));
-					y_ += 16;
-				}
-				if (player->HasPlayerFlag(PlayerFlags::Wounded)) {
-					Renderer::boldtext(footPos + Vector2(0, y_), Color3(255, 0, 0, 255), 12.f, true, true, wxorstr_(L"*wounded*"));
-					y_ += 16;
-				}
-
-				if (target_ply == nullptr)
-					target_ply = player;
-				else
-					if (dfc(target_ply) > dfc(player))
-						target_ply = player;
+		if (settings::players) {
+			auto entityList = BaseNetworkable::clientEntities()->entityList();
+			if (!entityList) {
+				target_ply = nullptr;
+				return;
 			}
+
+			if (entityList->vals->size <= 1) {
+				target_ply = nullptr;
+				return;
+			}
+
+			if (target_ply != nullptr) {
+				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
+					target_ply = nullptr;
+				else
+					if (target_ply->isCached( )) {
+						auto bounds = target_ply->bones( )->bounds;
+						if (!bounds.empty( ))
+							Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
+
+						if (settings::manipulator && !other::m_manipulate.empty( ))
+							Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
+
+						auto mpv = target_ply->find_mpv_bone( );
+						Bone* target;
+						if (mpv != nullptr)
+							target = mpv;
+						else
+							target = target_ply->bones( )->head;
+
+						if (target->visible)
+							Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
+
+						if (settings::desync && target_ply->bones( )->desyncable)
+							Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
+
+						Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
+					}
+			}
+
+			for (int i = 0; i < entityList->vals->size; i++) {
+				auto entity = *reinterpret_cast<BaseNetworkable**>(std::uint64_t(entityList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
+				if (!entity) continue;
+
+				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+					auto player = reinterpret_cast<BasePlayer*>(entity);
+
+					if (!player->IsValid( )) continue;
+					if (!player->isCached( )) continue;
+					if (player->health( ) <= 0.0f) continue;
+					if (player->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
+					if (player->playerModel( )->isNpc( ) && !settings::npcs) continue;
+					if (player->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
+
+					auto bounds = player->bones( )->bounds;
+					if (!bounds.empty( )) {
+						int y_ = 0;
+
+						float box_width = bounds.right - bounds.left;
+						float box_height = bounds.bottom - bounds.top;
+						Vector2 footPos = { bounds.left + (box_width / 2), bounds.bottom + 7.47f };
+						Vector2 headPos = { bounds.left + (box_width / 2), bounds.top - 9.54f };
+
+						Color3 col_c = player->is_target( ) ? player->is_visible( ) ? Color3(255, 0, 0) : Color3(184, 0, 0) : player->playerModel( )->isNpc( ) ? Color3(71, 209, 255) : player->is_visible( ) ? Color3(255, 255, 255) : Color3(186, 186, 186);
+						Color3 col = Color3(col_c.r, col_c.g, col_c.b/*, 255 - (player->bones()->head->position.distance(local->bones()->head->position) / 2.5)*/);
+
+						Renderer::text(headPos, col, 12.f, true, true, wxorstr_(L"%s [%dhp]"), player->_displayName( ), (int)ceil(player->health( )));
+
+						if (settings::look_dir)
+							Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);
+
+						Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+						Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+
+						Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+						Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+
+						Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+						Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+
+						Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+						Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+
+						if (player->GetHeldItem( )) {
+							Renderer::text(footPos, col, 12.f, true, true, player->GetHeldItem( )->info( )->displayName( )->english( ));
+							y_ += 16;
+						}
+						if (player->HasPlayerFlag(PlayerFlags::Wounded)) {
+							Renderer::boldtext(footPos + Vector2(0, y_), Color3(255, 0, 0, 255), 12.f, true, true, wxorstr_(L"*wounded*"));
+							y_ += 16;
+						}
+
+						if (target_ply == nullptr)
+							target_ply = player;
+						else
+							if (dfc(target_ply) > dfc(player))
+								target_ply = player;
+					}
+				}
+			}
+		}
+		else {
+			if (target_ply != nullptr)
+				target_ply = nullptr;
 		}
 	}
 	void gamethread( ) {
@@ -205,11 +217,7 @@ namespace players {
 							if (!material)
 								continue;
 
-							auto shader = material->shader( );
-							if (!shader)
-								continue;
-
-							material->set_shader(nullptr);
+							renderer->set_material(nullptr);
 						}
 					}
 				}

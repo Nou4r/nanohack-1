@@ -63,7 +63,7 @@ Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1
 #include "core/main/aimutils.hpp"
 #include "core/main/hooks.hpp"
 
-#define authh
+//#define authh
 
 void entry_thread( ) {
 #ifdef authh

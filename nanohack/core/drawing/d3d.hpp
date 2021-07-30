@@ -26,7 +26,7 @@ namespace d3d {
 			settings::menu = !settings::menu;
 
 		if (Renderer::new_frame(swapChain)) {
-			if (settings::players && settings::cheat_init)
+			if (settings::cheat_init)
 				players::loop( );
 
 			menu_framework::render( );
