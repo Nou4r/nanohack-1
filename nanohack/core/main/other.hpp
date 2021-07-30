@@ -16,7 +16,7 @@ namespace other {
 			return;
 		}
 
-		float mm_max_eye = 2.5f;
+		float mm_max_eye = loco->movement()->TargetMovement().empty() ? 2.5f : 1.4f;
 
 		auto right = loco->eyes( )->MovementRight( );
 		auto forward = loco->eyes( )->MovementForward( );

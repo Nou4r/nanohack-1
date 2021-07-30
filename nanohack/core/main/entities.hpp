@@ -42,7 +42,7 @@ namespace players {
 		}
 
 		auto local = LocalPlayer::Entity( );
-		if (local == nullptr || !local->isCached( )) {
+		if (local == nullptr) {
 			target_ply = nullptr;
 			return;
 		}
@@ -104,6 +104,8 @@ namespace players {
 			for (int i = 0; i < entityList->vals->size; i++) {
 				auto entity = *reinterpret_cast<BaseNetworkable**>(std::uint64_t(entityList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
 				if (!entity) continue;
+
+
 
 				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
 					auto player = reinterpret_cast<BasePlayer*>(entity);

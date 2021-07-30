@@ -192,29 +192,29 @@ bool IsDown_hk(InputState* self, BUTTON btn) {
 void OnAttacked_hk(BaseCombatEntity* self, HitInfo* info) {
 	self->OnAttacked(info);
 
-	if (settings::killsay != 0) {
-		if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
-			if (info->Initiator( ) == LocalPlayer::Entity( )) {
-				auto entity = reinterpret_cast<BasePlayer*>(self);
+	//if (settings::killsay != 0) {
+	//	if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+	//		if (info->Initiator( ) == LocalPlayer::Entity( )) {
+	//			auto entity = reinterpret_cast<BasePlayer*>(self);
 
-				static auto string_klass = CLASS("mscorlib::System::String");
-				static auto arrayy = il2cpp_array_new<System::String>(string_klass, 0);
+	//			static auto string_klass = CLASS("mscorlib::System::String");
+	//			static auto arrayy = il2cpp_array_new<System::String>(string_klass, 0);
 
-				std::string str;
-				if (settings::killsay == 1) // advertise
-					str = StringFormat::format(xorstr_("\"%s, you just got beamed by plusminus.\""), entity->_displayName( ));
-				else if (settings::killsay == 2) // mock
-					str = StringFormat::format(xorstr_("\"%s, you are a fucking nn dog.\""), entity->_displayName( ));
+	//			std::string str;
+	//			if (settings::killsay == 1) // advertise
+	//				str = StringFormat::format(xorstr_("\"%s, you just got beamed by plusminus.\""), entity->_displayName( ));
+	//			else if (settings::killsay == 2) // mock
+	//				str = StringFormat::format(xorstr_("\"%s, you are a fucking nn dog.\""), entity->_displayName( ));
 
-				arrayy->add(0, String::New(str.c_str( )));
+	//			arrayy->add(0, String::New(str.c_str( )));
 
-				if (settings::killsay == 1)
-					ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
-				else if (settings::killsay == 2)
-					ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
-			}
-		}
-	}
+	//			if (settings::killsay == 1)
+	//				ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
+	//			else if (settings::killsay == 2)
+	//				ConsoleSystem::Run(ConsoleSystem::Option::Client( ), String::New(xorstr_("chat.say")), reinterpret_cast<System::Array<System::Object_*>*>(arrayy));
+	//		}
+	//	}
+	//}
 }
 //if (settings::desync && get_key(settings::desync_key))
 //if (player->input( )->state( )->current( )->buttons( ) != player->input( )->state( )->previous( )->buttons( ))
@@ -226,7 +226,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
 		players::gamethread( );
 
-		if (settings::manipulator && !(settings::desync && get_key(settings::desync_key)))
+		if (settings::manipulator && plly->movement()->TargetMovement().empty() && !(settings::desync && get_key(settings::desync_key)))
 			plly->clientTickInterval( ) = 0.4f;
 		else if (settings::desync && get_key(settings::desync_key))
 			plly->clientTickInterval( ) = 0.95f;
