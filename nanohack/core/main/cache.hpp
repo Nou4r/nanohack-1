@@ -73,7 +73,6 @@ namespace bonecache {
 			cache->r_ankle_scale = model->resolve(STATIC_CRC32("r_ankle_scale"));
 			cache->r_foot = model->resolve(STATIC_CRC32("r_foot"));
 
-
 			if (player->userID( ) != LocalPlayer::Entity( )->userID( )) {
 				box_bounds bo = get_bounds(player, 2.f);
 				if (!bo.empty( ))

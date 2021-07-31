@@ -7,13 +7,20 @@ void ClientUpdate_hk(BasePlayer* player) {
 		if (settings::players) {
 			bonecache::cachePlayer(player);
 		}
+		if (local->userID( ) == player->userID( )) {
+			if (target_ply != nullptr)
+				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || entities::dfc(target_ply) > settings::targeting_fov || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
+					target_ply = nullptr;
+		}
 	}
 	return player->ClientUpdate( );
 }
 Vector3 GetModifiedAimConeDirection_hk(float aimCone, Vector3 inputVec, bool anywhereInside = true) {
 	if (settings::psilent && target_ply != nullptr && target_ply->isCached( )) {
-		return (aimutils::get_prediction( ) - LocalPlayer::Entity( )->eyes( )->position( )).normalized( );
+		inputVec = (aimutils::get_prediction( ) - LocalPlayer::Entity( )->eyes( )->position( )).normalized( );
 	}
+
+	aimCone *= settings::spread_p / 100.0f;
 
 	return AimConeUtil::GetModifiedAimConeDirection(aimCone, inputVec, anywhereInside);
 }
@@ -224,14 +231,20 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		return plly->ClientInput(state);
 
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
-		entities::gamethread( );
-
 		if (settings::manipulator && plly->movement()->TargetMovement().empty() && !(settings::desync && get_key(settings::desync_key)))
 			plly->clientTickInterval( ) = 0.4f;
 		else if (settings::desync && get_key(settings::desync_key))
 			plly->clientTickInterval( ) = 0.95f;
 		else
 			plly->clientTickInterval( ) = 0.05f;
+
+		auto held = plly->GetHeldEntity<BaseProjectile>( );
+		if (held) {
+			if (settings::nosway) {
+				held->aimSway( ) = 0.f;
+				held->aimSwaySpeed( ) = 0.f;
+			}
+		}
 
 		settings::tr::desyncing = settings::desync && get_key(settings::desync_key);
 
@@ -242,7 +255,6 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 			plly->eyes( )->viewOffset( ) = Vector3(0, max_eye_value, 0);
 		}
 		if (settings::autoshoot) {
-			auto held = plly->GetHeldEntity<BaseProjectile>( );
 			if (held && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
 				if (target_ply != nullptr && target_ply->isCached( )) {
 					auto mpv = target_ply->find_mpv_bone( );
@@ -287,7 +299,10 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		else
 			ConVar::Graphics::_fov( ) = settings::camera_fov;
 
-		if (settings::weapon_spam)
+		if (settings::fakeadmin)
+			LocalPlayer::Entity( )->playerFlags( ) |= PlayerFlags::IsAdmin;
+
+		if (settings::weapon_spam && get_key(settings::weapon_spam_key))
 			if (plly->GetHeldEntity( ))
 				plly->GetHeldEntity( )->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
 
@@ -445,6 +460,26 @@ String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::
 
 	return ConsoleSystem::Run(optiom, str, args);
 }
+void set_flying_hk(ModelState* modelState, bool state) 	{
+	modelState->set_flying(false);
+}
+void RebuildModel_hk(SkinnedMultiMesh* self, PlayerModel* model, bool reset) {
+	self->RebuildModel(model, reset);
+
+	if (!settings::chams || self == LocalPlayer::Entity( )->playerModel( )->_multiMesh( ))
+		return;
+
+	auto renderer_list = self->Renderers( );
+	if (renderer_list) {
+		for (int j = 0; j < renderer_list->size; j++) {
+			auto renderer = (Renderer_*)renderer_list->get(j);
+			if (!renderer)
+				continue;
+
+			renderer->material( )->set_shader(nullptr);
+		}
+	}
+}
 void do_hooks( ) {
 	hookengine::hook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
 	hookengine::hook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
@@ -459,6 +494,8 @@ void do_hooks( ) {
 	hookengine::hook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
 	hookengine::hook(ConsoleSystem::Run_, ConsoleRun_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
+	hookengine::hook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
+	hookengine::hook(ModelState::set_flying_, set_flying_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(BaseMelee::ProcessAttack_, ProcessAttack_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);

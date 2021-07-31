@@ -45,9 +45,9 @@ void save_item(item& item) {
 
 namespace config {
 	std::vector< item > m_items;
-	std::string m_directory = xorstr_("C:/plusminus");
+	std::string m_directory = xorstr_("plusminus");
 
-	std::string file = m_directory + xorstr_("config");
+	std::string file = xorstr_("config");
 
 	bool init( ) {
 		if (!std::filesystem::exists(m_directory)) {
@@ -64,38 +64,52 @@ namespace config {
 		item(settings::desync_key, "settings::desync_key", m_items);
 		item(settings::autoshoot, "settings::autoshoot", m_items);
 		item(settings::penetrate, "settings::penetrate", m_items);
-		item(settings::bigger_bullets, "settings::bigger_bullets", m_items);
-		item(settings::faster_bullets, "settings::faster_bullets", m_items);
-		item(settings::always_eoka, "settings::always_eoka", m_items);
 		item(settings::draw_fov, "settings::draw_fov", m_items);
 		item(settings::targeting_fov, "settings::targeting_fov", m_items);
 
 		item(settings::recoil_p, "settings::recoil_p", m_items);
+		item(settings::spread_p, "settings::spread_p", m_items);
+		item(settings::nosway, "settings::nosway", m_items);
+		item(settings::bigger_bullets, "settings::bigger_bullets", m_items);
+		item(settings::faster_bullets, "settings::faster_bullets", m_items);
+		item(settings::always_eoka, "settings::always_eoka", m_items);
 
 		item(settings::players, "settings::players", m_items);
 		item(settings::npcs, "settings::npcs", m_items);
 		item(settings::look_dir, "settings::look_dir", m_items);
 		item(settings::chams, "settings::chams", m_items);
+		item(settings::reload_indicator, "settings::reload_indicator", m_items);
+		item(settings::belt, "settings::belt", m_items);
 
 		item(settings::camera_fov, "settings::camera_fov", m_items);
 		item(settings::zoom_key, "settings::zoom_key", m_items);
 		item(settings::bullet_tracers, "settings::bullet_tracers", m_items);
+		item(settings::fakeadmin, "settings::fakeadmin", m_items);
 		item(settings::fastloot, "settings::fastloot", m_items);
 		item(settings::farm_assist, "settings::farm_assist", m_items);
 		item(settings::walkonwater, "settings::walkonwater", m_items);
+		item(settings::lightning, "settings::lightning", m_items);
 		item(settings::weapon_spam, "settings::weapon_spam", m_items);
+		item(settings::weapon_spam_key, "settings::weapon_spam_key", m_items);
 		item(settings::infinite_jump, "settings::infinite_jump", m_items);
 		item(settings::freeaim, "settings::freeaim", m_items);
 		item(settings::omnisprint, "settings::omnisprint", m_items);
 		item(settings::nofall, "settings::nofall", m_items);
 		item(settings::camera_fov, "settings::camera_fov", m_items);
 
+		item(settings::crosshair, "settings::crosshair", m_items);
+
+		item(settings::variables::x, "variables::x", m_items);
+		item(settings::variables::y, "variables::y", m_items);
+		item(settings::g::b_x, "variables::b_x", m_items);
+		item(settings::g::b_y, "variables::b_y", m_items);
+
 		return true;
 	}
 
 	bool load( ) {
 		std::ifstream input_file = std::ifstream(m_directory + "/" + file);
-		if (!input_file.good( ))
+		if (!input_file.good())
 			return false;
 
 		try {

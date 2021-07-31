@@ -26,15 +26,11 @@ std::string_view keys_list[ ]{
 				"Error", "Error", "Error", "Error", "Error", "Error", "Error", "Error", "Error",
 				"Error", "Error"
 };
-
+using namespace settings;
 namespace menu_framework {
 
 #define THEME_COLOR Color3(255, 173, 31)
 
-	namespace variables {
-		int x = 140, y = 140;
-		int w = 400, h = 300;
-	}
 
 	int current_tab{ 0 };
 
@@ -102,11 +98,7 @@ namespace menu_framework {
 				value = !value;
 
 			if (!tooltip.empty( )) {
-				Vector2 str_size = Renderer::get_text_size(StringConverter::ToUnicode(string), 12.f);
-				int tt_w = str_size.x + 40, tt_h = 75; // tooltip shit
-
-				Renderer::rectangle_filled(Vector2(screen_center.x - tt_w / 2, 5), Vector2(tt_w, tt_h), Color3(36, 36, 36, 255));
-				Renderer::text({ screen_center.x, 10 }, Color3(255, 255, 255), 12.f, true, false, StringConverter::ToUnicode(tooltip));
+				Renderer::text({ screen_center.x, 10 }, Color3(255, 255, 255), 12.f, true, true, StringConverter::ToUnicode(tooltip));
 			}
 		}
 			
@@ -231,10 +223,7 @@ namespace menu_framework {
 				}
 
 				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("autoshoot"), settings::autoshoot, xorstr_("automatically shoots at the targeted player when they're visible.")); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("pierce"), settings::penetrate, xorstr_("lets you shoot through random entities like trees, ores, cargo ship, monuments, crates, etc..")); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("big bullets"), settings::bigger_bullets); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("fast bullets"), settings::faster_bullets); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("insta eoka"), settings::always_eoka); combat_y += 15; combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("pierce"), settings::penetrate, xorstr_("lets you shoot through random entities like trees, ores, cargo ship, monuments, crates, etc..")); combat_y += 15; combat_y += 15;
 
 				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("draw targeting fov"), settings::draw_fov); combat_y += 15;
 				menu_framework::slider(variables::x + 120, variables::y + combat_y, 125, xorstr_("targeting fov"), settings::targeting_fov, 30.f, 2500.f); combat_y += 15;
@@ -244,7 +233,12 @@ namespace menu_framework {
 			menu_framework::group_box(variables::x + 110, variables::y + 35, 285, 260, xorstr_("weapon"), true); {
 				int weapon_y = 45;
 
-				menu_framework::slider(variables::x + 120, variables::y + weapon_y, 125, xorstr_("recoil percentage"), settings::recoil_p, 0.f, 100.f); weapon_y += 15;
+				menu_framework::slider(variables::x + 120, variables::y + weapon_y, 125, xorstr_("recoil %"), settings::recoil_p, 0.f, 100.f); weapon_y += 15;
+				menu_framework::slider(variables::x + 120, variables::y + weapon_y, 125, xorstr_("spread %"), settings::spread_p, 0.f, 100.f); weapon_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("no sway"), settings::nosway); weapon_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("big bullets"), settings::bigger_bullets); weapon_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("fast bullets"), settings::faster_bullets); weapon_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("insta eoka"), settings::always_eoka); weapon_y += 15;
 			}
 			break;
 		case 2:
@@ -259,6 +253,7 @@ namespace menu_framework {
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("chams"), settings::chams); visuals_y += 15;
 				}
 				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("reload indicator"), settings::reload_indicator, xorstr_("draws your reloading progress.")); visuals_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("target player belt"), settings::belt); visuals_y += 15;
 			}
 			break;
 		case 3:
@@ -268,10 +263,17 @@ namespace menu_framework {
 				menu_framework::slider(variables::x + 120, variables::y + misc_y, 125, xorstr_("camera fov"), settings::camera_fov, 30.f, 160.f); misc_y += 15;
 				menu_framework::keybind(variables::x + 165, variables::y + misc_y, variables::x + 120, xorstr_("zoom bind"), settings::zoom_key); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("bullet tracers"), settings::bullet_tracers); misc_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fake admin"), settings::fakeadmin); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fast loot"), settings::fastloot); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("farm assist"), settings::farm_assist, xorstr_("will automatically hit tree markers and ore hot spots when you hit the ore / tree.")); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("walk on water"), settings::walkonwater); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("fake shots"), settings::weapon_spam); misc_y += 15;
+
+				if (settings::weapon_spam) {
+					static float offset = 15;
+					menu_framework::keybind(variables::x + 165 + offset, variables::y + misc_y, variables::x + 120 + offset, xorstr_("fake shots bind"), settings::weapon_spam_key); misc_y += 15;
+				}
+
 				menu_framework::selector(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("lightning"), settings::lightning, { xorstr_("default"), xorstr_("dark"), xorstr_("light") }); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no jumping restrictions"), settings::infinite_jump); misc_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + misc_y, variables::x + 120, xorstr_("no attack restrictions"), settings::freeaim); misc_y += 15;
@@ -292,7 +294,7 @@ namespace menu_framework {
 				} other_y += 27;
 
 				if (menu_framework::button(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("config load"))) {
-					if (config::load( ))
+					if (!config::load( ))
 						MessageBoxA(0, xorstr_("oopsie !! config get broke!!!!!! go complain to sk4ddu that it not work !!!!!!"), xorstr_("oopsie poopie haha 5"), 0);
 
 				} other_y += 15; other_y += 15;

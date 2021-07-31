@@ -69,7 +69,7 @@
     <ClInclude Include="core\main\hooks.hpp">
       <Filter>Source Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="core\main\bonecache.hpp">
+    <ClInclude Include="core\main\cache.hpp">
       <Filter>Source Files\core\sdk</Filter>
     </ClInclude>
     <ClInclude Include="core\main\entities.hpp">
@@ -98,5 +98,6 @@
     <ClInclude Include="auth\WinReg.hpp" />
     <ClInclude Include="core\sdk\utils\xorf.hpp" />
     <ClInclude Include="core\main\config.hpp" />
+    <ClInclude Include="core\core.hpp" />
   </ItemGroup>
 </Project>

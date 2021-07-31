@@ -6,18 +6,22 @@ namespace settings {
 	bool always_eoka = false;
 	bool infinite_jump = false;
 	bool weapon_spam = false;
+	int weapon_spam_key = 76;
 	bool players = true;
 	bool npcs = false;
 	bool look_dir = false;
+	bool belt = false;
 	bool bullet_tracers = false;
 	float camera_fov = 90.f;
 	float targeting_fov = 300.f;
 	float recoil_p = 100.f;
+	float spread_p = 100.f;
 	bool draw_fov = false;
 	bool manipulator = false;
 	bool desync = false;
 	int desync_key = 5;
 	bool autoshoot = false;
+	bool fakeadmin = false;
 	bool walkonwater = false;
 	int zoom_key = 6;
 	bool reload_indicator = false;
@@ -30,6 +34,7 @@ namespace settings {
 	bool fastloot = false;
 	bool faster_bullets = false;
 	bool penetrate = false;
+	bool nosway = false;
 
 	int lightning = 0;
 	int h_override = 0;
@@ -38,8 +43,16 @@ namespace settings {
 
 	bool debug = false;
 
+	namespace variables {
+		int x = 140, y = 140;
+		int w = 400, h = 300;
+	}
+
 	namespace tr {
 		bool desyncing = false;
+	}
+	namespace g {
+		int b_x = 200, b_y = 200;
 	}
 	namespace auth {
 		std::wstring username = L"dev";

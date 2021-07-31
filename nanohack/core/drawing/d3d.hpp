@@ -16,11 +16,9 @@ namespace d3d {
 			Renderer::Init(swapChain);
 		}
 		immediate_context->OMSetRenderTargets(1, &render_target_view, nullptr);
-		if (screen_size.empty( ) && screen_center.empty( )) {
-			immediate_context->RSGetViewports(&vps, &viewport);
-			screen_size = { viewport.Width, viewport.Height };
-			screen_center = { viewport.Width / 2.0f, viewport.Height / 2.0f };
-		}
+		immediate_context->RSGetViewports(&vps, &viewport);
+		screen_size = { viewport.Width, viewport.Height };
+		screen_center = { viewport.Width / 2.0f, viewport.Height / 2.0f };
 
 		if (GetAsyncKeyState(VK_INSERT) & 1)
 			settings::menu = !settings::menu;

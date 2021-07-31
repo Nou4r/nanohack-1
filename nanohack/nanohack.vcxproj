@@ -167,9 +167,10 @@
     <ClInclude Include="auth\api.hpp" />
     <ClInclude Include="auth\Fingerprint.hpp" />
     <ClInclude Include="auth\WinReg.hpp" />
+    <ClInclude Include="core\core.hpp" />
     <ClInclude Include="core\drawing\framework.hpp" />
     <ClInclude Include="core\main\aimutils.hpp" />
-    <ClInclude Include="core\main\bonecache.hpp" />
+    <ClInclude Include="core\main\cache.hpp" />
     <ClInclude Include="core\main\config.hpp" />
     <ClInclude Include="core\sdk\utils\crc32.hpp" />
     <ClInclude Include="core\drawing\d3d.hpp" />

@@ -1,4 +1,35 @@
 namespace entities {
+	namespace belt {
+		bool should_drag = false;
+		bool should_move = false;
+
+		POINT cursor;
+		POINT cursor_corrected;
+		void belt_tab_mov(int& x, int& y, int w, int h) {
+			GetCursorPos(&cursor);
+
+			if (GetAsyncKeyState(VK_LBUTTON) < 0 && (cursor.x > x && cursor.x < x + w && cursor.y > y && cursor.y < y + h)) {
+				should_drag = true;
+
+				if (!should_move) {
+					cursor_corrected.x = cursor.x - x;
+					cursor_corrected.y = cursor.y - y;
+					should_move = true;
+				}
+			}
+
+			if (should_drag) {
+				x = cursor.x - cursor_corrected.x;
+				y = cursor.y - cursor_corrected.y;
+			}
+
+			if (GetAsyncKeyState(VK_LBUTTON) == 0) {
+				should_drag = false;
+				should_move = false;
+			}
+		}
+	}
+
 	float dfc(BasePlayer* player) {
 		if (!player)
 			return 1000.f;
@@ -73,37 +104,64 @@ namespace entities {
 			}
 
 			if (target_ply != nullptr) {
-				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || dfc(target_ply) > settings::targeting_fov || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
-					target_ply = nullptr;
-				else
-					if (target_ply->isCached( )) {
-						auto bounds = target_ply->bones( )->bounds;
-						if (!bounds.empty( ))
-							Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
+				if (target_ply->isCached( )) {
+					auto bounds = target_ply->bones( )->bounds;
+					if (!bounds.empty( ))
+						Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
 
-						if (settings::manipulator && !other::m_manipulate.empty( ))
-							Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
+					if (settings::manipulator && !other::m_manipulate.empty( ))
+						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
 
-						auto mpv = target_ply->find_mpv_bone( );
-						Bone* target;
-						if (mpv != nullptr)
-							target = mpv;
-						else
-							target = target_ply->bones( )->head;
+					auto mpv = target_ply->find_mpv_bone( );
+					Bone* target;
+					if (mpv != nullptr)
+						target = mpv;
+					else
+						target = target_ply->bones( )->head;
 
-						if (target->visible)
-							Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
+					if (target->visible)
+						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
-						if (settings::desync && target_ply->bones( )->desyncable)
-							Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
+					if (settings::desync && target_ply->bones( )->desyncable)
+						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
 
-						Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
+					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
+
+					if (settings::belt) {
+						int w = 200, h = 102;
+
+						belt::belt_tab_mov(settings::g::b_x, settings::g::b_y, w, -20);
+
+						Renderer::rectangle_filled({ float(settings::g::b_x), settings::g::b_y - float(20) }, Vector2(w, 20), Color3(25, 25, 25));
+						Renderer::rectangle_filled(Vector2(settings::g::b_x, settings::g::b_y), Vector2(w, h), Color3(36, 36, 36));
+						Renderer::rectangle_filled(Vector2(settings::g::b_x + float(5), settings::g::b_y + float(5)), Vector2(w - 10, h - 10), Color3(25, 25, 25));
+
+						Renderer::text({ settings::g::b_x + float(7), settings::g::b_y - float(16) }, Color3(255, 255, 255), 12.f, false, false, target_ply->_displayName( ));
+
+						auto list = target_ply->inventory( )->containerBelt( )->itemList( );
+						if (list) {
+							int y = 0;
+							for (int i = 0; i < list->size; i++) {
+								auto item = (Item*)list->get(i);
+								if (!item)
+									continue;
+
+								Color3 col = item->uid( ) == target_ply->clActiveItem( ) ? Color3(255, 0, 0) : Color3(255, 255, 255);
+
+								Renderer::text({ settings::g::b_x + float(7), settings::g::b_y + float(7) + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
+
+								y += 15;
+							}
+						}
 					}
+				}
 			}
 
 			for (int i = 0; i < entityList->vals->size; i++) {
-				auto entity = *reinterpret_cast<BaseNetworkable**>(std::uint64_t(entityList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
+				auto entity = *reinterpret_cast<BaseEntity**>(std::uint64_t(entityList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
 				if (!entity) continue;
+
+				if (!entity->IsValid( )) continue;
 
 				if (settings::debug) {
 					Vector2 screen;
@@ -111,10 +169,9 @@ namespace entities {
 						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name( )).c_str( ));
 				}
 
-				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash() == STATIC_CRC32("ScientistNPCNew")) {
 					auto player = reinterpret_cast<BasePlayer*>(entity);
 
-					if (!player->IsValid( )) continue;
 					if (!player->isCached( )) continue;
 					if (player->health( ) <= 0.0f) continue;
 					if (player->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
@@ -158,6 +215,10 @@ namespace entities {
 							Renderer::boldtext(footPos + Vector2(0, y_), Color3(255, 0, 0, 255), 12.f, true, true, wxorstr_(L"*wounded*"));
 							y_ += 16;
 						}
+						if (player->HasPlayerFlag(PlayerFlags::Aiming)) {
+							Renderer::boldtext(footPos + Vector2(0, y_), Color3(255, 127, 0, 255), 12.f, true, true, wxorstr_(L"*aiming*"));
+							y_ += 16;
+						}
 
 						if (dfc(player) < settings::targeting_fov) {
 							if (target_ply == nullptr)
@@ -173,63 +234,6 @@ namespace entities {
 		else {
 			if (target_ply != nullptr)
 				target_ply = nullptr;
-		}
-	}
-	void gamethread( ) {
-		auto playerList = BasePlayer::visiblePlayerList( );
-		if (playerList) {
-			for (int i = 0; i < playerList->vals->size; i++) {
-				auto ppp = *reinterpret_cast<BasePlayer**>(std::uint64_t(playerList->vals->buffer) + (0x20 + (sizeof(void*) * i)));
-
-				if (!ppp) continue;
-				if (!ppp->IsValid( )) continue;
-				if (!ppp->isCached( )) continue;
-				if (ppp->health( ) <= 0.0f) continue;
-				if (ppp->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
-				if (ppp->playerModel( )->isNpc( ) && !settings::npcs) continue;
-				if (ppp->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
-
-				if (settings::chams) {
-					/*static auto bundle = AssetBundle::LoadFromFile(xorstr_("C:/Users/sduihfoqawhf/Downloads/shadersbundle"));
-					static auto shader_b = bundle->LoadAsset< Shader >(xorstr_("assets/assets/resources/chamsshader.shader"), Type::Shader( ));
-
-					auto renderer_list = ppp->playerModel( )->_multiMesh( )->Renderers( );
-					if (renderer_list && shader_b && bundle) {
-						for (int j = 0; j < renderer_list->size; j++) {
-							auto renderer = (Renderer_*)renderer_list->get(j);
-							if (!renderer)
-								continue;
-
-							auto material = renderer->material( );
-							if (!material)
-								continue;
-
-							auto shader = material->shader( );
-							if (!shader)
-								continue;
-
-							if (shader == shader_b)
-								continue;
-
-							material->set_shader(shader_b);
-						}
-					}*/
-					auto renderer_list = ppp->playerModel( )->_multiMesh( )->Renderers( );
-					if (renderer_list) {
-						for (int j = 0; j < renderer_list->size; j++) {
-							auto renderer = (Renderer_*)renderer_list->get(j);
-							if (!renderer)
-								continue;
-
-							auto material = renderer->material( );
-							if (!material)
-								continue;
-
-							renderer->set_material(nullptr);
-						}
-					}
-				}
-			}
 		}
 	}
 }

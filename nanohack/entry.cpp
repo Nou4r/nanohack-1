@@ -41,7 +41,7 @@
 #include "auth/Fingerprint.hpp"
 #include "auth/api.hpp"
 
-Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.0"));
+Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.3"));
 
 #include "settings.hpp"
 #include "core/sdk/vector.hpp"
@@ -54,7 +54,8 @@ Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1
 #include "core/sdk/il2cpp/dissector.hpp"
 #include "core/sdk/structs.hpp"
 #include "core/sdk/game.hpp"
-#include "core/main/bonecache.hpp"
+#include "core/core.hpp"
+#include "core/main/cache.hpp"
 #include "core/main/other.hpp"
 #include "core/sdk/utils/math.hpp"
 #include "core/main/entities.hpp"
@@ -64,7 +65,7 @@ Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1
 #include "core/main/aimutils.hpp"
 #include "core/main/hooks.hpp"
 
-//#define authh
+#define authh
 
 void entry_thread( ) {
 #ifdef authh
