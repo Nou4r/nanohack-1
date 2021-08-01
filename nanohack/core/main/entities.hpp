@@ -78,6 +78,7 @@ namespace entities {
 			return;
 		}
 
+
 		if (settings::reload_indicator) {
 			auto held = local->GetHeldEntity<BaseProjectile>( );
 			if (held) {
@@ -103,6 +104,8 @@ namespace entities {
 				return;
 			}
 
+			viewMatrix = Camera::getViewMatrix( );
+
 			if (target_ply != nullptr) {
 				if (target_ply->isCached( )) {
 					auto bounds = target_ply->bones( )->bounds;
@@ -123,7 +126,7 @@ namespace entities {
 						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
 					if (settings::desync && target_ply->bones( )->desyncable)
-						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
+						Renderer::boldtext({ screen_center.x + 20, screen_center.y + 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 

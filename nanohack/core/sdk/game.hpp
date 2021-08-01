@@ -1539,6 +1539,14 @@ public:
 		static auto off = METHOD("Assembly-CSharp::BasePlayer::GetMaxSpeed(): Single");
 		return reinterpret_cast<float(__fastcall*)(BasePlayer*)>(off)(this);
 	}
+	float MaxVelocity( ) {
+		if (!this) return 0.f;
+		
+		if (this->mounted( ))
+			return this->GetMaxSpeed( ) * 2;
+
+		return this->GetMaxSpeed( );
+	}
 	float GetHeight(bool ducked) {
 		if (!this) return 0.f;
 		static auto off = METHOD("Assembly-CSharp::BasePlayer::GetHeight(Boolean): Single");
@@ -1586,14 +1594,14 @@ public:
 		if (!this->isCached( ))
 			return false;
 
-		if ((cachedBones[ this->userID( ) ]->head->visible &&
-			cachedBones[ this->userID( ) ]->neck->visible) ||
-			(cachedBones[ this->userID( ) ]->spine4->visible &&
-				cachedBones[ this->userID( ) ]->pelvis->visible) ||
-			(cachedBones[ this->userID( ) ]->r_foot->visible &&
-				cachedBones[ this->userID( ) ]->l_foot->visible) ||
-			(cachedBones[ this->userID( ) ]->r_knee->visible &&
-				cachedBones[ this->userID( ) ]->l_knee->visible)) {
+		if (cachedBones[ this->userID( ) ]->head->visible ||
+			cachedBones[ this->userID( ) ]->neck->visible ||
+			cachedBones[ this->userID( ) ]->spine4->visible ||
+			cachedBones[ this->userID( ) ]->pelvis->visible ||
+			cachedBones[ this->userID( ) ]->r_foot->visible ||
+			cachedBones[ this->userID( ) ]->l_foot->visible ||
+			cachedBones[ this->userID( ) ]->r_knee->visible ||
+			cachedBones[ this->userID( ) ]->l_knee->visible) {
 
 			return true;
 		}
@@ -1887,6 +1895,7 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Facepunch.Console::ConsoleSystem::Run(Option,String,Object[]): String", ConsoleSystem::Run_);
 	ASSIGN_HOOK("Rust.Data::ModelState::set_flying(Boolean): Void", ModelState::set_flying_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
+	ASSIGN_HOOK("Assembly-CSharp::BaseMountable::EyePositionForPlayer(BasePlayer,Quaternion): Vector3", BaseMountable::EyePositionForPlayer_);
 	ASSIGN_HOOK("Assembly-CSharp::SkinnedMultiMesh::RebuildModel(PlayerModel,Boolean): Void", SkinnedMultiMesh::RebuildModel_);
 	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseMelee::ProcessAttack(HitTest): Void", BaseMelee::ProcessAttack_);

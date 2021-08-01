@@ -151,6 +151,15 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 
 	return self->UpdateVelocity( );
 }
+Vector3 EyePositionForPlayer_hk(BaseMountable* mount, BasePlayer* player, Quaternion lookRot) {
+	if (player->userID( ) == LocalPlayer::Entity( )->userID()) {
+		if (settings::desync && get_key(settings::desync_key)) {
+			return mount->EyePositionForPlayer(player, lookRot) + LocalPlayer::Entity( )->eyes( )->viewOffset( );
+		}
+	}
+
+	return mount->EyePositionForPlayer(player, lookRot);
+}
 void HandleJumping_hk(PlayerWalkMovement* a1, ModelState* state, bool wantsJump, bool jumpInDirection = false) {
 	if (settings::infinite_jump) {
 		if (!wantsJump)
@@ -250,7 +259,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 
 		if (settings::desync && get_key(settings::desync_key)) {
 			float desyncTime = (Time::realtimeSinceStartup( ) - plly->lastSentTickTime( )) - 0.03125 * 3;
-			float max_eye_value = (0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * plly->GetMaxSpeed( )) - 0.05f;
+			float max_eye_value = (0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * plly->MaxVelocity( )) - 0.05f;
 
 			plly->eyes( )->viewOffset( ) = Vector3(0, max_eye_value, 0);
 		}
@@ -267,22 +276,9 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 					if (LineOfSight(target, plly->eyes( )->position( )))
 						held->DoAttack( );
 				}
-				/*if (settings::camera_fov > 120) {
-					auto rend = held->model( )->gameObject( )->GetComponentsInChildren<Renderer_>(Type::Renderer( ));
-					if (rend) {
-						for (int j = 0; j < rend->size( ); j++) { auto renderer = rend->get(j); if (!renderer) continue; renderer->set_material(nullptr); }
-					}
-				}
-				else {
-					auto materials = held->itemSkin( )->Materials( );
-					if (materials) {
-						for (int j = 0; j < materials->size( ); j++) { auto material = materials->get(j); if (!material) continue; material = nullptr; }
-					}
-				}*/
 			}
 		}
 		GLOBAL_TIME = Time::time( );
-		viewMatrix = Camera::getViewMatrix( );
 
 		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && !(settings::desync && get_key(settings::desync_key)))
 			other::find_manipulate_angle( );
@@ -300,7 +296,12 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 			ConVar::Graphics::_fov( ) = settings::camera_fov;
 
 		if (settings::fakeadmin)
-			LocalPlayer::Entity( )->playerFlags( ) |= PlayerFlags::IsAdmin;
+			plly->playerFlags( ) |= PlayerFlags::IsAdmin;
+
+		if (settings::freeaim)
+			if (plly->mounted( ))
+				plly->mounted( )->canWieldItems( ) = true;
+		
 
 		if (settings::weapon_spam && get_key(settings::weapon_spam_key))
 			if (plly->GetHeldEntity( ))
@@ -452,7 +453,12 @@ String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::
 	if (optiom->IsFromServer( )) {
 		if (str->buffer) {
 			auto string = std::wstring(str->buffer);
-			if (string.find(wxorstr_(L"noclip")) != std::wstring::npos || string.find(wxorstr_(L"debugcamera")) != std::wstring::npos || string.find(wxorstr_(L"admintime")) != std::wstring::npos) {
+			if (string.find(wxorstr_(L"noclip")) != std::wstring::npos || 
+				string.find(wxorstr_(L"debugcamera")) != std::wstring::npos || 
+				string.find(wxorstr_(L"admintime")) != std::wstring::npos ||
+				string.find(wxorstr_(L"camlerp")) != std::wstring::npos ||
+				string.find(wxorstr_(L"camspeed")) != std::wstring::npos) {
+
 				str = String::New(xorstr_(""));
 			}
 		}
@@ -499,6 +505,7 @@ void do_hooks( ) {
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(BaseMelee::ProcessAttack_, ProcessAttack_hk);
 	hookengine::hook(Projectile::DoHit_, DoHit_hk);
+	hookengine::hook(BaseMountable::EyePositionForPlayer_, EyePositionForPlayer_hk);
 	hookengine::hook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);
 	hookengine::hook(Projectile::SetEffectScale_, SetEffectScale_hk);
 	hookengine::hook(BasePlayer::ClientInput_, ClientInput_hk);
@@ -508,4 +515,34 @@ void do_hooks( ) {
 	hookengine::hook(PlayerEyes::DoFirstPersonCamera_, DoFirstPersonCamera_hk);
 	hookengine::hook(Vector3_::MoveTowards_, MoveTowards_hk);
 	hookengine::hook(HeldEntity::AddPunch_, AddPunch_hk);
+}
+void undo_hooks( ) {
+	hookengine::unhook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
+	hookengine::unhook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
+	hookengine::unhook(PlayerWalkMovement::HandleJumping_, HandleJumping_hk);
+	hookengine::unhook(BasePlayer::CanAttack_, CanAttack_hk);
+	hookengine::unhook(BasePlayer::OnLand_, OnLand_hk);
+	hookengine::unhook(Projectile::DoMovement_, DoMovement_hk);
+	hookengine::unhook(FlintStrikeWeapon::DoAttack_, DoAttack_hk);
+	hookengine::unhook(ViewmodelBob::Apply_, BobApply_hk);
+	hookengine::unhook(ViewmodelSway::Apply_, SwayApply_hk);
+	hookengine::unhook(InputState::IsDown_, IsDown_hk);
+	hookengine::unhook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
+	hookengine::unhook(ConsoleSystem::Run_, ConsoleRun_hk);
+	hookengine::unhook(ViewmodelLower::Apply_, LowerApply_hk);
+	hookengine::unhook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
+	hookengine::unhook(ModelState::set_flying_, set_flying_hk);
+	hookengine::unhook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
+	hookengine::unhook(BaseMelee::ProcessAttack_, ProcessAttack_hk);
+	hookengine::unhook(Projectile::DoHit_, DoHit_hk);
+	hookengine::unhook(BaseMountable::EyePositionForPlayer_, EyePositionForPlayer_hk);
+	hookengine::unhook(MonoBehaviour::StartCoroutine_, StartCoroutine_hk);
+	hookengine::unhook(Projectile::SetEffectScale_, SetEffectScale_hk);
+	hookengine::unhook(BasePlayer::ClientInput_, ClientInput_hk);
+	hookengine::unhook(ItemModProjectile::GetRandomVelocity_, GetRandomVelocity_hk);
+	hookengine::unhook(PlayerEyes::BodyLeanOffset_, BodyLeanOffset_hk);
+	hookengine::unhook(AimConeUtil::GetModifiedAimConeDirection_, GetModifiedAimConeDirection_hk);
+	hookengine::unhook(PlayerEyes::DoFirstPersonCamera_, DoFirstPersonCamera_hk);
+	hookengine::unhook(Vector3_::MoveTowards_, MoveTowards_hk);
+	hookengine::unhook(HeldEntity::AddPunch_, AddPunch_hk);
 }

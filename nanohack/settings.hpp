@@ -48,6 +48,8 @@ namespace settings {
 		int w = 400, h = 300;
 	}
 
+	bool panic = false;
+
 	namespace tr {
 		bool desyncing = false;
 	}

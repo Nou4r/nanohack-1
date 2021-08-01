@@ -2,6 +2,8 @@
 #pragma comment(lib,"d3d11.lib")
 bool menu_init = false;
 
+void undo_hooks( );
+
 namespace d3d {
 	HRESULT present_hook(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags) {
 		if (!device) {
@@ -23,17 +25,27 @@ namespace d3d {
 		if (GetAsyncKeyState(VK_INSERT) & 1)
 			settings::menu = !settings::menu;
 
-		if (Renderer::new_frame(swapChain)) {
-			if (settings::cheat_init)
-				entities::loop( );
+		if (!settings::panic) {
+			if (Renderer::new_frame(swapChain)) {
+				if (settings::cheat_init)
+					entities::loop( );
 
-			if (settings::draw_fov) {
-				Renderer::circle(screen_center, Color3(255, 255, 255), settings::targeting_fov, 1.f);
+				if (settings::draw_fov) {
+					Renderer::circle(screen_center, Color3(255, 255, 255), settings::targeting_fov, 1.f);
+				}
+
+				menu_framework::render( );
+
+				Renderer::end_frame( );
 			}
-
-			menu_framework::render( );
-
-			Renderer::end_frame( );
+		}
+		else {
+			static bool once = false;
+			if (!once) {
+				undo_hooks( );
+				
+				once = true;
+			}
 		}
 
 		return present_original(swapChain, syncInterval, flags);
