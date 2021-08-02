@@ -360,18 +360,18 @@ namespace entities {
 									Camera::world_to_screen(backBottomLeft, backBottomLeft_2d) &&
 									Camera::world_to_screen(backBottomRight, backBottomRight_2d)) {
 
-									Renderer::line(frontTopLeft_2d, frontTopRight_2d, col);
-									Renderer::line(frontTopRight_2d, frontBottomRight_2d, col);
-									Renderer::line(frontBottomRight_2d, frontBottomLeft_2d, col);
-									Renderer::line(frontBottomLeft_2d, frontTopLeft_2d, col);
-									Renderer::line(backTopLeft_2d, backTopRight_2d, col);
-									Renderer::line(backTopRight_2d, backBottomRight_2d, col);
-									Renderer::line(backBottomRight_2d, backBottomLeft_2d, col);
-									Renderer::line(backBottomLeft_2d, backTopLeft_2d, col);
-									Renderer::line(frontTopLeft_2d, backTopLeft_2d, col);
-									Renderer::line(frontTopRight_2d, backTopRight_2d, col);
-									Renderer::line(frontBottomRight_2d, backBottomRight_2d, col);
-									Renderer::line(frontBottomLeft_2d, backBottomLeft_2d, col);
+									Renderer::line(frontTopLeft_2d, frontTopRight_2d, col, true, 1.5f);
+									Renderer::line(frontTopRight_2d, frontBottomRight_2d, col, true, 1.5f);
+									Renderer::line(frontBottomRight_2d, frontBottomLeft_2d, col, true, 1.5f);
+									Renderer::line(frontBottomLeft_2d, frontTopLeft_2d, col, true, 1.5f);
+									Renderer::line(backTopLeft_2d, backTopRight_2d, col, true, 1.5f);
+									Renderer::line(backTopRight_2d, backBottomRight_2d, col, true, 1.5f);
+									Renderer::line(backBottomRight_2d, backBottomLeft_2d, col, true, 1.5f);
+									Renderer::line(backBottomLeft_2d, backTopLeft_2d, col, true, 1.5f);
+									Renderer::line(frontTopLeft_2d, backTopLeft_2d, col, true, 1.5f);
+									Renderer::line(frontTopRight_2d, backTopRight_2d, col, true, 1.5f);
+									Renderer::line(frontBottomRight_2d, backBottomRight_2d, col, true, 1.5f);
+									Renderer::line(frontBottomLeft_2d, backBottomLeft_2d, col, true, 1.5f);
 								}
 								break;
 							}

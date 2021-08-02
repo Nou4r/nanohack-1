@@ -253,8 +253,28 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 				held->aimSway( ) = 0.f;
 				held->aimSwaySpeed( ) = 0.f;
 			}
+
 			if (settings::automatic)
 				held->automatic() = true;
+
+			if (settings::weapon_spam && get_key(settings::weapon_spam_key))
+				held->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
+
+			if (settings::autoshoot) {
+				if (held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
+					if (target_ply != nullptr && target_ply->isCached( )) {
+						auto mpv = target_ply->find_mpv_bone( );
+						Vector3 target;
+						if (mpv != nullptr)
+							target = mpv->position;
+						else
+							target = target_ply->bones( )->head->position;
+
+						if (LineOfSight(target, plly->eyes( )->position( )))
+							held->DoAttack( );
+					}
+				}
+			}
 		}
 
 		settings::tr::desyncing = settings::desync && get_key(settings::desync_key);
@@ -265,21 +285,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 
 			plly->eyes( )->viewOffset( ) = Vector3(0, max_eye_value, 0);
 		}
-		if (settings::autoshoot) {
-			if (held && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
-				if (target_ply != nullptr && target_ply->isCached( )) {
-					auto mpv = target_ply->find_mpv_bone( );
-					Vector3 target;
-					if (mpv != nullptr)
-						target = mpv->position;
-					else
-						target = target_ply->bones( )->head->position;
-
-					if (LineOfSight(target, plly->eyes( )->position( )))
-						held->DoAttack( );
-				}
-			}
-		}
+		
 		GLOBAL_TIME = Time::time( );
 
 		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && !(settings::desync && get_key(settings::desync_key)))
@@ -303,11 +309,6 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		if (settings::freeaim)
 			if (plly->mounted( ))
 				plly->mounted( )->canWieldItems( ) = true;
-
-
-		if (settings::weapon_spam && get_key(settings::weapon_spam_key))
-			if (plly->GetHeldEntity( ))
-				plly->GetHeldEntity( )->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
 
 		if (settings::lightning != 0) {
 			auto list = TOD_Sky::instances( );
