@@ -6,26 +6,26 @@ namespace entities {
 		POINT cursor;
 		POINT cursor_corrected;
 		void belt_tab_mov(int& x, int& y, int w, int h) {
-			GetCursorPos(&cursor);
+			GetCursorPos(&belt::cursor);
 
-			if (GetAsyncKeyState(VK_LBUTTON) < 0 && (cursor.x > x && cursor.x < x + w && cursor.y > y && cursor.y < y + h)) {
-				should_drag = true;
+			if (GetAsyncKeyState(VK_LBUTTON) < 0 && (belt::cursor.x > x && belt::cursor.x < x + w && belt::cursor.y > y && belt::cursor.y < y + h)) {
+				belt::should_drag = true;
 
-				if (!should_move) {
-					cursor_corrected.x = cursor.x - x;
-					cursor_corrected.y = cursor.y - y;
-					should_move = true;
+				if (!belt::should_move) {
+					belt::cursor_corrected.x = belt::cursor.x - x;
+					belt::cursor_corrected.y = belt::cursor.y - y;
+					belt::should_move = true;
 				}
 			}
 
-			if (should_drag) {
-				x = cursor.x - cursor_corrected.x;
-				y = cursor.y - cursor_corrected.y;
+			if (belt::should_drag) {
+				x = belt::cursor.x - belt::cursor_corrected.x;
+				y = belt::cursor.y - belt::cursor_corrected.y;
 			}
 
 			if (GetAsyncKeyState(VK_LBUTTON) == 0) {
-				should_drag = false;
-				should_move = false;
+				belt::should_drag = false;
+				belt::should_move = false;
 			}
 		}
 	}
