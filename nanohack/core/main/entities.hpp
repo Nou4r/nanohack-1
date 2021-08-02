@@ -299,17 +299,82 @@ namespace entities {
 							Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);
 
 						if (settings::box) {
-							Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
-							Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+							switch (settings::box_type) {
+							case 0: // cornered
+								Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
 
-							Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
-							Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
 
-							Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
-							Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
 
-							Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
-							Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+								break;
+							case 1: // 2d
+								Renderer::line({ bounds.left, bounds.top }, { bounds.right, bounds.top }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.bottom }, { bounds.right, bounds.bottom }, col, true, 1.5f);
+
+								Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.bottom }, col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.bottom }, col, true, 1.5f);
+								break;
+							case 2: // 3d (hippity hoppity your 3d box is now my property)
+								CBounds bounds = CBounds( );
+
+								if (player->IsDucked( )) {
+									bounds.center = player->midPoint( ) + Vector3(0.0f, 0.55f, 0.0f);
+									bounds.extents = Vector3(0.4f, 0.65f, 0.4f);
+								}
+								else {
+									if (player->HasPlayerFlag(PlayerFlags::Wounded) || player->HasPlayerFlag(PlayerFlags::Sleeping)) {
+										bounds.center = player->bones()->pelvis->position;
+										bounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+									}
+									else {
+										bounds.center = player->midPoint( ) + Vector3(0.0f, 0.85f, 0.0f);
+										bounds.extents = Vector3(0.4f, 0.9f, 0.4f);
+									}
+								}
+
+								float y = math::euler_angles(player->bones( )->eye_rot).y;
+								Vector3 center = bounds.center;
+								Vector3 extents = bounds.extents;
+								Vector3 frontTopLeft = math::rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
+								Vector3 frontTopRight = math::rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
+								Vector3 frontBottomLeft = math::rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
+								Vector3 frontBottomRight = math::rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
+								Vector3 backTopLeft = math::rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
+								Vector3 backTopRight = math::rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
+								Vector3 backBottomLeft = math::rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
+								Vector3 backBottomRight = math::rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
+
+								Vector2 frontTopLeft_2d, frontTopRight_2d, frontBottomLeft_2d, frontBottomRight_2d, backTopLeft_2d, backTopRight_2d, backBottomLeft_2d, backBottomRight_2d;
+								if (Camera::world_to_screen(frontTopLeft, frontTopLeft_2d) &&
+									Camera::world_to_screen(frontTopRight, frontTopRight_2d) &&
+									Camera::world_to_screen(frontBottomLeft, frontBottomLeft_2d) &&
+									Camera::world_to_screen(frontBottomRight, frontBottomRight_2d) &&
+									Camera::world_to_screen(backTopLeft, backTopLeft_2d) &&
+									Camera::world_to_screen(backTopRight, backTopRight_2d) &&
+									Camera::world_to_screen(backBottomLeft, backBottomLeft_2d) &&
+									Camera::world_to_screen(backBottomRight, backBottomRight_2d)) {
+
+									Renderer::line(frontTopLeft_2d, frontTopRight_2d, col);
+									Renderer::line(frontTopRight_2d, frontBottomRight_2d, col);
+									Renderer::line(frontBottomRight_2d, frontBottomLeft_2d, col);
+									Renderer::line(frontBottomLeft_2d, frontTopLeft_2d, col);
+									Renderer::line(backTopLeft_2d, backTopRight_2d, col);
+									Renderer::line(backTopRight_2d, backBottomRight_2d, col);
+									Renderer::line(backBottomRight_2d, backBottomLeft_2d, col);
+									Renderer::line(backBottomLeft_2d, backTopLeft_2d, col);
+									Renderer::line(frontTopLeft_2d, backTopLeft_2d, col);
+									Renderer::line(frontTopRight_2d, backTopRight_2d, col);
+									Renderer::line(frontBottomRight_2d, backBottomRight_2d, col);
+									Renderer::line(frontBottomLeft_2d, backBottomLeft_2d, col);
+								}
+								break;
+							}
 						}
 
 						if (player->GetHeldItem( )) {

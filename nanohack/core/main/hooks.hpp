@@ -471,23 +471,6 @@ String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::
 void set_flying_hk(ModelState* modelState, bool state) {
 	modelState->set_flying(false);
 }
-//void RebuildModel_hk(SkinnedMultiMesh* self, PlayerModel* model, bool reset) {
-//	self->RebuildModel(model, reset);
-//
-//	if (!settings::chams || self == LocalPlayer::Entity( )->playerModel( )->_multiMesh( ))
-//		return;
-//
-//	auto renderer_list = self->Renderers( );
-//	if (renderer_list) {
-//		for (int j = 0; j < renderer_list->size; j++) {
-//			auto renderer = (Renderer_*)renderer_list->get(j);
-//			if (!renderer)
-//				continue;
-//
-//			renderer->material( )->set_shader(nullptr);
-//		}
-//	}
-//}
 void do_hooks( ) {
 	hookengine::hook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
 	hookengine::hook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
@@ -501,8 +484,6 @@ void do_hooks( ) {
 	hookengine::hook(InputState::IsDown_, IsDown_hk);
 	hookengine::hook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
 	hookengine::hook(ConsoleSystem::Run_, ConsoleRun_hk);
-	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
-	//hookengine::hook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
 	hookengine::hook(ModelState::set_flying_, set_flying_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(BaseMelee::ProcessAttack_, ProcessAttack_hk);
@@ -532,7 +513,6 @@ void undo_hooks( ) {
 	hookengine::unhook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
 	hookengine::unhook(ConsoleSystem::Run_, ConsoleRun_hk);
 	hookengine::unhook(ViewmodelLower::Apply_, LowerApply_hk);
-	//hookengine::unhook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
 	hookengine::unhook(ModelState::set_flying_, set_flying_hk);
 	hookengine::unhook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::unhook(BaseMelee::ProcessAttack_, ProcessAttack_hk);

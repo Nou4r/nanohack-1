@@ -33,6 +33,7 @@ namespace settings {
 	bool bigger_bullets = false;
 	bool skeleton = false;
 	bool box = false;
+	int box_type = 0;
 	bool fastloot = false;
 	bool faster_bullets = false;
 	bool penetrate = false;

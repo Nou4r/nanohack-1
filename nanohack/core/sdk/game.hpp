@@ -1319,6 +1319,7 @@ public:
 	Vector2 dfc;
 	Vector2 forward;
 	bool desyncable;
+	Quaternion eye_rot;
 
 	BoneCache( ) {
 		head = new Bone( );
@@ -1343,6 +1344,7 @@ public:
 		dfc = Vector2( );
 		forward = { };
 		desyncable = false;
+		eye_rot = { };
 	}
 };
 class Attack {
@@ -1466,10 +1468,13 @@ public:
 	FIELD("Assembly-CSharp::BasePlayer::lastSentTickTime", lastSentTickTime, float);
 	FIELD("Assembly-CSharp::BasePlayer::clientTickInterval", clientTickInterval, float);
 
-	bool IsDucked( ) {
+	bool IsDucked( ) { // lad don't fancy calling functions in a non-game thread, eh, thy lad shall recreate it.
 		if (!this) return false;
-		static auto off = METHOD("Assembly-CSharp::BasePlayer::IsDucked(): Boolean");
-		return reinterpret_cast<bool(__stdcall*)(BasePlayer*)>(off)(this);
+		
+		if (this->movement( ) != nullptr)
+			return this->movement( )->Ducking( ) > 0.5f;
+
+		return this->modelState( ) != nullptr && this->modelState( )->flags( ) & 1;
 	}
 	Bone* find_mpv_bone( ) {
 		if (!this)
@@ -1619,6 +1624,12 @@ public:
 		}
 
 		return false;
+	}
+	Vector3 midPoint( ) {
+		if (!this->isCached())
+			return Vector3::Zero( );
+
+		return this->bones()->r_foot->position.midPoint(this->bones( )->l_foot->position) - Vector3(0.0f, 0.1f, 0.0f);
 	}
 	bool out_of_fov( ) {
 		if (!this->isCached( ))

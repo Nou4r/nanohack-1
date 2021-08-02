@@ -91,7 +91,8 @@ namespace bonecache {
 				else
 					target = player->bones( )->head->position;
 
-				cache->desyncable = LocalPlayer::Entity()->mounted() == nullptr ? LineOfSight(LocalPlayer::Entity()->bones()->head->position + Vector3(0, 7, 0), target) : LineOfSight(LocalPlayer::Entity( )->bones( )->head->position + Vector3(0, 14, 0), target);
+				cache->desyncable = LocalPlayer::Entity()->mounted() == nullptr ? LineOfSight(LocalPlayer::Entity()->bones()->head->position + Vector3(0, 7, 0), target) : LineOfSight(LocalPlayer::Entity( )->bones( )->head->position + Vector3(0, 28, 0), target);
+				cache->eye_rot = player->eyes( )->rotation( );
 			}
 			else {
 				

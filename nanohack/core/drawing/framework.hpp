@@ -253,6 +253,11 @@ namespace menu_framework {
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("looking direction"), settings::look_dir); visuals_y += 15;
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("skeleton"), settings::skeleton); visuals_y += 15;
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("box"), settings::box); visuals_y += 15;
+
+					if (settings::box) {
+						static float offset2 = 30;
+						menu_framework::selector(variables::x + 135 + offset2, variables::y + visuals_y, variables::x + 120 + offset2, xorstr_("box type"), settings::box_type, { xorstr_("cornered"), xorstr_("full"), xorstr_("3 dimension") }); visuals_y += 15;
+					}
 				}
 				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("reload indicator"), settings::reload_indicator, xorstr_("draws your reloading progress.")); visuals_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("target player belt"), settings::belt); visuals_y += 15;
