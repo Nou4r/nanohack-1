@@ -320,10 +320,6 @@ namespace entities {
 							Renderer::boldtext(footPos + Vector2(0, y_), Color3(255, 0, 0, 255), 12.f, true, true, wxorstr_(L"*wounded*"));
 							y_ += 16;
 						}
-						if (player->HasPlayerFlag(PlayerFlags::Aiming)) {
-							Renderer::boldtext(footPos + Vector2(0, y_), Color3(255, 127, 0, 255), 12.f, true, true, wxorstr_(L"*aiming*"));
-							y_ += 16;
-						}
 
 						if (!player->is_teammate( )) {
 							if (dfc(player) < settings::targeting_fov) {
