@@ -250,7 +250,8 @@ namespace menu_framework {
 					static float offset = 15;
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("npc"), settings::npcs); visuals_y += 15;
 					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("looking direction"), settings::look_dir); visuals_y += 15;
-					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("chams"), settings::chams); visuals_y += 15;
+					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("skeleton"), settings::skeleton); visuals_y += 15;
+					menu_framework::checkbox(variables::x + 135 + offset, variables::y + visuals_y, variables::x + 120 + offset, xorstr_("box"), settings::box); visuals_y += 15;
 				}
 				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("reload indicator"), settings::reload_indicator, xorstr_("draws your reloading progress.")); visuals_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + visuals_y, variables::x + 120, xorstr_("target player belt"), settings::belt); visuals_y += 15;
@@ -299,7 +300,7 @@ namespace menu_framework {
 
 				} other_y += 15; other_y += 15;
 
-				//menu_framework::checkbox(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("debug"), settings::debug); other_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("debug"), settings::debug); other_y += 15;
 					
 			}
 			break;

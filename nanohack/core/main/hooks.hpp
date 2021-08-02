@@ -9,7 +9,7 @@ void ClientUpdate_hk(BasePlayer* player) {
 		}
 		if (local->userID( ) == player->userID( )) {
 			if (target_ply != nullptr)
-				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || entities::dfc(target_ply) > settings::targeting_fov || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
+				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->is_teammate( ) || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || entities::dfc(target_ply) > settings::targeting_fov || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
 					target_ply = nullptr;
 		}
 	}
@@ -152,7 +152,7 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 	return self->UpdateVelocity( );
 }
 Vector3 EyePositionForPlayer_hk(BaseMountable* mount, BasePlayer* player, Quaternion lookRot) {
-	if (player->userID( ) == LocalPlayer::Entity( )->userID()) {
+	if (player->userID( ) == LocalPlayer::Entity( )->userID( )) {
 		if (settings::desync && get_key(settings::desync_key)) {
 			return mount->EyePositionForPlayer(player, lookRot) + LocalPlayer::Entity( )->eyes( )->viewOffset( );
 		}
@@ -186,7 +186,7 @@ void OnLand_hk(BasePlayer* ply, float vel) {
 bool IsDown_hk(InputState* self, BUTTON btn) {
 	if (btn == BUTTON::FIRE_PRIMARY) {
 		if (settings::autoshoot) {
-			auto held = LocalPlayer::Entity()->GetHeldEntity<BaseProjectile>( );
+			auto held = LocalPlayer::Entity( )->GetHeldEntity<BaseProjectile>( );
 			if (held && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
 				if (target_ply != nullptr && target_ply->isCached( )) {
 					auto mpv = target_ply->find_mpv_bone( );
@@ -240,7 +240,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		return plly->ClientInput(state);
 
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
-		if (settings::manipulator && plly->movement()->TargetMovement().empty() && !(settings::desync && get_key(settings::desync_key)))
+		if (settings::manipulator && plly->movement( )->TargetMovement( ).empty( ) && !(settings::desync && get_key(settings::desync_key)))
 			plly->clientTickInterval( ) = 0.4f;
 		else if (settings::desync && get_key(settings::desync_key))
 			plly->clientTickInterval( ) = 0.95f;
@@ -301,7 +301,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		if (settings::freeaim)
 			if (plly->mounted( ))
 				plly->mounted( )->canWieldItems( ) = true;
-		
+
 
 		if (settings::weapon_spam && get_key(settings::weapon_spam_key))
 			if (plly->GetHeldEntity( ))
@@ -379,15 +379,15 @@ void ProcessAttack_hk(BaseMelee* self, HitTest* hit) {
 
 	return self->ProcessAttack(hit);
 }
-void AddPunch_hk(HeldEntity* attackEntity, Vector3 amount, float duration) 	{
+void AddPunch_hk(HeldEntity* attackEntity, Vector3 amount, float duration) {
 	amount *= settings::recoil_p / 100.0f;
 
 	attackEntity->AddPunch(amount, duration);
 }
 
-Vector3 MoveTowards_hk(Vector3 current, Vector3 target, float maxDelta) 	{
+Vector3 MoveTowards_hk(Vector3 current, Vector3 target, float maxDelta) {
 	static auto ptr = METHOD("Assembly-CSharp::BaseProjectile::SimulateAimcone(): Void");
-	if (CALLED_BY(ptr, 0x800)) 		{
+	if (CALLED_BY(ptr, 0x800)) {
 		target *= settings::recoil_p / 100.0f;
 		maxDelta *= settings::recoil_p / 100.0f;
 	}
@@ -453,8 +453,8 @@ String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::
 	if (optiom->IsFromServer( )) {
 		if (str->buffer) {
 			auto string = std::wstring(str->buffer);
-			if (string.find(wxorstr_(L"noclip")) != std::wstring::npos || 
-				string.find(wxorstr_(L"debugcamera")) != std::wstring::npos || 
+			if (string.find(wxorstr_(L"noclip")) != std::wstring::npos ||
+				string.find(wxorstr_(L"debugcamera")) != std::wstring::npos ||
 				string.find(wxorstr_(L"admintime")) != std::wstring::npos ||
 				string.find(wxorstr_(L"camlerp")) != std::wstring::npos ||
 				string.find(wxorstr_(L"camspeed")) != std::wstring::npos) {
@@ -466,26 +466,26 @@ String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::
 
 	return ConsoleSystem::Run(optiom, str, args);
 }
-void set_flying_hk(ModelState* modelState, bool state) 	{
+void set_flying_hk(ModelState* modelState, bool state) {
 	modelState->set_flying(false);
 }
-void RebuildModel_hk(SkinnedMultiMesh* self, PlayerModel* model, bool reset) {
-	self->RebuildModel(model, reset);
-
-	if (!settings::chams || self == LocalPlayer::Entity( )->playerModel( )->_multiMesh( ))
-		return;
-
-	auto renderer_list = self->Renderers( );
-	if (renderer_list) {
-		for (int j = 0; j < renderer_list->size; j++) {
-			auto renderer = (Renderer_*)renderer_list->get(j);
-			if (!renderer)
-				continue;
-
-			renderer->material( )->set_shader(nullptr);
-		}
-	}
-}
+//void RebuildModel_hk(SkinnedMultiMesh* self, PlayerModel* model, bool reset) {
+//	self->RebuildModel(model, reset);
+//
+//	if (!settings::chams || self == LocalPlayer::Entity( )->playerModel( )->_multiMesh( ))
+//		return;
+//
+//	auto renderer_list = self->Renderers( );
+//	if (renderer_list) {
+//		for (int j = 0; j < renderer_list->size; j++) {
+//			auto renderer = (Renderer_*)renderer_list->get(j);
+//			if (!renderer)
+//				continue;
+//
+//			renderer->material( )->set_shader(nullptr);
+//		}
+//	}
+//}
 void do_hooks( ) {
 	hookengine::hook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
 	hookengine::hook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
@@ -500,7 +500,7 @@ void do_hooks( ) {
 	hookengine::hook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
 	hookengine::hook(ConsoleSystem::Run_, ConsoleRun_hk);
 	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
-	hookengine::hook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
+	//hookengine::hook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
 	hookengine::hook(ModelState::set_flying_, set_flying_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(BaseMelee::ProcessAttack_, ProcessAttack_hk);
@@ -530,7 +530,7 @@ void undo_hooks( ) {
 	hookengine::unhook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
 	hookengine::unhook(ConsoleSystem::Run_, ConsoleRun_hk);
 	hookengine::unhook(ViewmodelLower::Apply_, LowerApply_hk);
-	hookengine::unhook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
+	//hookengine::unhook(SkinnedMultiMesh::RebuildModel_, RebuildModel_hk);
 	hookengine::unhook(ModelState::set_flying_, set_flying_hk);
 	hookengine::unhook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::unhook(BaseMelee::ProcessAttack_, ProcessAttack_hk);

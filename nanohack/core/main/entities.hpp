@@ -42,6 +42,38 @@ namespace entities {
 
 		return screen_center.distance_2d(player->bones( )->dfc);
 	}
+	Color3 get_color(BasePlayer* player) {
+		if (!player->playerModel( )->isNpc( )) {
+			if (player->is_target( ))
+				if (player->is_visible( ))
+					return Color3(255, 0, 0);
+				else
+					return Color3(184, 0, 0);
+			else
+				if (player->is_teammate( ))
+					if (player->is_visible( ))
+						return Color3(53, 232, 21);
+					else
+						return Color3(31, 153, 9);
+				else
+					if (player->is_visible( ))
+						return Color3(255, 255, 255);
+					else
+						return Color3(186, 186, 186);
+		}
+		else {
+			if (!player->is_target( ))
+				if (player->is_visible( ))
+					return Color3(71, 209, 255);
+				else
+					return Color3(7, 124, 163);
+			else
+				if (player->is_visible( ))
+					return Color3(255, 0, 0);
+				else
+					return Color3(184, 0, 0);
+		}
+	}
 	void loop( ) {
 		switch (settings::crosshair) {
 		case 1:
@@ -67,7 +99,7 @@ namespace entities {
 		default:
 			break;
 		}
-		
+
 		if (settings::tr::desyncing) {
 			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 13.5f, true, true, wxorstr_(L"desync'ed"));
 		}
@@ -93,7 +125,7 @@ namespace entities {
 			}
 		}
 		if (settings::players) {
-			auto entityList = BaseNetworkable::clientEntities()->entityList();
+			auto entityList = BaseNetworkable::clientEntities( )->entityList( );
 			if (!entityList) {
 				target_ply = nullptr;
 				return;
@@ -172,7 +204,7 @@ namespace entities {
 						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name( )).c_str( ));
 				}
 
-				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash() == STATIC_CRC32("ScientistNPCNew")) {
+				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew")) {
 					auto player = reinterpret_cast<BasePlayer*>(entity);
 
 					if (!player->isCached( )) continue;
@@ -190,25 +222,89 @@ namespace entities {
 						Vector2 footPos = { bounds.left + (box_width / 2), bounds.bottom + 7.47f };
 						Vector2 headPos = { bounds.left + (box_width / 2), bounds.top - 9.54f };
 
-						Color3 col_c = player->is_target( ) ? player->is_visible( ) ? Color3(255, 0, 0) : Color3(184, 0, 0) : player->playerModel( )->isNpc( ) ? Color3(71, 209, 255) : player->is_visible( ) ? Color3(255, 255, 255) : Color3(186, 186, 186);
-						Color3 col = Color3(col_c.r, col_c.g, col_c.b/*, 255 - (player->bones()->head->position.distance(local->bones()->head->position) / 2.5)*/);
+						Color3 col = get_color(player);
+
+						if (settings::skeleton) {
+							float dist = player->bones( )->head->position.distance(local->bones( )->head->position);
+							if (dist < 175.f) {
+
+								auto info = player->bones( );
+
+								auto head_b = info->head;
+								auto spine4_b = info->spine4;
+								auto l_upperarm_b = info->l_upperarm;
+								auto l_forearm_b = info->l_forearm;
+								auto l_hand_b = info->l_hand;
+								auto r_upperarm_b = info->r_upperarm;
+								auto r_forearm_b = info->r_forearm;
+								auto r_hand_b = info->r_hand;
+								auto pelvis_b = info->pelvis;
+								auto l_hip_b = info->l_hip;
+								auto l_knee_b = info->l_knee;
+								auto l_foot_b = info->l_foot;
+								auto r_hip_b = info->r_hip;
+								auto r_knee_b = info->r_knee;
+								auto r_foot_b = info->r_foot;
+								auto r_toe_b = info->r_toe;
+								auto l_toe_b = info->l_toe;
+
+								Vector2 head, spine, l_upperarm, l_forearm, l_hand, r_upperarm, r_forearm, r_hand, pelvis, l_hip, l_knee, l_foot, r_hip, r_knee, r_foot, l_toe, r_toe;
+								if (Camera::world_to_screen(head_b->position, head) &&
+									Camera::world_to_screen(spine4_b->position, spine) &&
+									Camera::world_to_screen(l_upperarm_b->position, l_upperarm) &&
+									Camera::world_to_screen(l_forearm_b->position, l_forearm) &&
+									Camera::world_to_screen(l_hand_b->position, l_hand) &&
+									Camera::world_to_screen(r_upperarm_b->position, r_upperarm) &&
+									Camera::world_to_screen(r_forearm_b->position, r_forearm) &&
+									Camera::world_to_screen(r_hand_b->position, r_hand) &&
+									Camera::world_to_screen(pelvis_b->position, pelvis) &&
+									Camera::world_to_screen(l_hip_b->position, l_hip) &&
+									Camera::world_to_screen(l_knee_b->position, l_knee) &&
+									Camera::world_to_screen(l_foot_b->position, l_foot) &&
+									Camera::world_to_screen(r_hip_b->position, r_hip) &&
+									Camera::world_to_screen(r_knee_b->position, r_knee) &&
+									Camera::world_to_screen(r_toe_b->position, r_toe) &&
+									Camera::world_to_screen(l_toe_b->position, l_toe) &&
+									Camera::world_to_screen(r_foot_b->position, r_foot)) {
+
+									Renderer::line(head, spine, (head_b->visible || spine4_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(spine, l_upperarm, (spine4_b->visible || l_upperarm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(l_upperarm, l_forearm, (l_upperarm_b->visible || l_forearm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(l_forearm, l_hand, (l_forearm_b->visible || l_hand_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(spine, r_upperarm, (spine4_b->visible || r_upperarm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(r_upperarm, r_forearm, (r_upperarm_b->visible || r_forearm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(r_forearm, r_hand, (r_forearm_b->visible || r_hand_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(spine, pelvis, (spine4_b->visible || pelvis_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(pelvis, l_hip, (pelvis_b->visible || l_hip_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(l_hip, l_knee, (l_hip_b->visible || l_knee_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(l_knee, l_foot, (l_knee_b->visible || l_foot_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(pelvis, r_hip, (pelvis_b->visible || r_hip_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(r_hip, r_knee, (r_hip_b->visible || r_knee_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(r_knee, r_foot, (r_knee_b->visible || r_foot_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(r_foot, r_toe, (r_foot_b->visible || r_toe_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Renderer::line(l_foot, l_toe, (l_foot_b->visible || l_toe_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+								}
+							}
+						}
 
 						Renderer::text(headPos, col, 12.f, true, true, wxorstr_(L"%s [%dhp]"), player->_displayName( ), (int)ceil(player->health( )));
 
 						if (settings::look_dir)
 							Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);
 
-						Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
-						Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+						if (settings::box) {
+							Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+							Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
 
-						Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
-						Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+							Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+							Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
 
-						Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
-						Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+							Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+							Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
 
-						Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
-						Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+							Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+							Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+						}
 
 						if (player->GetHeldItem( )) {
 							Renderer::text(footPos, col, 12.f, true, true, player->GetHeldItem( )->info( )->displayName( )->english( ));
@@ -223,12 +319,14 @@ namespace entities {
 							y_ += 16;
 						}
 
-						if (dfc(player) < settings::targeting_fov) {
-							if (target_ply == nullptr)
-								target_ply = player;
-							else
-								if (dfc(target_ply) > dfc(player))
+						if (!player->is_teammate( )) {
+							if (dfc(player) < settings::targeting_fov) {
+								if (target_ply == nullptr)
 									target_ply = player;
+								else
+									if (dfc(target_ply) > dfc(player))
+										target_ply = player;
+							}
 						}
 					}
 				}

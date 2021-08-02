@@ -30,7 +30,8 @@ namespace settings {
 	bool freeaim = false;
 	bool psilent = false;
 	bool bigger_bullets = false;
-	bool chams = false;
+	bool skeleton = false;
+	bool box = false;
 	bool fastloot = false;
 	bool faster_bullets = false;
 	bool penetrate = false;
@@ -46,6 +47,28 @@ namespace settings {
 	namespace variables {
 		int x = 140, y = 140;
 		int w = 400, h = 300;
+	}
+
+	namespace esp {
+		namespace resources {
+			bool enabled = false;
+
+			bool stone = false;
+			bool sulfur = false;
+			bool metal = false;
+			bool hemp = false;
+		}
+		namespace base {
+			bool enabled = false;
+
+			bool tc = false;
+		}
+		namespace others {
+			bool enabled = false;
+
+			bool corpses = false;
+			bool stashes = false;
+		}
 	}
 
 	bool panic = false;

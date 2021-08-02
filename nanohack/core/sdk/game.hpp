@@ -1297,26 +1297,23 @@ class BoneCache {
 public:
 	Bone* head;
 	Bone* neck;
-	Bone* root;
 	Bone* spine4;
 	Bone* spine1;
-	Bone* l_clavicle;
 	Bone* l_upperarm;
 	Bone* l_forearm;
 	Bone* l_hand;
-	Bone* r_clavicle;
 	Bone* r_upperarm;
 	Bone* r_forearm;
 	Bone* r_hand;
 	Bone* pelvis;
 	Bone* l_hip;
 	Bone* l_knee;
-	Bone* l_ankle_scale;
 	Bone* l_foot;
 	Bone* r_hip;
 	Bone* r_knee;
-	Bone* r_ankle_scale;
 	Bone* r_foot;
+	Bone* r_toe;
+	Bone* l_toe;
 
 	box_bounds bounds;
 	Vector2 dfc;
@@ -1326,25 +1323,20 @@ public:
 	BoneCache( ) {
 		head = new Bone( );
 		neck = new Bone( );
-		root = new Bone( );
 		spine4 = new Bone( );
 		spine1 = new Bone( );
-		l_clavicle = new Bone( );
 		l_upperarm = new Bone( );
 		l_forearm = new Bone( );
 		l_hand = new Bone( );
-		r_clavicle = new Bone( );
 		r_upperarm = new Bone( );
 		r_forearm = new Bone( );
 		r_hand = new Bone( );
 		pelvis = new Bone( );
 		l_hip = new Bone( );
 		l_knee = new Bone( );
-		l_ankle_scale = new Bone( );
 		l_foot = new Bone( );
 		r_hip = new Bone( );
 		r_knee = new Bone( );
-		r_ankle_scale = new Bone( );
 		r_foot = new Bone( );
 
 		bounds = { 0, 0, 0, 0 };
@@ -1400,6 +1392,28 @@ public:
 		return IsDown_(this, btn);
 	}
 };
+class TeamMember {
+public:
+	bool online( ) {
+		return *reinterpret_cast<bool*>(this + 0x38);
+	}
+	uint64_t& userID( ) {
+		return *reinterpret_cast<uint64_t*>(this + 0x20);
+	}
+	Vector3& position( ) {
+		return *reinterpret_cast<Vector3*>(this + 0x2C);
+	}
+	const wchar_t* displayName( ) {
+		if (!this) return L"";
+		return (*reinterpret_cast<String**>(this + 0x18))->buffer;
+	}
+};
+class PlayerTeam {
+public:
+	List<TeamMember*>* members( ) {
+		return *reinterpret_cast<List<TeamMember*>**>(this + 0x30);
+	}
+};
 class PlayerInput {
 public:
 	FIELD("Assembly-CSharp::PlayerInput::state", state, InputState*);
@@ -1442,6 +1456,7 @@ public:
 	FIELD("Assembly-CSharp::BasePlayer::modelState", modelState, ModelState*);
 	FIELD("Assembly-CSharp::BasePlayer::playerModel", playerModel, PlayerModel*);
 	FIELD("Assembly-CSharp::BasePlayer::input", input, PlayerInput*);
+	FIELD("Assembly-CSharp::BasePlayer::clientTeam", clientTeam, PlayerTeam*);
 	FIELD("Assembly-CSharp::BasePlayer::playerFlags", playerFlags, PlayerFlags);
 	FIELD("Assembly-CSharp::BasePlayer::inventory", inventory, PlayerInventory*);
 	FIELD("Assembly-CSharp::BasePlayer::clActiveItem", clActiveItem, uint32_t);
@@ -1543,7 +1558,7 @@ public:
 		if (!this) return 0.f;
 		
 		if (this->mounted( ))
-			return this->GetMaxSpeed( ) * 2;
+			return this->GetMaxSpeed( ) * 4;
 
 		return this->GetMaxSpeed( );
 	}
@@ -1583,6 +1598,27 @@ public:
 			return false;
 
 		return map_contains_key(cachedBones, this->userID( ));
+	}
+	bool is_teammate( ) {
+		if (!this)
+			return false;
+
+		auto team = LocalPlayer::Entity( )->clientTeam( );
+		if (team) {
+			auto list = team->members( );
+			if (list) {
+				for (int i = 0; i < list->size; i++) {
+					auto member = reinterpret_cast<TeamMember*>(list->get(i));
+					if (!member) continue;
+
+					if (member->userID( ) == this->userID( )) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 	bool out_of_fov( ) {
 		if (!this->isCached( ))
@@ -1896,7 +1932,7 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("Rust.Data::ModelState::set_flying(Boolean): Void", ModelState::set_flying_);
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::OnLand(Single): Void", BasePlayer::OnLand_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseMountable::EyePositionForPlayer(BasePlayer,Quaternion): Vector3", BaseMountable::EyePositionForPlayer_);
-	ASSIGN_HOOK("Assembly-CSharp::SkinnedMultiMesh::RebuildModel(PlayerModel,Boolean): Void", SkinnedMultiMesh::RebuildModel_);
+	//ASSIGN_HOOK("Assembly-CSharp::SkinnedMultiMesh::RebuildModel(PlayerModel,Boolean): Void", SkinnedMultiMesh::RebuildModel_);
 	ASSIGN_HOOK("Assembly-CSharp::FlintStrikeWeapon::DoAttack(): Void", FlintStrikeWeapon::DoAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseMelee::ProcessAttack(HitTest): Void", BaseMelee::ProcessAttack_);
 	ASSIGN_HOOK("Assembly-CSharp::BaseCombatEntity::OnAttacked(HitInfo): Void", BaseCombatEntity::OnAttacked_);

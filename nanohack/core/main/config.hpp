@@ -77,7 +77,8 @@ namespace config {
 		item(settings::players, "settings::players", m_items);
 		item(settings::npcs, "settings::npcs", m_items);
 		item(settings::look_dir, "settings::look_dir", m_items);
-		item(settings::chams, "settings::chams", m_items);
+		item(settings::skeleton, "settings::skeleton", m_items);
+		item(settings::box, "settings::box", m_items);
 		item(settings::reload_indicator, "settings::reload_indicator", m_items);
 		item(settings::belt, "settings::belt", m_items);
 

@@ -52,26 +52,23 @@ namespace bonecache {
 
 			cache->head = model->resolve(STATIC_CRC32("head"));
 			cache->neck = model->resolve(STATIC_CRC32("neck"));
-			cache->root = model->resolve(STATIC_CRC32("root"));
 			cache->spine4 = model->resolve(STATIC_CRC32("spine4"));
 			cache->spine1 = model->resolve(STATIC_CRC32("spine1"));
-			cache->l_clavicle = model->resolve(STATIC_CRC32("l_clavicle"));
 			cache->l_upperarm = model->resolve(STATIC_CRC32("l_upperarm"));
 			cache->l_forearm = model->resolve(STATIC_CRC32("l_forearm"));
 			cache->l_hand = model->resolve(STATIC_CRC32("l_hand"));
-			cache->r_clavicle = model->resolve(STATIC_CRC32("r_clavicle"));
 			cache->r_upperarm = model->resolve(STATIC_CRC32("r_upperarm"));
 			cache->r_forearm = model->resolve(STATIC_CRC32("r_forearm"));
 			cache->r_hand = model->resolve(STATIC_CRC32("r_hand"));
 			cache->pelvis = model->resolve(STATIC_CRC32("pelvis"));
 			cache->l_hip = model->resolve(STATIC_CRC32("l_hip"));
 			cache->l_knee = model->resolve(STATIC_CRC32("l_knee"));
-			cache->l_ankle_scale = model->resolve(STATIC_CRC32("l_ankle_scale"));
 			cache->l_foot = model->resolve(STATIC_CRC32("l_foot"));
 			cache->r_hip = model->resolve(STATIC_CRC32("r_hip"));
 			cache->r_knee = model->resolve(STATIC_CRC32("r_knee"));
-			cache->r_ankle_scale = model->resolve(STATIC_CRC32("r_ankle_scale"));
 			cache->r_foot = model->resolve(STATIC_CRC32("r_foot"));
+			cache->r_toe = model->resolve(STATIC_CRC32("r_toe"));
+			cache->l_toe = model->resolve(STATIC_CRC32("l_toe"));
 
 			if (player->userID( ) != LocalPlayer::Entity( )->userID( )) {
 				box_bounds bo = get_bounds(player, 2.f);
