@@ -162,7 +162,7 @@ namespace entities {
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 
-					if (settings::belt) {
+					if (settings::belt && !settings::menu) {
 						int w = 200, h = 102;
 
 						belt::belt_tab_mov(settings::g::b_x, settings::g::b_y, w, -20);
@@ -204,7 +204,10 @@ namespace entities {
 						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name( )).c_str( ));
 				}
 
-				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew")) {
+				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") 
+					|| entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew")
+					|| entity->class_name_hash() == STATIC_CRC32("Scientist")) {
+
 					auto player = reinterpret_cast<BasePlayer*>(entity);
 
 					if (!player->isCached( )) continue;
@@ -267,22 +270,25 @@ namespace entities {
 									Camera::world_to_screen(l_toe_b->position, l_toe) &&
 									Camera::world_to_screen(r_foot_b->position, r_foot)) {
 
-									Renderer::line(head, spine, (head_b->visible || spine4_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(spine, l_upperarm, (spine4_b->visible || l_upperarm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(l_upperarm, l_forearm, (l_upperarm_b->visible || l_forearm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(l_forearm, l_hand, (l_forearm_b->visible || l_hand_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(spine, r_upperarm, (spine4_b->visible || r_upperarm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(r_upperarm, r_forearm, (r_upperarm_b->visible || r_forearm_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(r_forearm, r_hand, (r_forearm_b->visible || r_hand_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(spine, pelvis, (spine4_b->visible || pelvis_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(pelvis, l_hip, (pelvis_b->visible || l_hip_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(l_hip, l_knee, (l_hip_b->visible || l_knee_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(l_knee, l_foot, (l_knee_b->visible || l_foot_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(pelvis, r_hip, (pelvis_b->visible || r_hip_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(r_hip, r_knee, (r_hip_b->visible || r_knee_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(r_knee, r_foot, (r_knee_b->visible || r_foot_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(r_foot, r_toe, (r_foot_b->visible || r_toe_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
-									Renderer::line(l_foot, l_toe, (l_foot_b->visible || l_toe_b->visible) ? Color3(0, 250, 255) : Color3(0, 110, 112), 3.f);
+									Color3 viscol = player->playerModel( )->isNpc( ) ? Color3(38, 255, 0) : Color3(0, 250, 255);
+									Color3 inviscol = player->playerModel( )->isNpc( ) ? Color3(22, 145, 0) : Color3(0, 152, 156);
+
+									Renderer::line(head, spine, (head_b->visible || spine4_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(spine, l_upperarm, (spine4_b->visible || l_upperarm_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(l_upperarm, l_forearm, (l_upperarm_b->visible || l_forearm_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(l_forearm, l_hand, (l_forearm_b->visible || l_hand_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(spine, r_upperarm, (spine4_b->visible || r_upperarm_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(r_upperarm, r_forearm, (r_upperarm_b->visible || r_forearm_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(r_forearm, r_hand, (r_forearm_b->visible || r_hand_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(spine, pelvis, (spine4_b->visible || pelvis_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(pelvis, l_hip, (pelvis_b->visible || l_hip_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(l_hip, l_knee, (l_hip_b->visible || l_knee_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(l_knee, l_foot, (l_knee_b->visible || l_foot_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(pelvis, r_hip, (pelvis_b->visible || r_hip_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(r_hip, r_knee, (r_hip_b->visible || r_knee_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(r_knee, r_foot, (r_knee_b->visible || r_foot_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(r_foot, r_toe, (r_foot_b->visible || r_toe_b->visible) ? viscol : inviscol, 3.f);
+									Renderer::line(l_foot, l_toe, (l_foot_b->visible || l_toe_b->visible) ? viscol : inviscol, 3.f);
 								}
 							}
 						}

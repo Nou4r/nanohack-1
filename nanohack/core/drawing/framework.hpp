@@ -300,7 +300,7 @@ namespace menu_framework {
 
 				} other_y += 15; other_y += 15;
 
-				menu_framework::checkbox(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("debug"), settings::debug); other_y += 15;
+				// menu_framework::checkbox(variables::x + 135, variables::y + other_y, variables::x + 120, xorstr_("debug"), settings::debug); other_y += 15;
 					
 			}
 			break;
