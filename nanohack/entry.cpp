@@ -41,7 +41,7 @@
 #include "auth/Fingerprint.hpp"
 #include "auth/api.hpp"
 
-Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.5"));
+Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.6"));
 
 #include "settings.hpp"
 #include "core/sdk/vector.hpp"
@@ -109,17 +109,24 @@ void entry_thread( ) {
 	do_hooks();
 }
 
-#ifdef auth
-extern "C" __declspec(dllexport) int Chad(DWORD Magic, const char* mutex)
+struct inj_data
 {
+	DWORD Magic;
+	std::string mutex;
+};
+
+#ifdef authh
+extern "C" __declspec(dllexport) int Gamer(inj_data data)
+{
+	DWORD Magic = data.Magic;
 	auto RMul = 0x7123A781 * GetCurrentProcessId();
 	if (!(RMul % 2)) RMul++;
 	Magic *= RMul;
+
 	if ((Magic & 0xFFFF) != (GetCurrentProcessId() & 0xFFFF))
 		exit(0);
 
-
-	HANDLE hMutex = OpenMutexA(SYNCHRONIZE, FALSE, xorstr_("Mf0fbSaxIFaCU8Nsa1ET9bPEd8YR6GnGz0f8i99K"));
+	HANDLE hMutex = OpenMutexA(SYNCHRONIZE, FALSE, data.mutex.c_str());
 	if (!hMutex)
 	{
 		exit(0);
@@ -135,7 +142,7 @@ extern "C" __declspec(dllexport) int Chad(DWORD Magic, const char* mutex)
 #endif
 
 bool DllMain(HMODULE hMod, uint32_t call_reason, LPVOID reserved) {
-#ifndef auth
+#ifndef authh
 	if (call_reason == DLL_PROCESS_ATTACH)
 	{
 		const auto handle = CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry_thread), 0, 0, nullptr);

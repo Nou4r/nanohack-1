@@ -204,10 +204,7 @@ namespace entities {
 						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name( )).c_str( ));
 				}
 
-				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") 
-					|| entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew")
-					|| entity->class_name_hash() == STATIC_CRC32("Scientist")) {
-
+				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew")) {
 					auto player = reinterpret_cast<BasePlayer*>(entity);
 
 					if (!player->isCached( )) continue;
