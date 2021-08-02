@@ -41,7 +41,7 @@
 #include "auth/Fingerprint.hpp"
 #include "auth/api.hpp"
 
-Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.4"));
+Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.5"));
 
 #include "settings.hpp"
 #include "core/sdk/vector.hpp"
@@ -85,8 +85,6 @@ void entry_thread( ) {
 		}
 	}
 	save_file.close( );
-
-	std::remove(xorstr_("C:\\pml.dat"));
 
 	api.init( );
 
