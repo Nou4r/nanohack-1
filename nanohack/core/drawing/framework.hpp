@@ -239,6 +239,7 @@ namespace menu_framework {
 				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("big bullets"), settings::bigger_bullets); weapon_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("fast bullets"), settings::faster_bullets); weapon_y += 15;
 				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("insta eoka"), settings::always_eoka); weapon_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + weapon_y, variables::x + 120, xorstr_("automatic"), settings::automatic); weapon_y += 15;
 			}
 			break;
 		case 2:
