@@ -152,7 +152,7 @@ namespace menu_framework {
 		int ix = x + 140;
 		int yi = y + 2;
 
-		if ((cursor.x > ix) && (cursor.x < ix + position) && (cursor.y > yi) && (cursor.y < yi + 6) && (GetAsyncKeyState(VK_LBUTTON)))
+		if ((cursor.x > ix - 0.80f) && (cursor.x < ix + position + 0.80f) && (cursor.y > yi) && (cursor.y < yi + 6) && (GetAsyncKeyState(VK_LBUTTON)))
 			value = (cursor.x - ix) / (float(position) / float(max_value));
 
 		Renderer::rectangle_filled(Vector2(ix, yi), Vector2(position, 6), Color3(36, 36, 36, 255));

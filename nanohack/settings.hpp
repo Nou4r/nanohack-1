@@ -4,6 +4,7 @@ namespace settings {
 
 	bool nofall = false;
 	bool always_eoka = false;
+	bool automatic = false;
 	bool infinite_jump = false;
 	bool weapon_spam = false;
 	int weapon_spam_key = 76;

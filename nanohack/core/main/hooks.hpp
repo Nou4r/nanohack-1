@@ -253,6 +253,8 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 				held->aimSway( ) = 0.f;
 				held->aimSwaySpeed( ) = 0.f;
 			}
+			if (settings::automatic)
+				held->automatic() = true;
 		}
 
 		settings::tr::desyncing = settings::desync && get_key(settings::desync_key);
