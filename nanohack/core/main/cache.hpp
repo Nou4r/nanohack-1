@@ -45,9 +45,6 @@ namespace bonecache {
 
 		return ret;
 	};
-	auto get_los_point = [&](Vector3 target, float multiplier = 1) {
-		return LineOfSight(LocalPlayer::Entity( )->bones( )->head->position + Vector3(0, 7 * multiplier, 0), target);
-	};
 	void cachePlayer(BasePlayer* player) {
 		auto model = player->model( );
 		if (model) {
@@ -94,7 +91,20 @@ namespace bonecache {
 				else
 					target = player->bones( )->head->position;
 
-				cache->manipulatable = LocalPlayer::Entity()->mounted() == nullptr ? get_los_point(target) : get_los_point(target, 4);
+				if (target_ply != nullptr) {
+					if (player->userID( ) == target_ply->userID( )) {
+						float h = LocalPlayer::Entity( )->mounted( ) == nullptr ? 7 : 28;
+						auto right = LocalPlayer::Entity( )->eyes( )->MovementRight( );
+
+						if (LineOfSight(target, LocalPlayer::Entity( )->bones( )->head->position + Vector3(0, h, 0)) ||
+							LineOfSight(target, LocalPlayer::Entity( )->bones( )->head->position + Vector3(right.x * h, 0, right.z * h)) ||
+							LineOfSight(target, LocalPlayer::Entity( )->bones( )->head->position + Vector3(-(right.x * h), 0, -(right.z * h)))) {
+
+							cache->manipulatable = true;
+						}
+					}
+				}
+				
 				cache->eye_rot = player->eyes( )->rotation( );
 			}
 			else {

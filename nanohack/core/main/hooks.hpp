@@ -184,8 +184,8 @@ void OnLand_hk(BasePlayer* ply, float vel) {
 		ply->OnLand(vel);
 }
 bool IsDown_hk(InputState* self, BUTTON btn) {
-	if (btn == BUTTON::FIRE_PRIMARY) {
-		if (settings::autoshoot) {
+	if (settings::autoshoot || (settings::manipulator && get_key(settings::manipulate_key))) {
+		if (btn == BUTTON::FIRE_PRIMARY) {
 			auto held = LocalPlayer::Entity( )->GetHeldEntity<BaseProjectile>( );
 			if (held && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
 				if (target_ply != nullptr && target_ply->isCached( )) {
@@ -483,6 +483,7 @@ void do_hooks( ) {
 	hookengine::hook(InputState::IsDown_, IsDown_hk);
 	hookengine::hook(BaseCombatEntity::OnAttacked_, OnAttacked_hk);
 	hookengine::hook(ConsoleSystem::Run_, ConsoleRun_hk);
+	hookengine::hook(ViewmodelLower::Apply_, LowerApply_hk);
 	hookengine::hook(ModelState::set_flying_, set_flying_hk);
 	hookengine::hook(HitTest::BuildAttackMessage_, BuildAttackMessage_hk);
 	hookengine::hook(BaseMelee::ProcessAttack_, ProcessAttack_hk);

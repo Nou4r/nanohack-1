@@ -110,7 +110,6 @@ namespace entities {
 			return;
 		}
 
-
 		if (settings::reload_indicator) {
 			auto held = local->GetHeldEntity<BaseProjectile>( );
 			if (held) {
@@ -121,6 +120,9 @@ namespace entities {
 					Renderer::rectangle_filled({ screen_center.x - 26, screen_center.y + 30 }, { 51, 5 }, Color3(0, 0, 0));
 					Renderer::rectangle_filled({ screen_center.x - 25, screen_center.y + 31 }, { 50 * (time_left / time_full), 4 }, Color3(0, 255, 0));
 					Renderer::text({ (screen_center.x - 25) + (50 * (time_left / time_full)), screen_center.y + 31 + 2 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)ceil(time_left));
+				}
+				if (held->Empty( )) {
+					Renderer::text({ screen_center.x, screen_center.y + 48 }, Color3(89, 227, 255), 12.f, true, true, wxorstr_(L"[empty weapon]"));
 				}
 			}
 		}
@@ -155,7 +157,7 @@ namespace entities {
 						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
 					if (settings::manipulator && target_ply->bones( )->manipulatable)
-						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
+						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 
@@ -201,7 +203,7 @@ namespace entities {
 						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name( )).c_str( ));
 				}
 
-				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew")) {
+				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew") || entity->class_name_hash() == STATIC_CRC32("Scientist")) {
 					auto player = reinterpret_cast<BasePlayer*>(entity);
 
 					if (!player->isCached( )) continue;

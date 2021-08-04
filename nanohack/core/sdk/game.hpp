@@ -1113,6 +1113,7 @@ public:
 	class Magazine {
 	public:
 		FIELD("Assembly-CSharp::Magazine::ammoType", ammoType, ItemDefinition*);
+		FIELD("Assembly-CSharp::Magazine::contents", contents, int);
 	};
 	static inline Projectile* (*CreateProjectile_)(BaseProjectile*, String*, Vector3, Vector3, Vector3) = nullptr;
 	Projectile* CreateProjectile(String* prefabPath, Vector3 pos, Vector3 forward, Vector3 velocity) {
@@ -1132,6 +1133,9 @@ public:
 		if (!this) return;
 		static auto off = METHOD("Assembly-CSharp::BaseProjectile::DoAttack(): Void");
 		return reinterpret_cast<void(__fastcall*)(BaseProjectile*)>(off)(this);
+	}
+	bool Empty( ) {
+		return this->primaryMagazine( )->contents( ) <= 0;
 	}
 	bool HasReloadCooldown( ) {
 		return GLOBAL_TIME < this->nextReloadTime( );
@@ -1756,8 +1760,10 @@ public:
 			auto bone_transform = bone_transforms->get(i);
 			if (!bone_name || !bone_transform) continue;
 
-			if (RUNTIME_CRC32_W(bone_name->buffer) == hash)                      // forth and back - thanks server
-				return new Bone(bone_transform->position( ), LineOfSight(bone_transform->position( ), LocalPlayer::Entity( )->eyes( )->position( )), bone_transform);
+			if (RUNTIME_CRC32_W(bone_name->buffer) == hash) {
+				Vector3 ret = LocalPlayer::Entity( )->transform( )->position( ) + LocalPlayer::Entity( )->transform( )->up( ) * (PlayerEyes::EyeOffset( ).y + LocalPlayer::Entity( )->eyes( )->viewOffset( ).y);
+				return new Bone(bone_transform->position( ), LineOfSight(bone_transform->position( ), ret), bone_transform);
+			}
 		}
 
 		return nullptr;
