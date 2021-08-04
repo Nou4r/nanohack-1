@@ -1357,6 +1357,7 @@ public:
 	FIELD("Rust.Data::ProtoBuf::Attack::hitBone", hitBone, uint32_t);
 	FIELD("Rust.Data::ProtoBuf::Attack::hitMaterialID", hitMaterialID, uint32_t);
 	FIELD("Rust.Data::ProtoBuf::Attack::hitPositionWorld", hitPositionWorld, Vector3);
+	FIELD("Rust.Data::ProtoBuf::Attack::hitNormalWorld", hitNormalWorld, Vector3);
 	FIELD("Rust.Data::ProtoBuf::Attack::pointStart", pointStart, Vector3);
 	FIELD("Rust.Data::ProtoBuf::Attack::pointEnd", pointEnd, Vector3);
 };

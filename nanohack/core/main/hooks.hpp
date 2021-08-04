@@ -29,6 +29,15 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 
 	auto localPlayer = LocalPlayer::Entity( );
 	if (localPlayer) {
+		if (settings::yeet && target_ply != nullptr) {
+			ret->hitBone( ) = StringPool::Get(xorstr_("head"));
+			ret->hitID( ) = target_ply->net( )->ID( );
+			ret->hitNormalWorld( ) = Vector3(0.f, -1.f, 0.f); // meme
+
+			return ret;
+		}
+
+
 		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == localPlayer->userID( )) { // isAuthoritative
 			if (settings::bullet_tracers) {
 				DDraw::Line(localPlayer->eyes( )->position( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
@@ -39,21 +48,23 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 			if (entity) {
 				if (entity->IsPlayer( )) {
 					if (entity->isCached( )) {
-						if (settings::h_override != 0) {
-							if (localPlayer->isCached( )) {
-								// trajectory_end = ~1 meter
-								// player_distance = 0.2 meter
-								// profit $$$$$$
+						if (localPlayer->isCached( )) {
+							// trajectory_end = ~1 meter
+							// player_distance = 0.2 meter
+							// profit $$$$$$
 
-								if (settings::bigger_bullets) {
-									auto bone = entity->model( )->find_bone(ret->hitPositionWorld( ));
-									if (bone.second) { // f
-										if (settings::bullet_tracers)
-											DDraw::Line(ret->hitPositionWorld( ), bone.first->position( ), Color(1, 0, 0, 1), 1.5f, false, true);
+							if (settings::bigger_bullets) {
+								auto bone = entity->model( )->find_bone(ret->hitPositionWorld( ));
+								if (bone.second) { // f
+									if (settings::bullet_tracers)
+										DDraw::Sphere(ret->hitPositionWorld( ), 0.05f, Color(1, 1, 1, 1), 1.5f, false);
 
-										ret->hitPositionWorld( ) = bone.first->position( );
-									}
+									ret->hitPositionWorld( ) = bone.first->position( );
+
+									DDraw::Sphere(ret->hitPositionWorld( ), 0.05f, Color(0, 1, 0, 1), 1.5f, false);
 								}
+							}
+							if (settings::h_override != 0) {
 								if (settings::h_override == 1)
 									ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
 								else if (settings::h_override == 2)
@@ -187,7 +198,7 @@ bool IsDown_hk(InputState* self, BUTTON btn) {
 	if (settings::autoshoot || (settings::manipulator && get_key(settings::manipulate_key))) {
 		if (btn == BUTTON::FIRE_PRIMARY) {
 			auto held = LocalPlayer::Entity( )->GetHeldEntity<BaseProjectile>( );
-			if (held && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
+			if (held && !held->Empty( ) && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
 				if (target_ply != nullptr && target_ply->isCached( )) {
 					auto mpv = target_ply->find_mpv_bone( );
 					Vector3 target;
@@ -253,13 +264,13 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 			}
 
 			if (settings::automatic)
-				held->automatic() = true;
+				held->automatic( ) = true;
 
 			if (settings::weapon_spam && get_key(settings::weapon_spam_key))
 				held->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
 
 			if (settings::autoshoot || (settings::manipulator && get_key(settings::manipulate_key))) {
-				if (held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
+				if (!held->Empty( ) && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
 					if (target_ply != nullptr && target_ply->isCached( )) {
 						auto mpv = target_ply->find_mpv_bone( );
 						Vector3 target;
@@ -283,7 +294,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 
 			plly->eyes( )->viewOffset( ) = Vector3(0, max_eye_value, 0);
 		}*/
-		
+
 		GLOBAL_TIME = Time::time( );
 
 		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && get_key(settings::manipulate_key))

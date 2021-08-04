@@ -44,6 +44,8 @@ namespace settings {
 	int crosshair = 0;
 
 	bool debug = false;
+	bool yeet = false;
+	bool yeet2 = false;
 
 	namespace variables {
 		int x = 140, y = 140;
