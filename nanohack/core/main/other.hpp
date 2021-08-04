@@ -16,7 +16,8 @@ namespace other {
 			return;
 		}
 
-		float mm_max_eye = loco->movement()->TargetMovement().empty() ? 2.5f : 1.4f;
+		float desyncTime = (Time::realtimeSinceStartup( ) - loco->lastSentTickTime( )) - 0.03125 * 3;
+		float mm_max_eye = (0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * loco->MaxVelocity( )) - 0.05f;
 
 		auto right = loco->eyes( )->MovementRight( );
 		auto forward = loco->eyes( )->MovementForward( );

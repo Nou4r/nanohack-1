@@ -100,8 +100,8 @@ namespace entities {
 			break;
 		}
 
-		if (settings::tr::desyncing) {
-			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 13.5f, true, true, wxorstr_(L"desync'ed"));
+		if (settings::tr::manipulated) {
+			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 11.f, true, true, wxorstr_(L"[manipulated]"));
 		}
 
 		auto local = LocalPlayer::Entity( );
@@ -144,9 +144,6 @@ namespace entities {
 					if (!bounds.empty( ))
 						Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
 
-					if (settings::manipulator && !other::m_manipulate.empty( ))
-						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(200, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
-
 					auto mpv = target_ply->find_mpv_bone( );
 					Bone* target;
 					if (mpv != nullptr)
@@ -157,8 +154,8 @@ namespace entities {
 					if (target->visible)
 						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
-					if (settings::desync && target_ply->bones( )->desyncable)
-						Renderer::boldtext({ screen_center.x + 20, screen_center.y + 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
+					if (settings::manipulator && target_ply->bones( )->manipulatable)
+						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[d]"));
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 

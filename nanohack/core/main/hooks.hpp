@@ -107,7 +107,7 @@ void DoAttack_hk(FlintStrikeWeapon* weapon) {
 	return weapon->DoAttack( );
 }
 Vector3 BodyLeanOffset_hk(PlayerEyes* a1) {
-	if (settings::manipulator && !(settings::desync && get_key(settings::desync_key))) {
+	if (settings::manipulator && get_key(settings::manipulate_key)) {
 		if (target_ply != nullptr) {
 			if (other::m_manipulate.empty( ) || !LocalPlayer::Entity( )->GetHeldEntity( ))
 				return a1->BodyLeanOffset( );
@@ -141,7 +141,7 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 				self->TargetMovement( ) = target_vel;
 			}
 		}
-		if (settings::desync && get_key(settings::desync_key)) {
+		if (settings::manipulator && get_key(settings::manipulate_key)) {
 			float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
 			if (vel.length( ) > 0.f) {
 				self->TargetMovement( ) = Vector3::Zero( );
@@ -153,8 +153,8 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 }
 Vector3 EyePositionForPlayer_hk(BaseMountable* mount, BasePlayer* player, Quaternion lookRot) {
 	if (player->userID( ) == LocalPlayer::Entity( )->userID( )) {
-		if (settings::desync && get_key(settings::desync_key)) {
-			return mount->EyePositionForPlayer(player, lookRot) + LocalPlayer::Entity( )->eyes( )->viewOffset( );
+		if (settings::manipulator && get_key(settings::manipulate_key)) {
+			return mount->EyePositionForPlayer(player, lookRot) + other::m_manipulate;
 		}
 	}
 
@@ -240,9 +240,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		return plly->ClientInput(state);
 
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
-		if (settings::manipulator && plly->movement( )->TargetMovement( ).empty( ) && !(settings::desync && get_key(settings::desync_key)))
-			plly->clientTickInterval( ) = 0.4f;
-		else if (settings::desync && get_key(settings::desync_key))
+		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && get_key(settings::manipulate_key))
 			plly->clientTickInterval( ) = 0.95f;
 		else
 			plly->clientTickInterval( ) = 0.05f;
@@ -260,7 +258,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 			if (settings::weapon_spam && get_key(settings::weapon_spam_key))
 				held->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
 
-			if (settings::autoshoot) {
+			if (settings::autoshoot || (settings::manipulator && get_key(settings::manipulate_key))) {
 				if (held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
 					if (target_ply != nullptr && target_ply->isCached( )) {
 						auto mpv = target_ply->find_mpv_bone( );
@@ -277,18 +275,18 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 			}
 		}
 
-		settings::tr::desyncing = settings::desync && get_key(settings::desync_key);
+		settings::tr::manipulated = settings::manipulator && get_key(settings::manipulate_key);
 
-		if (settings::desync && get_key(settings::desync_key)) {
+		/*if (settings::desync && get_key(settings::desync_key)) {
 			float desyncTime = (Time::realtimeSinceStartup( ) - plly->lastSentTickTime( )) - 0.03125 * 3;
 			float max_eye_value = (0.1f + ((desyncTime + 2.f / 60.f + 0.125f) * 1.5f) * plly->MaxVelocity( )) - 0.05f;
 
 			plly->eyes( )->viewOffset( ) = Vector3(0, max_eye_value, 0);
-		}
+		}*/
 		
 		GLOBAL_TIME = Time::time( );
 
-		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && !(settings::desync && get_key(settings::desync_key)))
+		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && get_key(settings::manipulate_key))
 			other::find_manipulate_angle( );
 		else
 			if (!other::m_manipulate.empty( ))

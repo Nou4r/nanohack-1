@@ -60,8 +60,7 @@ namespace config {
 		item(settings::psilent, "settings::psilent", m_items);
 		item(settings::h_override, "settings::h_override", m_items);
 		item(settings::manipulator, "settings::manipulator", m_items);
-		item(settings::desync, "settings::desync", m_items);
-		item(settings::desync_key, "settings::desync_key", m_items);
+		item(settings::manipulate_key, "settings::manipulate_key", m_items);
 		item(settings::autoshoot, "settings::autoshoot", m_items);
 		item(settings::penetrate, "settings::penetrate", m_items);
 		item(settings::draw_fov, "settings::draw_fov", m_items);

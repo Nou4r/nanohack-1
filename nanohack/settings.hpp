@@ -19,8 +19,7 @@ namespace settings {
 	float spread_p = 100.f;
 	bool draw_fov = false;
 	bool manipulator = false;
-	bool desync = false;
-	int desync_key = 5;
+	int manipulate_key = 5;
 	bool autoshoot = false;
 	bool fakeadmin = false;
 	bool walkonwater = false;
@@ -76,7 +75,7 @@ namespace settings {
 	bool panic = false;
 
 	namespace tr {
-		bool desyncing = false;
+		bool manipulated = false;
 	}
 	namespace g {
 		int b_x = 200, b_y = 200;

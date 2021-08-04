@@ -1318,7 +1318,7 @@ public:
 	box_bounds bounds;
 	Vector2 dfc;
 	Vector2 forward;
-	bool desyncable;
+	bool manipulatable;
 	Quaternion eye_rot;
 
 	BoneCache( ) {
@@ -1343,7 +1343,7 @@ public:
 		bounds = { 0, 0, 0, 0 };
 		dfc = Vector2( );
 		forward = { };
-		desyncable = false;
+		manipulatable = false;
 		eye_rot = { };
 	}
 };

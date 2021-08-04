@@ -213,13 +213,12 @@ namespace menu_framework {
 				int combat_y = 45;
 
 				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("psilent"), settings::psilent, xorstr_("makes bullets fly towards the targeted player without directly aiming at them.")); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("manipulator"), settings::manipulator, xorstr_("automatically finds the best angle for you to hit a player, works better when standing still.")); combat_y += 15;
 				menu_framework::selector(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("hitbox override"), settings::h_override, { xorstr_("none"), xorstr_("body"), xorstr_("head"), xorstr_("randomize (all)"), xorstr_("randomize (main)") }); combat_y += 15;
-				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("desync"), settings::desync, xorstr_("basically like long neck, but goes way higher. overpowered.")); combat_y += 15;
+				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("manipulator"), settings::manipulator, xorstr_("automatically finds the best angle for you to hit a player and shoots for you.")); combat_y += 15;
 
-				if (settings::desync) {
+				if (settings::manipulator) {
 					static float offset = 15;
-					menu_framework::keybind(variables::x + 165 + offset, variables::y + combat_y, variables::x + 120 + offset, xorstr_("desync bind"), settings::desync_key); combat_y += 15;
+					menu_framework::keybind(variables::x + 165 + offset, variables::y + combat_y, variables::x + 120 + offset, xorstr_("manipulator bind"), settings::manipulate_key); combat_y += 15;
 				}
 
 				menu_framework::checkbox(variables::x + 135, variables::y + combat_y, variables::x + 120, xorstr_("autoshoot"), settings::autoshoot, xorstr_("automatically shoots at the targeted player when they're visible.")); combat_y += 15;
