@@ -37,7 +37,6 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 			return ret;
 		}
 
-
 		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == localPlayer->userID( )) { // isAuthoritative
 			if (settings::bullet_tracers) {
 				DDraw::Line(localPlayer->eyes( )->position( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
