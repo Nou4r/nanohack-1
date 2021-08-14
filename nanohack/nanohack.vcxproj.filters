@@ -25,6 +25,96 @@
     <ClCompile Include="entry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FGUI\widgets\button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\checkbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\colorpicker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\combobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\keybinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\label.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\listbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\multibox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\slider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\tabpanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\textbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGUI\widgets\widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\auth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\bearer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\cookies.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\cprtypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\curl_container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\curlholder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\error.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\multipart.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\parameters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\payload.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\proxies.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\proxyauth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\response.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\timeout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\unix_socket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cpr\util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\drawing\d3d.hpp">
@@ -85,8 +175,6 @@
       <Filter>Source Files\core\utils</Filter>
     </ClInclude>
     <ClInclude Include="core\sdk\utils\string.hpp" />
-    <ClInclude Include="core\drawing\framework.hpp" />
-    <ClInclude Include="auth\api.hpp" />
     <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs.h" />
     <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_BorlandC_inline.h" />
     <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_GNU_inline.h" />
@@ -94,10 +182,63 @@
     <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_LCC_inline.h" />
     <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_VC_inline.h" />
     <ClInclude Include="ThemidaSDK\ThemidaSDK.h" />
-    <ClInclude Include="auth\Fingerprint.hpp" />
-    <ClInclude Include="auth\WinReg.hpp" />
+    <ClInclude Include="utils\Fingerprint.hpp" />
+    <ClInclude Include="utils\WinReg.hpp" />
     <ClInclude Include="core\sdk\utils\xorf.hpp" />
-    <ClInclude Include="core\main\config.hpp" />
     <ClInclude Include="core\core.hpp" />
+    <ClInclude Include="utils\Cryptography.hpp" />
+    <ClInclude Include="core\drawing\fgui\FRenderer.hpp" />
+    <ClInclude Include="core\drawing\fgui\FInput.hpp" />
+    <ClInclude Include="core\drawing\ui.hpp" />
+    <ClInclude Include="FGUI\dependencies\external\json.hpp" />
+    <ClInclude Include="FGUI\internal\aliases.hpp" />
+    <ClInclude Include="FGUI\internal\definitions.hpp" />
+    <ClInclude Include="FGUI\internal\helpers.hpp" />
+    <ClInclude Include="FGUI\misc\builder.hpp" />
+    <ClInclude Include="FGUI\widgets\button.hpp" />
+    <ClInclude Include="FGUI\widgets\checkbox.hpp" />
+    <ClInclude Include="FGUI\widgets\colorpicker.hpp" />
+    <ClInclude Include="FGUI\widgets\combobox.hpp" />
+    <ClInclude Include="FGUI\widgets\container.hpp" />
+    <ClInclude Include="FGUI\widgets\keybinder.hpp" />
+    <ClInclude Include="FGUI\widgets\label.hpp" />
+    <ClInclude Include="FGUI\widgets\listbox.hpp" />
+    <ClInclude Include="FGUI\widgets\multibox.hpp" />
+    <ClInclude Include="FGUI\widgets\slider.hpp" />
+    <ClInclude Include="FGUI\widgets\tabpanel.hpp" />
+    <ClInclude Include="FGUI\widgets\textbox.hpp" />
+    <ClInclude Include="FGUI\widgets\widgets.hpp" />
+    <ClInclude Include="FGUI\FGUI.hpp" />
+    <ClInclude Include="cpr\api.h" />
+    <ClInclude Include="cpr\auth.h" />
+    <ClInclude Include="cpr\bearer.h" />
+    <ClInclude Include="cpr\body.h" />
+    <ClInclude Include="cpr\callback.h" />
+    <ClInclude Include="cpr\connect_timeout.h" />
+    <ClInclude Include="cpr\cookies.h" />
+    <ClInclude Include="cpr\cpr.h" />
+    <ClInclude Include="cpr\cprtypes.h" />
+    <ClInclude Include="cpr\curl_container.h" />
+    <ClInclude Include="cpr\curlholder.h" />
+    <ClInclude Include="cpr\digest.h" />
+    <ClInclude Include="cpr\error.h" />
+    <ClInclude Include="cpr\limit_rate.h" />
+    <ClInclude Include="cpr\low_speed.h" />
+    <ClInclude Include="cpr\max_redirects.h" />
+    <ClInclude Include="cpr\multipart.h" />
+    <ClInclude Include="cpr\ntlm.h" />
+    <ClInclude Include="cpr\parameters.h" />
+    <ClInclude Include="cpr\payload.h" />
+    <ClInclude Include="cpr\proxies.h" />
+    <ClInclude Include="cpr\proxyauth.h" />
+    <ClInclude Include="cpr\response.h" />
+    <ClInclude Include="cpr\session.h" />
+    <ClInclude Include="cpr\ssl_options.h" />
+    <ClInclude Include="cpr\status_codes.h" />
+    <ClInclude Include="cpr\timeout.h" />
+    <ClInclude Include="cpr\unix_socket.h" />
+    <ClInclude Include="cpr\user_agent.h" />
+    <ClInclude Include="cpr\util.h" />
+    <ClInclude Include="cpr\verbose.h" />
   </ItemGroup>
 </Project>

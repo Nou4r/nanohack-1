@@ -107,9 +107,6 @@ namespace bonecache {
 				
 				cache->eye_rot = player->eyes( )->rotation( );
 			}
-			else {
-				
-			}
 
 			if (!map_contains_key(cachedBones, player->userID( )))
 				cachedBones.insert(std::make_pair(player->userID( ), cache));

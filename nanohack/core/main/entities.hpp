@@ -1,31 +1,31 @@
 namespace entities {
 	namespace belt {
+		Vector2 pos = Vector2(200, 200);
 		bool should_drag = false;
 		bool should_move = false;
 
 		POINT cursor;
 		POINT cursor_corrected;
-		void belt_tab_mov(int& x, int& y, int w, int h) {
-			GetCursorPos(&belt::cursor);
+		void belt_tab_mov(Vector2 size) {
+			GetCursorPos(&cursor);
 
-			if (GetAsyncKeyState(VK_LBUTTON) < 0 && (belt::cursor.x > x && belt::cursor.x < x + w && belt::cursor.y > y && belt::cursor.y < y + h)) {
-				belt::should_drag = true;
-
-				if (!belt::should_move) {
-					belt::cursor_corrected.x = belt::cursor.x - x;
-					belt::cursor_corrected.y = belt::cursor.y - y;
-					belt::should_move = true;
+			if (GetAsyncKeyState(VK_LBUTTON) && (cursor.x > pos.x && cursor.y > pos.y && cursor.x < pos.x + size.x && cursor.y < pos.y + size.y)) {
+				should_drag = true;
+				if (!should_move) {
+					cursor_corrected.x = cursor.x - pos.x;
+					cursor_corrected.y = cursor.y - pos.y;
+					should_move = true;
 				}
 			}
 
-			if (belt::should_drag) {
-				x = belt::cursor.x - belt::cursor_corrected.x;
-				y = belt::cursor.y - belt::cursor_corrected.y;
+			if (should_drag) {
+				pos.x = cursor.x - cursor_corrected.x;
+				pos.y = cursor.y - cursor_corrected.y;
 			}
 
 			if (GetAsyncKeyState(VK_LBUTTON) == 0) {
-				belt::should_drag = false;
-				belt::should_move = false;
+				should_drag = false;
+				should_move = false;
 			}
 		}
 	}
@@ -42,40 +42,62 @@ namespace entities {
 
 		return screen_center.distance_2d(player->bones( )->dfc);
 	}
-	Color3 get_color(BasePlayer* player) {
-		if (!player->playerModel( )->isNpc( )) {
-			if (player->is_target( ))
-				if (player->is_visible( ))
-					return Color3(255, 0, 0);
+	Color3 get_color(BasePlayer* player, bool boxes = false) {
+		if (!boxes)
+		{
+			if (player->HasPlayerFlag(PlayerFlags::Sleeping))
+			{
+				if (player->is_visible())
+					return plusminus::ui::get_color("visible sleepers");
 				else
-					return Color3(184, 0, 0);
-			else
-				if (player->is_teammate( ))
-					if (player->is_visible( ))
-						return Color3(53, 232, 21);
+					return plusminus::ui::get_color("invisible sleepers");
+			}
+
+			if (!player->playerModel()->isNpc()) {
+				if (player->is_target())
+					if (player->is_visible())
+						return plusminus::ui::get_color("visible players");
 					else
-						return Color3(31, 153, 9);
+						return plusminus::ui::get_color("invisible players");
 				else
-					if (player->is_visible( ))
-						return Color3(255, 255, 255);
+					if (player->is_teammate())
+						if (player->is_visible())
+							return plusminus::ui::get_color("visible teammate");
+						else
+							return plusminus::ui::get_color("invisible teammate");
 					else
-						return Color3(186, 186, 186);
+						if (player->is_visible())
+							return plusminus::ui::get_color("visible players");
+						else
+							return plusminus::ui::get_color("invisible players");
+			}
+			else {
+				if (!player->is_target())
+					if (player->is_visible())
+						return plusminus::ui::get_color("visible npcs");
+					else
+						return plusminus::ui::get_color("invisible npcs");
+				else
+					if (player->is_visible())
+						return plusminus::ui::get_color("visible npcs");
+					else
+						return plusminus::ui::get_color("invisible npcs");
+			}
 		}
-		else {
-			if (!player->is_target( ))
-				if (player->is_visible( ))
-					return Color3(71, 209, 255);
-				else
-					return Color3(7, 124, 163);
+
+		if (boxes)
+		{
+			if (player->is_target())
+				return plusminus::ui::get_color("targeted boxes");
 			else
-				if (player->is_visible( ))
-					return Color3(255, 0, 0);
+				if (player->is_visible())
+					return plusminus::ui::get_color("visible boxes");
 				else
-					return Color3(184, 0, 0);
+					return plusminus::ui::get_color("invisible boxes");
 		}
 	}
 	void loop( ) {
-		switch (settings::crosshair) {
+		switch (plusminus::ui::get_combobox(xorstr_("crosshair"))) {
 		case 1:
 			Renderer::circle(screen_center - Vector2(2, 2), Color3(255, 255, 255), 4.f, 0.75f);
 			Renderer::circle(screen_center + Vector2(2, 2), Color3(0, 0, 0), 4.f, 0.75f);
@@ -100,6 +122,17 @@ namespace entities {
 			break;
 		}
 
+		if (plusminus::ui::get_bool(xorstr_("target player belt")) && plusminus::ui::is_menu_open())
+		{
+			int w = 200, h = 102;
+
+			belt::belt_tab_mov(Vector2(w, h + 20.0f));
+
+			Renderer::rectangle_filled({ belt::pos.x, belt::pos.y }, Vector2(w, 20), Color3(25, 25, 25));
+			Renderer::rectangle_filled(Vector2(belt::pos.x, belt::pos.y + 20.0f), Vector2(w, h), Color3(36, 36, 36));
+			Renderer::rectangle_filled(Vector2(belt::pos.x + 5.0f, belt::pos.y + 20.0f + 5.0f), Vector2(w - 10, h - 10), Color3(25, 25, 25));
+		}
+
 		if (settings::tr::manipulated) {
 			Renderer::text({ screen_center.x, screen_center.y + 150 }, Color3(173, 0, 0), 11.f, true, true, wxorstr_(L"[manipulated]"));
 		}
@@ -110,7 +143,7 @@ namespace entities {
 			return;
 		}
 
-		if (settings::reload_indicator) {
+		if (plusminus::ui::get_bool(xorstr_("reload indicator"))) {
 			auto held = local->GetHeldEntity<BaseProjectile>( );
 			if (held) {
 				if (held->HasReloadCooldown( ) && held->class_name_hash( ) != STATIC_CRC32("BowWeapon") && held->class_name_hash( ) != STATIC_CRC32("CompoundBowWeapon")) { // im sorry for my sins
@@ -121,12 +154,25 @@ namespace entities {
 					Renderer::rectangle_filled({ screen_center.x - 25, screen_center.y + 31 }, { 50 * (time_left / time_full), 4 }, Color3(0, 255, 0));
 					Renderer::text({ (screen_center.x - 25) + (50 * (time_left / time_full)), screen_center.y + 31 + 2 }, Color3(255, 255, 255), 12.f, true, true, wxorstr_(L"%d"), (int)ceil(time_left));
 				}
-				if (held->Empty( )) {
-					Renderer::text({ screen_center.x, screen_center.y + 48 }, Color3(89, 227, 255), 12.f, true, true, wxorstr_(L"[empty weapon]"));
+				if (held->class_name_hash() == STATIC_CRC32("BaseProjectile") ||
+					held->class_name_hash() == STATIC_CRC32("BowWeapon") ||
+					held->class_name_hash() == STATIC_CRC32("CompoundBowWeapon") ||
+					held->class_name_hash() == STATIC_CRC32("BaseLauncher") ||
+					held->class_name_hash() == STATIC_CRC32("CrossbowWeapon"))
+				{
+					if (held->Empty()) {
+						Renderer::text({ screen_center.x, screen_center.y + 48 }, Color3(89, 227, 255), 12.f, true, true, wxorstr_(L"[empty weapon]"));
+					}
 				}
 			}
 		}
-		if (settings::players) {
+		if (plusminus::ui::get_bool(xorstr_("players")) || 
+			plusminus::ui::get_bool(xorstr_("ores")) || 
+			plusminus::ui::get_bool(xorstr_("stashes")) || 
+			plusminus::ui::get_bool(xorstr_("corpses")) || 
+			plusminus::ui::get_bool(xorstr_("traps")) ||
+			plusminus::ui::get_bool(xorstr_("hemp")) ||
+			plusminus::ui::get_bool(xorstr_("vehicles"))) {
 			auto entityList = BaseNetworkable::clientEntities( )->entityList( );
 			if (!entityList) {
 				target_ply = nullptr;
@@ -156,21 +202,21 @@ namespace entities {
 					if (target->visible)
 						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
-					if (settings::manipulator && target_ply->bones( )->manipulatable)
+					if (plusminus::ui::get_bool(xorstr_("manipulator")) && target_ply->bones( )->manipulatable)
 						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
 
 					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 
-					if (settings::belt && !settings::menu) {
+					if (plusminus::ui::get_bool(xorstr_("target player belt")) && !plusminus::ui::is_menu_open()) {
 						int w = 200, h = 102;
 
-						belt::belt_tab_mov(settings::g::b_x, settings::g::b_y, w, -20);
+						belt::belt_tab_mov(Vector2(w, -20));
 
-						Renderer::rectangle_filled({ float(settings::g::b_x), settings::g::b_y - float(20) }, Vector2(w, 20), Color3(25, 25, 25));
-						Renderer::rectangle_filled(Vector2(settings::g::b_x, settings::g::b_y), Vector2(w, h), Color3(36, 36, 36));
-						Renderer::rectangle_filled(Vector2(settings::g::b_x + float(5), settings::g::b_y + float(5)), Vector2(w - 10, h - 10), Color3(25, 25, 25));
+						Renderer::rectangle_filled({ belt::pos.x, belt::pos.y - 20.0f }, Vector2(w, 20), Color3(25, 25, 25));
+						Renderer::rectangle_filled(Vector2(belt::pos.x, belt::pos.y), Vector2(w, h), Color3(36, 36, 36));
+						Renderer::rectangle_filled(Vector2(belt::pos.x + 5.0f, belt::pos.y + 5.0f), Vector2(w - 10, h - 10), Color3(25, 25, 25));
 
-						Renderer::text({ settings::g::b_x + float(7), settings::g::b_y - float(16) }, Color3(255, 255, 255), 12.f, false, false, target_ply->_displayName( ));
+						Renderer::text({ belt::pos.x + 7.0f, belt::pos.y - 16.0f }, Color3(255, 255, 255), 12.f, false, false, target_ply->_displayName( ));
 
 						auto list = target_ply->inventory( )->containerBelt( )->itemList( );
 						if (list) {
@@ -182,7 +228,7 @@ namespace entities {
 
 								Color3 col = item->uid( ) == target_ply->clActiveItem( ) ? Color3(255, 0, 0) : Color3(255, 255, 255);
 
-								Renderer::text({ settings::g::b_x + float(7), settings::g::b_y + float(7) + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
+								Renderer::text({ belt::pos.x + 7.0f, belt::pos.y + 7.0f + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
 
 								y += 15;
 							}
@@ -197,19 +243,34 @@ namespace entities {
 
 				if (!entity->IsValid( )) continue;
 
-				if (settings::debug) {
+#ifndef authh
+				if (plusminus::ui::get_bool(xorstr_("debug")) && entity->transform()->position().distance(LocalPlayer::Entity()->transform()->position()) <= 5.0f) {
 					Vector2 screen;
-					if (Camera::world_to_screen(entity->transform( )->position( ), screen))
-						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name( )).c_str( ));
+					if (Camera::world_to_screen(entity->transform()->position(), screen))
+					{
+						Renderer::text(screen, Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), StringConverter::ToUnicode(entity->class_name()).c_str());
+						Renderer::text(screen + Vector2(0, 15), Color3(0, 255, 0), 12.f, true, true, wxorstr_(L"%s"), entity->ShortPrefabName());
+					}
 				}
-
-				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || entity->class_name_hash( ) == STATIC_CRC32("ScientistNPCNew") || entity->class_name_hash() == STATIC_CRC32("Scientist")) {
+#endif
+				if (entity->class_name_hash( ) == STATIC_CRC32("BasePlayer") || 
+					entity->class_name_hash( ) == STATIC_CRC32("NPCPlayerApex") || 
+					entity->class_name_hash() == STATIC_CRC32("NPCMurderer") ||
+					entity->class_name_hash() == STATIC_CRC32("NPCPlayer") ||
+					entity->class_name_hash() == STATIC_CRC32("HumanNPC") ||
+					entity->class_name_hash() == STATIC_CRC32("Scientist") ||
+					entity->class_name_hash() == STATIC_CRC32("HTNPlayer") ||
+					entity->class_name_hash() == STATIC_CRC32("HumanNPCNew") ||
+					entity->class_name_hash() == STATIC_CRC32("ScientistNPCNew") ||
+					entity->class_name_hash() == STATIC_CRC32("TunnelDweller") ||
+					entity->class_name_hash() == STATIC_CRC32("BanditGuard")) {
+					if (!plusminus::ui::get_bool(xorstr_("players")) && !plusminus::ui::get_bool(xorstr_("sleepers"))) continue;
 					auto player = reinterpret_cast<BasePlayer*>(entity);
 
 					if (!player->isCached( )) continue;
 					if (player->health( ) <= 0.0f) continue;
-					if (player->HasPlayerFlag(PlayerFlags::Sleeping)) continue;
-					if (player->playerModel( )->isNpc( ) && !settings::npcs) continue;
+					if (player->HasPlayerFlag(PlayerFlags::Sleeping) && !plusminus::ui::get_bool(xorstr_("sleepers"))) continue;
+					if (player->playerModel( )->isNpc( ) && !plusminus::ui::get_bool(xorstr_("npc"))) continue;
 					if (player->userID( ) == LocalPlayer::Entity( )->userID( )) continue;
 
 					auto bounds = player->bones( )->bounds;
@@ -222,8 +283,9 @@ namespace entities {
 						Vector2 headPos = { bounds.left + (box_width / 2), bounds.top - 9.54f };
 
 						Color3 col = get_color(player);
+						Color3 box_col = get_color(player, true);
 
-						if (settings::skeleton) {
+						if (plusminus::ui::get_bool(xorstr_("skeleton"))) {
 							float dist = player->bones( )->head->position.distance(local->bones( )->head->position);
 							if (dist < 175.f) {
 
@@ -269,6 +331,19 @@ namespace entities {
 									Color3 viscol = player->playerModel( )->isNpc( ) ? Color3(38, 255, 0) : Color3(0, 250, 255);
 									Color3 inviscol = player->playerModel( )->isNpc( ) ? Color3(22, 145, 0) : Color3(0, 152, 156);
 
+									if (player->HasPlayerFlag(PlayerFlags::Sleeping))
+									{
+										viscol = plusminus::ui::get_color("visible skeleton");
+										inviscol = plusminus::ui::get_color("invisible skeleton");
+									}else if (!player->playerModel()->isNpc()) {
+										viscol = plusminus::ui::get_color("visible skeleton players");
+										inviscol = plusminus::ui::get_color("invisible skeleton players");
+									}
+									else {
+										viscol = plusminus::ui::get_color("visible skeleton npc");
+										inviscol = plusminus::ui::get_color("invisible skeleton npc");
+									}
+
 									Renderer::line(head, spine, (head_b->visible || spine4_b->visible) ? viscol : inviscol, 3.f);
 									Renderer::line(spine, l_upperarm, (spine4_b->visible || l_upperarm_b->visible) ? viscol : inviscol, 3.f);
 									Renderer::line(l_upperarm, l_forearm, (l_upperarm_b->visible || l_forearm_b->visible) ? viscol : inviscol, 3.f);
@@ -291,30 +366,30 @@ namespace entities {
 
 						Renderer::text(headPos, col, 12.f, true, true, wxorstr_(L"%s [%dhp]"), player->_displayName( ), (int)ceil(player->health( )));
 
-						if (settings::look_dir)
-							Renderer::line(player->bones( )->dfc, player->bones( )->forward, col, true);
+						if (plusminus::ui::get_bool(xorstr_("looking direction")) && !player->HasPlayerFlag(PlayerFlags::Sleeping))
+							Renderer::line(player->bones( )->dfc, player->bones( )->forward, plusminus::ui::get_color(xorstr_("looking direction color")), true);
 
-						if (settings::box) {
-							switch (settings::box_type) {
+						if (plusminus::ui::get_bool(xorstr_("box"))) {
+							switch (plusminus::ui::get_combobox(xorstr_("box type"))) {
 							case 0: // cornered
-								Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, col, true, 1.5f);
-								Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.top }, { bounds.left + (box_width / 3.5f), bounds.top }, box_col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.top }, { bounds.right - (box_width / 3.5f), bounds.top }, box_col, true, 1.5f);
 
-								Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
-								Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 3.5f), bounds.bottom }, box_col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 3.5f), bounds.bottom }, box_col, true, 1.5f);
 
-								Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
-								Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_width / 3.5f) }, box_col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_width / 3.5f) }, box_col, true, 1.5f);
 
-								Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
-								Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_width / 3.5f) }, box_col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_width / 3.5f) }, box_col, true, 1.5f);
 								break;
 							case 1: // 2d
-								Renderer::line({ bounds.left, bounds.top }, { bounds.right, bounds.top }, col, true, 1.5f);
-								Renderer::line({ bounds.left, bounds.bottom }, { bounds.right, bounds.bottom }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.top }, { bounds.right, bounds.top }, box_col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.bottom }, { bounds.right, bounds.bottom }, box_col, true, 1.5f);
 
-								Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.bottom }, col, true, 1.5f);
-								Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.bottom }, col, true, 1.5f);
+								Renderer::line({ bounds.left, bounds.top }, { bounds.left, bounds.bottom }, box_col, true, 1.5f);
+								Renderer::line({ bounds.right, bounds.top }, { bounds.right, bounds.bottom }, box_col, true, 1.5f);
 								break;
 							case 2: // 3d (hippity hoppity your 3d box is now my property)
 								CBounds bounds = CBounds( );
@@ -356,24 +431,24 @@ namespace entities {
 									Camera::world_to_screen(backBottomLeft, backBottomLeft_2d) &&
 									Camera::world_to_screen(backBottomRight, backBottomRight_2d)) {
 
-									Renderer::line(frontTopLeft_2d, frontTopRight_2d, col, true, 1.5f);
-									Renderer::line(frontTopRight_2d, frontBottomRight_2d, col, true, 1.5f);
-									Renderer::line(frontBottomRight_2d, frontBottomLeft_2d, col, true, 1.5f);
-									Renderer::line(frontBottomLeft_2d, frontTopLeft_2d, col, true, 1.5f);
-									Renderer::line(backTopLeft_2d, backTopRight_2d, col, true, 1.5f);
-									Renderer::line(backTopRight_2d, backBottomRight_2d, col, true, 1.5f);
-									Renderer::line(backBottomRight_2d, backBottomLeft_2d, col, true, 1.5f);
-									Renderer::line(backBottomLeft_2d, backTopLeft_2d, col, true, 1.5f);
-									Renderer::line(frontTopLeft_2d, backTopLeft_2d, col, true, 1.5f);
-									Renderer::line(frontTopRight_2d, backTopRight_2d, col, true, 1.5f);
-									Renderer::line(frontBottomRight_2d, backBottomRight_2d, col, true, 1.5f);
-									Renderer::line(frontBottomLeft_2d, backBottomLeft_2d, col, true, 1.5f);
+									Renderer::line(frontTopLeft_2d, frontTopRight_2d, box_col, true, 1.5f);
+									Renderer::line(frontTopRight_2d, frontBottomRight_2d, box_col, true, 1.5f);
+									Renderer::line(frontBottomRight_2d, frontBottomLeft_2d, box_col, true, 1.5f);
+									Renderer::line(frontBottomLeft_2d, frontTopLeft_2d, box_col, true, 1.5f);
+									Renderer::line(backTopLeft_2d, backTopRight_2d, box_col, true, 1.5f);
+									Renderer::line(backTopRight_2d, backBottomRight_2d, box_col, true, 1.5f);
+									Renderer::line(backBottomRight_2d, backBottomLeft_2d, box_col, true, 1.5f);
+									Renderer::line(backBottomLeft_2d, backTopLeft_2d, box_col, true, 1.5f);
+									Renderer::line(frontTopLeft_2d, backTopLeft_2d, box_col, true, 1.5f);
+									Renderer::line(frontTopRight_2d, backTopRight_2d, box_col, true, 1.5f);
+									Renderer::line(frontBottomRight_2d, backBottomRight_2d, box_col, true, 1.5f);
+									Renderer::line(frontBottomLeft_2d, backBottomLeft_2d, box_col, true, 1.5f);
 								}
 								break;
 							}
 						}
 
-						if (player->GetHeldItem( )) {
+						if (player->GetHeldItem( ) && !player->HasPlayerFlag(PlayerFlags::Sleeping)) {
 							Renderer::text(footPos, col, 12.f, true, true, player->GetHeldItem( )->info( )->displayName( )->english( ));
 							y_ += 16;
 						}
@@ -382,14 +457,143 @@ namespace entities {
 							y_ += 16;
 						}
 
-						if (!player->is_teammate( )) {
-							if (dfc(player) < settings::targeting_fov) {
+						if (!player->is_teammate( ) && !player->HasPlayerFlag(PlayerFlags::Sleeping)) {
+							if (dfc(player) < plusminus::ui::get_float(xorstr_("targeting fov"))) {
 								if (target_ply == nullptr)
 									target_ply = player;
 								else
 									if (dfc(target_ply) > dfc(player))
 										target_ply = player;
 							}
+						}
+					}
+				}
+
+				if (entity->class_name_hash() == STATIC_CRC32("OreResourceEntity") && plusminus::ui::get_bool(xorstr_("ores")))
+				{
+					if (entity->ShortPrefabName_hash() == STATIC_CRC32("stone-ore") ||
+						entity->ShortPrefabName_hash() == STATIC_CRC32("sulfur-ore") ||
+						entity->ShortPrefabName_hash() == STATIC_CRC32("metal-ore"))
+					{
+						Vector2 screen;
+						if (Camera::world_to_screen(entity->transform()->position(), screen))
+						{
+							switch (entity->ShortPrefabName_hash())
+							{
+							case STATIC_CRC32("stone-ore"):
+								Renderer::text(screen, plusminus::ui::get_color(xorstr_("ores color")), 12.f, true, true, wxorstr_(L"Stone Ore"));
+								break;
+							case STATIC_CRC32("sulfur-ore"):
+								Renderer::text(screen, plusminus::ui::get_color(xorstr_("ores color")), 12.f, true, true, wxorstr_(L"Sulfur Ore"));
+								break;
+							case STATIC_CRC32("metal-ore"):
+								Renderer::text(screen, plusminus::ui::get_color(xorstr_("ores color")), 12.f, true, true, wxorstr_(L"Metal Ore"));
+								break;
+							}
+						}
+					}
+				}
+				if (entity->ShortPrefabName_hash() == STATIC_CRC32("small_stash_deployed") && plusminus::ui::get_bool(xorstr_("stashes")))
+				{
+					Vector2 screen;
+					if (Camera::world_to_screen(entity->transform()->position(), screen))
+					{
+						if (entity->HasFlag(BaseEntity::Flags::Reserved5))
+						{
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("stashes color")), 12.f, true, true, wxorstr_(L"Stash (Hidden)"));
+						}
+						else
+						{
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("stashes color")), 12.f, true, true, wxorstr_(L"Stash"));
+						}
+					}
+
+				}
+				if ((entity->ShortPrefabName_hash() == STATIC_CRC32("rhib") || 
+					entity->ShortPrefabName_hash() == STATIC_CRC32("rowboat") ||
+					entity->ShortPrefabName_hash() == STATIC_CRC32("hotairballoon") ||
+					entity->ShortPrefabName_hash() == STATIC_CRC32("minicopter.entity") ||
+					entity->ShortPrefabName_hash() == STATIC_CRC32("scraptransporthelicopter") ||
+					entity->ShortPrefabName_hash() == STATIC_CRC32("submarineduo.entity") ||
+					entity->ShortPrefabName_hash() == STATIC_CRC32("submarinesolo.entity") ||
+					entity->ShortPrefabName_hash() == STATIC_CRC32("testridablehorse")) && plusminus::ui::get_bool(xorstr_("vehicles")))
+				{
+					Vector2 screen;
+					if (Camera::world_to_screen(entity->transform()->position(), screen))
+					{
+						switch (entity->ShortPrefabName_hash())
+						{
+						case STATIC_CRC32("rhib"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"RHIB"));
+							break;
+						case STATIC_CRC32("rowboat"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"Boat"));
+							break;
+						case STATIC_CRC32("hotairballoon"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"Hot Air Balloon"));
+							break;
+						case STATIC_CRC32("minicopter.entity"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"Minicopter"));
+							break;
+						case STATIC_CRC32("scraptransporthelicopter"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"Scrap Heli"));
+							break;
+						case STATIC_CRC32("testridablehorse"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"Horse"));
+							break;
+						case STATIC_CRC32("submarineduo.entity"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"Submarine (Duo)"));
+							break;
+						case STATIC_CRC32("submarinesolo.entity"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("vehicles color")), 12.f, true, true, wxorstr_(L"Submarine (Solo)"));
+							break;
+						}
+					}
+				}
+				if (entity->ShortPrefabName_hash() == STATIC_CRC32("hemp-collectable") && plusminus::ui::get_bool(xorstr_("hemp")))
+				{
+					Vector2 screen;
+					if (Camera::world_to_screen(entity->transform()->position(), screen))
+					{
+						Renderer::text(screen, plusminus::ui::get_color(xorstr_("hemp color")), 12.f, true, true, wxorstr_(L"Hemp"));
+					}
+
+				}
+				if ((entity->class_name_hash() == STATIC_CRC32("PlayerCorpse") || 
+					entity->class_name_hash() == STATIC_CRC32("NPCPlayerCorpse")) && plusminus::ui::get_bool(xorstr_("corpses")))
+				{
+					Vector2 screen;
+					if (Camera::world_to_screen(entity->transform()->position(), screen))
+					{
+						Renderer::text(screen, plusminus::ui::get_color(xorstr_("corpses color")), 12.f, true, true, wxorstr_(L"Corpse"));
+					}
+				}
+				if ((entity->class_name_hash() == STATIC_CRC32("AutoTurret") ||
+					entity->class_name_hash() == STATIC_CRC32("Landmine") ||
+					entity->class_name_hash() == STATIC_CRC32("BearTrap") ||
+					entity->class_name_hash() == STATIC_CRC32("SamSite") ||
+					entity->class_name_hash() == STATIC_CRC32("GunTrap")) && plusminus::ui::get_bool(xorstr_("traps")))
+				{
+					Vector2 screen;
+					if (Camera::world_to_screen(entity->transform()->position(), screen))
+					{
+						switch (entity->class_name_hash())
+						{
+						case STATIC_CRC32("AutoTurret"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("traps color")), 12.f, true, true, wxorstr_(L"Auto Turret"));
+							break;
+						case STATIC_CRC32("Landmine"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("traps color")), 12.f, true, true, wxorstr_(L"Landmine"));
+							break;
+						case STATIC_CRC32("BearTrap"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("traps color")), 12.f, true, true, wxorstr_(L"Bear Trap"));
+							break;
+						case STATIC_CRC32("SamSite"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("traps color")), 12.f, true, true, wxorstr_(L"SAM Site"));
+							break;
+						case STATIC_CRC32("GunTrap"):
+							Renderer::text(screen, plusminus::ui::get_color(xorstr_("traps color")), 12.f, true, true, wxorstr_(L"Shotgun Trap"));
+							break;
 						}
 					}
 				}

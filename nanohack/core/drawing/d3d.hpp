@@ -6,6 +6,7 @@ void undo_hooks( );
 
 namespace d3d {
 	HRESULT present_hook(IDXGISwapChain* swapChain, UINT syncInterval, UINT flags) {
+		static Vector2 text_size = Vector2(0, 0);
 		if (!device) {
 			swapChain->GetDevice(__uuidof(device), reinterpret_cast<PVOID*>(&device));
 			device->GetImmediateContext(&immediate_context);
@@ -16,25 +17,32 @@ namespace d3d {
 			renderTarget->Release( );
 
 			Renderer::Init(swapChain);
+			FGUI_INPUT_WIN32::OnEntryPoint();
+			FGUI_D3D11::OnEntryPoint();
+
 		}
 		immediate_context->OMSetRenderTargets(1, &render_target_view, nullptr);
 		immediate_context->RSGetViewports(&vps, &viewport);
 		screen_size = { viewport.Width, viewport.Height };
 		screen_center = { viewport.Width / 2.0f, viewport.Height / 2.0f };
 
-		if (GetAsyncKeyState(VK_INSERT) & 1)
-			settings::menu = !settings::menu;
+		//if (GetAsyncKeyState(VK_INSERT) & 1)
+		//	settings::menu = !settings::menu;
 
 		if (!settings::panic) {
 			if (Renderer::new_frame(swapChain)) {
+				Renderer::text(Vector2(5, 4), Color3(255, 255, 255), 14.f, false, true, wxorstr_(L"plusminus | %s | expires: %s"), settings::auth::username.c_str(), settings::auth::days_left.c_str());
+
+				if (!plusminus::ui::init)
+					plusminus::ui::OnSetupDevice();
+
+				plusminus::ui::vars::Container->Render();
+
 				if (settings::cheat_init)
 					entities::loop( );
 
-				if (settings::draw_fov) {
-					Renderer::circle(screen_center, Color3(255, 255, 255), settings::targeting_fov, 1.f);
-				}
-
-				menu_framework::render( );
+				if (plusminus::ui::get_bool(xorstr_("draw targeting fov")))
+					Renderer::circle(screen_center, plusminus::ui::get_color(xorstr_("draw targeting fov")), plusminus::ui::get_float(xorstr_("targeting fov color")), 1.f);
 
 				Renderer::end_frame( );
 			}

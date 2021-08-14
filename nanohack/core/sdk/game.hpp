@@ -265,6 +265,12 @@ public:
 		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::GameObject::get_tag(): String");
 		return reinterpret_cast<String * (__fastcall*)(GameObject*)>(off)(this)->buffer;
 	}
+	const wchar_t* name()
+	{
+		if (!this) return 0;
+		static auto off = METHOD("UnityEngine.CoreModule::UnityEngine::Object::get_name(): String");
+		return reinterpret_cast<String * (__fastcall*)(GameObject*)>(off)(this)->buffer;
+	}
 	template<typename T = GameObject>
 	T* GetComponent(Type* type) {
 		if (!this || !type) return nullptr;
@@ -381,6 +387,12 @@ public:
 		static auto off = METHOD("Assembly-CSharp::BaseNetworkable::get_ShortPrefabName(): String");
 		return reinterpret_cast<String * (__fastcall*)(BaseNetworkable*)>(off)(this)->buffer;
 	}
+
+	std::uint32_t ShortPrefabName_hash() {
+		if (!this) return 0;
+		static auto off = METHOD("Assembly-CSharp::BaseNetworkable::get_ShortPrefabName(): String");
+		return RUNTIME_CRC32_W(reinterpret_cast<String * (__fastcall*)(BaseNetworkable*)>(off)(this)->buffer);
+	}
 	FIELD("Assembly-CSharp::BaseNetworkable::<JustCreated>k__BackingField", JustCreated, bool);
 	FIELD("Assembly-CSharp::BaseNetworkable::net", net, Networkable*);
 	FIELD("Assembly-CSharp::BaseNetworkable::parentEntity", parentEntity, BaseEntity*);
@@ -416,10 +428,37 @@ public:
 		Eat,
 		Startled
 	};
+	enum class Flags
+	{
+		Placeholder = 1,
+		On = 2,
+		OnFire = 4,
+		Open = 8,
+		Locked = 16,
+		Debugging = 32,
+		Disabled = 64,
+		Reserved1 = 128,
+		Reserved2 = 256,
+		Reserved3 = 512,
+		Reserved4 = 1024,
+		Reserved5 = 2048,
+		Broken = 4096,
+		Busy = 8192,
+		Reserved6 = 16384,
+		Reserved7 = 32768,
+		Reserved8 = 65536,
+		Reserved9 = 131072,
+		Reserved10 = 262144
+	};
+
+	FIELD("Assembly-CSharp::BaseEntity::flags", flags, BaseEntity::Flags)
 	bool IsValid( ) {
 		if (!this) return false;
 		return !this->IsDestroyed( ) && this->net( ) != nullptr;
 	}
+
+	bool HasFlag(BaseEntity::Flags f);
+
 	void ServerRPC(const char* funcName) {
 		if (!this) return;
 		static auto off = METHOD("Assembly-CSharp::BaseEntity::ServerRPC(String): Void");
@@ -444,6 +483,45 @@ public:
 	FIELD("Assembly-CSharp::BaseEntity::itemSkin", itemSkin, ItemSkin*);
 };
 
+BaseEntity::Flags operator &(BaseEntity::Flags lhs, BaseEntity::Flags rhs) {
+	return static_cast<BaseEntity::Flags> (
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(lhs) &
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(rhs)
+		);
+}
+BaseEntity::Flags operator ^(BaseEntity::Flags lhs, BaseEntity::Flags rhs) {
+	return static_cast<BaseEntity::Flags> (
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(lhs) ^
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(rhs)
+		);
+}
+BaseEntity::Flags operator ~(BaseEntity::Flags rhs) {
+	return static_cast<BaseEntity::Flags> (
+		~static_cast<std::underlying_type<BaseEntity::Flags>::type>(rhs)
+		);
+}
+BaseEntity::Flags& operator |=(BaseEntity::Flags& lhs, BaseEntity::Flags rhs) {
+	lhs = static_cast<BaseEntity::Flags> (
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(lhs) |
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(rhs)
+		);
+
+	return lhs;
+}
+BaseEntity::Flags& operator &=(BaseEntity::Flags& lhs, BaseEntity::Flags rhs) {
+	lhs = static_cast<BaseEntity::Flags> (
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(lhs) &
+		static_cast<std::underlying_type<BaseEntity::Flags>::type>(rhs)
+		);
+
+	return lhs;
+}
+
+bool BaseEntity::HasFlag(BaseEntity::Flags f)
+{
+	return (this->flags() & f) == f;
+}
+
 class GamePhysics {
 public:
 	enum QueryTriggerInteraction {
@@ -455,7 +533,7 @@ public:
 	STATIC_FUNCTION("Assembly-CSharp::GamePhysics::CheckCapsule(Vector3,Vector3,Single,Int32,QueryTriggerInteraction): Boolean", CheckCapsule, bool(Vector3, Vector3, float, int, QueryTriggerInteraction));
 };
 bool LineOfSight(Vector3 a, Vector3 b) {
-	int mask = settings::penetrate ? 10551296 : 1503731969; // projectile los, flyhack mask
+	int mask = plusminus::ui::get_bool(xorstr_("pierce")) ? 10551296 : 1503731969; // projectile los, flyhack mask
 
 	bool result = GamePhysics::LineOfSight(a, b, mask, 0.f) && GamePhysics::LineOfSight(b, a, mask, 0.f);
 	return result;
@@ -1135,6 +1213,9 @@ public:
 		return reinterpret_cast<void(__fastcall*)(BaseProjectile*)>(off)(this);
 	}
 	bool Empty( ) {
+		if (!this) return true;
+		if (!this->primaryMagazine()) return true;
+			
 		return this->primaryMagazine( )->contents( ) <= 0;
 	}
 	bool HasReloadCooldown( ) {
@@ -1444,6 +1525,10 @@ public:
 	static inline void(*ClientUpdate_)(BasePlayer*) = nullptr;
 	void ClientUpdate( ) {
 		return ClientUpdate_(this);
+	}
+	static inline void(*ClientUpdate_Sleeping_)(BasePlayer*) = nullptr;
+	void ClientUpdate_Sleeping() {
+		return ClientUpdate_Sleeping_(this);
 	}
 	static inline void(*SendProjectileAttack_)(BasePlayer*, PlayerProjectileAttack*) = nullptr;
 	void SendProjectileAttack(PlayerProjectileAttack* attack) {
@@ -1936,6 +2021,7 @@ void initialize_cheat( ) {
 	init_methods( );
 
 	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::ClientUpdate(): Void", BasePlayer::ClientUpdate_);
+	ASSIGN_HOOK("Assembly-CSharp::BasePlayer::ClientUpdate_Sleeping(): Void", BasePlayer::ClientUpdate_Sleeping_);
 	ASSIGN_HOOK("Assembly-CSharp::HitTest::BuildAttackMessage(): Attack", HitTest::BuildAttackMessage_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerWalkMovement::HandleJumping(ModelState,Boolean,Boolean): Void", PlayerWalkMovement::HandleJumping_);
 	ASSIGN_HOOK("Assembly-CSharp::PlayerEyes::DoFirstPersonCamera(Camera): Void", PlayerEyes::DoFirstPersonCamera_);

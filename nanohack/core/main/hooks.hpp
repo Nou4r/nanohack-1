@@ -4,47 +4,65 @@
 void ClientUpdate_hk(BasePlayer* player) {
 	auto local = LocalPlayer::Entity( );
 	if (local) {
-		if (settings::players) {
+		if (plusminus::ui::get_bool(xorstr_("players")) || plusminus::ui::get_bool(xorstr_("sleepers"))) {
 			bonecache::cachePlayer(player);
 		}
 		if (local->userID( ) == player->userID( )) {
 			if (target_ply != nullptr)
-				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->is_teammate( ) || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || entities::dfc(target_ply) > settings::targeting_fov || (target_ply->playerModel( )->isNpc( ) && !settings::npcs))
+				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->is_teammate( ) || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || entities::dfc(target_ply) > plusminus::ui::get_float(xorstr_("targeting fov")) || (target_ply->playerModel( )->isNpc( ) && !plusminus::ui::get_bool(xorstr_("npc"))))
 					target_ply = nullptr;
 		}
 	}
 	return player->ClientUpdate( );
 }
+
+void ClientUpdate_Sleeping_hk(BasePlayer* player)
+{
+	auto local = LocalPlayer::Entity();
+	if (local) {
+		if (plusminus::ui::get_bool(xorstr_("players")) || plusminus::ui::get_bool(xorstr_("sleepers"))) {
+			bonecache::cachePlayer(player);
+		}
+	}
+
+	return player->ClientUpdate_Sleeping();
+}
+
 Vector3 GetModifiedAimConeDirection_hk(float aimCone, Vector3 inputVec, bool anywhereInside = true) {
-	if (settings::psilent && target_ply != nullptr && target_ply->isCached( )) {
+	if (plusminus::ui::get_bool(xorstr_("psilent")) && target_ply != nullptr && target_ply->isCached( )) {
 		inputVec = (aimutils::get_prediction( ) - LocalPlayer::Entity( )->eyes( )->position( )).normalized( );
 	}
 
-	aimCone *= settings::spread_p / 100.0f;
+	aimCone *= plusminus::ui::get_float(xorstr_("spread %")) / 100.0f;
 
 	return AimConeUtil::GetModifiedAimConeDirection(aimCone, inputVec, anywhereInside);
 }
 Attack* BuildAttackMessage_hk(HitTest* self) {
 	auto ret = self->BuildAttackMessage( );
+	auto entity = BaseNetworkable::clientEntities()->Find<BasePlayer*>(ret->hitID());
+
+	if (plusminus::ui::get_bool(xorstr_("always heli weakspot")))
+	{
+		if (entity->class_name_hash() == STATIC_CRC32("BaseHelicopter"))
+		{
+			if (entity->health() <= 5000.0f)
+				ret->hitBone() = StringPool::Get(xorstr_("tail_rotor_col"));
+			else
+				ret->hitBone() = StringPool::Get(xorstr_("engine_col"));
+		}
+	}
 
 	auto localPlayer = LocalPlayer::Entity( );
 	if (localPlayer) {
-		if (settings::yeet && target_ply != nullptr) {
-			ret->hitBone( ) = StringPool::Get(xorstr_("head"));
-			ret->hitID( ) = target_ply->net( )->ID( );
-			ret->hitNormalWorld( ) = Vector3(0.f, -1.f, 0.f); // meme
-
-			return ret;
-		}
 
 
 		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == localPlayer->userID( )) { // isAuthoritative
-			if (settings::bullet_tracers) {
-				DDraw::Line(localPlayer->eyes( )->position( ), ret->pointEnd( ), Color(1, 0, 0, 1), 1.5f, false, true);
+			if (plusminus::ui::get_bool(xorstr_("bullet tracers"))) {
+				DDraw::Line(localPlayer->eyes( )->position( ), ret->hitPositionWorld( ), Color(1, 0, 0, 1), 1.5f, false, true);
 				DDraw::Sphere(ret->pointEnd( ), 0.05f, Color(1, 0, 0, 1), 1.5f, false);
 			}
 
-			auto entity = BaseNetworkable::clientEntities( )->Find<BasePlayer*>(ret->hitID( ));
+
 			if (entity) {
 				if (entity->IsPlayer( )) {
 					if (entity->isCached( )) {
@@ -53,10 +71,10 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 							// player_distance = 0.2 meter
 							// profit $$$$$$
 
-							if (settings::bigger_bullets) {
+							if (plusminus::ui::get_bool(xorstr_("big bullets"))) {
 								auto bone = entity->model( )->find_bone(ret->hitPositionWorld( ));
 								if (bone.second) { // f
-									if (settings::bullet_tracers)
+									if (plusminus::ui::get_bool(xorstr_("bullet tracers")))
 										DDraw::Sphere(ret->hitPositionWorld( ), 0.05f, Color(1, 1, 1, 1), 1.5f, false);
 
 									ret->hitPositionWorld( ) = bone.first->position( );
@@ -64,12 +82,12 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 									DDraw::Sphere(ret->hitPositionWorld( ), 0.05f, Color(0, 1, 0, 1), 1.5f, false);
 								}
 							}
-							if (settings::h_override != 0) {
-								if (settings::h_override == 1)
+							if (plusminus::ui::get_combobox(xorstr_("hitbox override")) != 0) {
+								if (plusminus::ui::get_combobox(xorstr_("hitbox override")) == 1)
 									ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
-								else if (settings::h_override == 2)
+								else if (plusminus::ui::get_combobox(xorstr_("hitbox override")) == 2)
 									ret->hitBone( ) = StringPool::Get(xorstr_("head"));
-								else if (settings::h_override == 3) {
+								else if (plusminus::ui::get_combobox(xorstr_("hitbox override")) == 3) {
 									int num = rand( ) % 100;
 									if (num > 90)
 										ret->hitBone( ) = StringPool::Get(xorstr_("head"));
@@ -94,7 +112,7 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 									else
 										ret->hitBone( ) = StringPool::Get(xorstr_("spine4"));
 								}
-								else if (settings::h_override == 4) {
+								else if (plusminus::ui::get_combobox(xorstr_("hitbox override")) == 4) {
 									int yeet = rand( ) % 100;
 									if (yeet > 50)
 										ret->hitBone( ) = StringPool::Get(xorstr_("head"));
@@ -112,13 +130,13 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 	return ret;
 }
 void DoAttack_hk(FlintStrikeWeapon* weapon) {
-	if (settings::always_eoka)
+	if (plusminus::ui::get_bool(xorstr_("insta eoka")))
 		weapon->_didSparkThisFrame( ) = true;
 
 	return weapon->DoAttack( );
 }
 Vector3 BodyLeanOffset_hk(PlayerEyes* a1) {
-	if (settings::manipulator && get_key(settings::manipulate_key)) {
+	if (plusminus::ui::get_bool(xorstr_("manipulator")) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind")))) {
 		if (target_ply != nullptr) {
 			if (other::m_manipulate.empty( ) || !LocalPlayer::Entity( )->GetHeldEntity( ))
 				return a1->BodyLeanOffset( );
@@ -131,13 +149,13 @@ Vector3 BodyLeanOffset_hk(PlayerEyes* a1) {
 }
 void DoFirstPersonCamera_hk(PlayerEyes* a1, Component* cam) {
 	a1->DoFirstPersonCamera(cam);
-	if (settings::manipulator) {
+	if (plusminus::ui::get_bool(xorstr_("manipulator"))) {
 		Vector3 re_p = LocalPlayer::Entity( )->transform( )->position( ) + LocalPlayer::Entity( )->transform( )->up( ) * (PlayerEyes::EyeOffset( ).y + LocalPlayer::Entity( )->eyes( )->viewOffset( ).y);
 		cam->transform( )->set_position(re_p);
 	}
 }
 bool CanAttack_hk(BasePlayer* self) {
-	if (settings::freeaim)
+	if (plusminus::ui::get_bool(xorstr_("no attack restriction")))
 		return true;
 
 	return self->CanAttack( );
@@ -145,14 +163,14 @@ bool CanAttack_hk(BasePlayer* self) {
 void UpdateVelocity_hk(PlayerWalkMovement* self) {
 	if (!self->flying( )) {
 		Vector3 vel = self->TargetMovement( );
-		if (settings::omnisprint) {
+		if (plusminus::ui::get_bool(xorstr_("no sprinting restriction"))) {
 			float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
 			if (vel.length( ) > 0.f) {
 				Vector3 target_vel = Vector3(vel.x / vel.length( ) * max_speed, vel.y, vel.z / vel.length( ) * max_speed);
 				self->TargetMovement( ) = target_vel;
 			}
 		}
-		if (settings::manipulator && get_key(settings::manipulate_key)) {
+		if (plusminus::ui::get_bool(xorstr_("manipulator")) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind")))) {
 			float max_speed = (self->swimming( ) || self->Ducking( ) > 0.5) ? 1.7f : 5.5f;
 			if (vel.length( ) > 0.f) {
 				self->TargetMovement( ) = Vector3::Zero( );
@@ -164,7 +182,7 @@ void UpdateVelocity_hk(PlayerWalkMovement* self) {
 }
 Vector3 EyePositionForPlayer_hk(BaseMountable* mount, BasePlayer* player, Quaternion lookRot) {
 	if (player->userID( ) == LocalPlayer::Entity( )->userID( )) {
-		if (settings::manipulator && get_key(settings::manipulate_key)) {
+		if (plusminus::ui::get_bool(xorstr_("manipulator")) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind")))) {
 			return mount->EyePositionForPlayer(player, lookRot) + other::m_manipulate;
 		}
 	}
@@ -172,7 +190,7 @@ Vector3 EyePositionForPlayer_hk(BaseMountable* mount, BasePlayer* player, Quater
 	return mount->EyePositionForPlayer(player, lookRot);
 }
 void HandleJumping_hk(PlayerWalkMovement* a1, ModelState* state, bool wantsJump, bool jumpInDirection = false) {
-	if (settings::infinite_jump) {
+	if (plusminus::ui::get_bool(xorstr_("no jumping restriction"))) {
 		if (!wantsJump)
 			return;
 
@@ -191,11 +209,11 @@ void HandleJumping_hk(PlayerWalkMovement* a1, ModelState* state, bool wantsJump,
 	return a1->HandleJumping(state, wantsJump, jumpInDirection);
 }
 void OnLand_hk(BasePlayer* ply, float vel) {
-	if (!settings::nofall)
+	if (!plusminus::ui::get_bool(xorstr_("no fall damage")))
 		ply->OnLand(vel);
 }
 bool IsDown_hk(InputState* self, BUTTON btn) {
-	if (settings::autoshoot || (settings::manipulator && get_key(settings::manipulate_key))) {
+	if (plusminus::ui::get_bool(xorstr_("autoshoot")) || (plusminus::ui::get_bool(xorstr_("manipulator")) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind"))))) {
 		if (btn == BUTTON::FIRE_PRIMARY) {
 			auto held = LocalPlayer::Entity( )->GetHeldEntity<BaseProjectile>( );
 			if (held && !held->Empty( ) && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
@@ -251,25 +269,25 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 		return plly->ClientInput(state);
 
 	if (plly->userID( ) == LocalPlayer::Entity( )->userID( )) {
-		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && get_key(settings::manipulate_key))
+		if (plusminus::ui::get_bool(xorstr_("manipulator")) && target_ply != nullptr && target_ply->isCached( ) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind"))))
 			plly->clientTickInterval( ) = 0.95f;
 		else
 			plly->clientTickInterval( ) = 0.05f;
 
 		auto held = plly->GetHeldEntity<BaseProjectile>( );
 		if (held) {
-			if (settings::nosway) {
+			if (plusminus::ui::get_bool(xorstr_("no sway")) & held->class_name_hash() != STATIC_CRC32("BaseMelee")) {
 				held->aimSway( ) = 0.f;
 				held->aimSwaySpeed( ) = 0.f;
 			}
 
-			if (settings::automatic)
+			if (plusminus::ui::get_bool(xorstr_("automatic")))
 				held->automatic( ) = true;
 
-			if (settings::weapon_spam && get_key(settings::weapon_spam_key))
+			if (plusminus::ui::get_bool(xorstr_("fake shots")) && get_key(plusminus::ui::get_keybind(xorstr_("fake shots bind"))))
 				held->SendSignalBroadcast(BaseEntity::Signal::Attack, xorstr_(""));
 
-			if (settings::autoshoot || (settings::manipulator && get_key(settings::manipulate_key))) {
+			if (plusminus::ui::get_bool(xorstr_("autoshoot")) || (plusminus::ui::get_bool(xorstr_("manipulator")) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind"))))) {
 				if (!held->Empty( ) && held->class_name_hash( ) == STATIC_CRC32("BaseProjectile")) {
 					if (target_ply != nullptr && target_ply->isCached( )) {
 						auto mpv = target_ply->find_mpv_bone( );
@@ -286,7 +304,7 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 			}
 		}
 
-		settings::tr::manipulated = settings::manipulator && get_key(settings::manipulate_key);
+		settings::tr::manipulated = plusminus::ui::get_bool(xorstr_("manipulator")) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind")));
 
 		/*if (settings::desync && get_key(settings::desync_key)) {
 			float desyncTime = (Time::realtimeSinceStartup( ) - plly->lastSentTickTime( )) - 0.03125 * 3;
@@ -297,29 +315,29 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 
 		GLOBAL_TIME = Time::time( );
 
-		if (settings::manipulator && target_ply != nullptr && target_ply->isCached( ) && get_key(settings::manipulate_key))
+		if (plusminus::ui::get_bool(xorstr_("manipulator")) && target_ply != nullptr && target_ply->isCached( ) && get_key(plusminus::ui::get_keybind(xorstr_("manipulator bind"))))
 			other::find_manipulate_angle( );
 		else
 			if (!other::m_manipulate.empty( ))
 				other::m_manipulate = Vector3::Zero( );
 
-		Physics::IgnoreLayerCollision(4, 12, !settings::walkonwater);
-		Physics::IgnoreLayerCollision(30, 12, settings::walkonwater);
-		Physics::IgnoreLayerCollision(11, 12, settings::walkonwater);
+		Physics::IgnoreLayerCollision(4, 12, !plusminus::ui::get_bool(xorstr_("walk on water")));
+		Physics::IgnoreLayerCollision(30, 12, plusminus::ui::get_bool(xorstr_("walk on water")));
+		Physics::IgnoreLayerCollision(11, 12, plusminus::ui::get_bool(xorstr_("walk on water")));
 
-		if (get_key(settings::zoom_key))
+		if (get_key(plusminus::ui::get_keybind(xorstr_("zoom bind"))))
 			ConVar::Graphics::_fov( ) = 15.f;
 		else
-			ConVar::Graphics::_fov( ) = settings::camera_fov;
+			ConVar::Graphics::_fov( ) = plusminus::ui::get_float(xorstr_("camera fov"));
 
-		if (settings::fakeadmin)
+		if (plusminus::ui::get_bool(xorstr_("fake admin")))
 			plly->playerFlags( ) |= PlayerFlags::IsAdmin;
 
-		if (settings::freeaim)
+		if (plusminus::ui::get_bool(xorstr_("no attack restriction")))
 			if (plly->mounted( ))
 				plly->mounted( )->canWieldItems( ) = true;
 
-		if (settings::lightning != 0) {
+		if (plusminus::ui::get_combobox(xorstr_("lightning")) != 0) {
 			auto list = TOD_Sky::instances( );
 			if (list) {
 				for (int j = 0; j < list->size; j++) {
@@ -328,9 +346,9 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 						continue;
 
 					float amb = 1.f;
-					if (settings::lightning == 1)
+					if (plusminus::ui::get_combobox(xorstr_("lightning")) == 1)
 						amb = 4.f;
-					else if (settings::lightning == 2)
+					else if (plusminus::ui::get_combobox(xorstr_("lightning")) == 2)
 						amb = 6.f;
 
 					sky->Day( )->AmbientMultiplier( ) = amb == 4.f ? 0.2f : 1.f;
@@ -344,13 +362,13 @@ void ClientInput_hk(BasePlayer* plly, uintptr_t state) {
 
 	// before network 
 
-	if (settings::omnisprint)
+	if (plusminus::ui::get_bool(xorstr_("no sprinting restriction")))
 		LocalPlayer::Entity( )->add_modelstate_flag(ModelState::Flags::Sprinting);
 }
 
 void DoMovement_hk(Projectile* pr, float deltaTime) {
 	if (pr->isAuthoritative( ))
-		if (settings::bigger_bullets)
+		if (plusminus::ui::get_bool(xorstr_("big bullets")))
 			pr->thickness( ) = 1.f;
 		else
 			pr->thickness( ) = 0.1f;
@@ -360,7 +378,7 @@ void DoMovement_hk(Projectile* pr, float deltaTime) {
 float GetRandomVelocity_hk(ItemModProjectile* self) {
 	float modifier = 1.f;
 
-	if (settings::faster_bullets)
+	if (plusminus::ui::get_bool(xorstr_("fast bullets")))
 		modifier += 0.4f;
 
 	return self->GetRandomVelocity( ) * modifier;
@@ -368,7 +386,7 @@ float GetRandomVelocity_hk(ItemModProjectile* self) {
 void ProcessAttack_hk(BaseMelee* self, HitTest* hit) {
 	auto entity = hit->HitEntity( );
 
-	if (!settings::farm_assist || !entity)
+	if (!plusminus::ui::get_bool(xorstr_("farm assist")) || !entity)
 		return self->ProcessAttack(hit);
 
 	if (entity->class_name_hash( ) == STATIC_CRC32("OreResourceEntity")) {
@@ -392,7 +410,7 @@ void ProcessAttack_hk(BaseMelee* self, HitTest* hit) {
 	return self->ProcessAttack(hit);
 }
 void AddPunch_hk(HeldEntity* attackEntity, Vector3 amount, float duration) {
-	amount *= settings::recoil_p / 100.0f;
+	amount *= plusminus::ui::get_float(xorstr_("recoil %")) / 100.0f;
 
 	attackEntity->AddPunch(amount, duration);
 }
@@ -400,14 +418,14 @@ void AddPunch_hk(HeldEntity* attackEntity, Vector3 amount, float duration) {
 Vector3 MoveTowards_hk(Vector3 current, Vector3 target, float maxDelta) {
 	static auto ptr = METHOD("Assembly-CSharp::BaseProjectile::SimulateAimcone(): Void");
 	if (CALLED_BY(ptr, 0x800)) {
-		target *= settings::recoil_p / 100.0f;
-		maxDelta *= settings::recoil_p / 100.0f;
+		target *= plusminus::ui::get_float(xorstr_("recoil %")) / 100.0f;
+		maxDelta *= plusminus::ui::get_float(xorstr_("recoil %")) / 100.0f;
 	}
 
 	return Vector3_::MoveTowards(current, target, maxDelta);
 }
 bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
-	if (settings::penetrate) {
+	if (plusminus::ui::get_bool(xorstr_("pierce"))) {
 		if (prj->isAuthoritative( )) {
 			auto lol = test->HitEntity( );
 			auto go = test->gameObject( );
@@ -437,10 +455,10 @@ bool DoHit_hk(Projectile* prj, HitTest* test, Vector3 point, Vector3 normal) {
 	return prj->DoHit(test, point, normal);
 }
 void SetEffectScale_hk(Projectile* self, float eScale) {
-	return self->SetEffectScale((settings::psilent && self->isAuthoritative( )) ? 1.5f : eScale);
+	return self->SetEffectScale((plusminus::ui::get_bool(xorstr_("psilent")) && self->isAuthoritative( )) ? 1.5f : eScale);
 }
 System::Object_* StartCoroutine_hk(MonoBehaviour* a1, System::Object_* un2) {
-	if (settings::fastloot) {
+	if (plusminus::ui::get_bool(xorstr_("fast loot"))) {
 		static auto v = METHOD("Assembly-CSharp::ItemIcon::SetTimedLootAction(UInt32,Action): Void");
 		if (CALLED_BY(v, 0x656)) {
 			*reinterpret_cast<float*>(un2 + 0x28) = -0.2f;
@@ -450,15 +468,15 @@ System::Object_* StartCoroutine_hk(MonoBehaviour* a1, System::Object_* un2) {
 	return a1->StartCoroutine(un2);
 }
 void BobApply_hk(ViewmodelBob* self, uintptr_t vm, float fov) {
-	if (!settings::omnisprint)
+	if (!plusminus::ui::get_bool(xorstr_("no sprinting restriction")))
 		self->Apply(vm, fov);
 }
 void SwayApply_hk(ViewmodelSway* self, uintptr_t vm) {
-	if (!settings::omnisprint)
+	if (!plusminus::ui::get_bool(xorstr_("no sprinting restriction")))
 		self->Apply(vm);
 }
 void LowerApply_hk(ViewmodelLower* self, uintptr_t vm) {
-	if (!settings::omnisprint)
+	if (!plusminus::ui::get_bool(xorstr_("no sprinting restriction")))
 		self->Apply(vm);
 }
 String* ConsoleRun_hk(ConsoleSystem::Option* optiom, String* str, Array<System::Object_*>* args) {
@@ -483,6 +501,7 @@ void set_flying_hk(ModelState* modelState, bool state) {
 }
 void do_hooks( ) {
 	hookengine::hook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
+	hookengine::hook(BasePlayer::ClientUpdate_Sleeping_, ClientUpdate_Sleeping_hk);
 	hookengine::hook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
 	hookengine::hook(PlayerWalkMovement::HandleJumping_, HandleJumping_hk);
 	hookengine::hook(BasePlayer::CanAttack_, CanAttack_hk);

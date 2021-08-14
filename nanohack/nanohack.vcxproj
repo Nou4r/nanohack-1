@@ -79,12 +79,17 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\sduihfoqawhf\Documents\GitHub\nanohack\nanohack\core\drawing\zgui;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
     <VcpkgTriplet>x64-windows-static</VcpkgTriplet>
   </PropertyGroup>
@@ -128,13 +133,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;PLUSMINUSPRIVATE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>detours/detours.lib;ws2_32.lib;crypt32.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,8 +155,10 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,17 +171,78 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cpr\auth.cpp" />
+    <ClCompile Include="cpr\bearer.cpp" />
+    <ClCompile Include="cpr\cookies.cpp" />
+    <ClCompile Include="cpr\cprtypes.cpp" />
+    <ClCompile Include="cpr\curlholder.cpp" />
+    <ClCompile Include="cpr\curl_container.cpp" />
+    <ClCompile Include="cpr\error.cpp" />
+    <ClCompile Include="cpr\multipart.cpp" />
+    <ClCompile Include="cpr\parameters.cpp" />
+    <ClCompile Include="cpr\payload.cpp" />
+    <ClCompile Include="cpr\proxies.cpp" />
+    <ClCompile Include="cpr\proxyauth.cpp" />
+    <ClCompile Include="cpr\response.cpp" />
+    <ClCompile Include="cpr\session.cpp" />
+    <ClCompile Include="cpr\timeout.cpp" />
+    <ClCompile Include="cpr\unix_socket.cpp" />
+    <ClCompile Include="cpr\util.cpp" />
     <ClCompile Include="entry.cpp" />
+    <ClCompile Include="FGUI\widgets\button.cpp" />
+    <ClCompile Include="FGUI\widgets\checkbox.cpp" />
+    <ClCompile Include="FGUI\widgets\colorpicker.cpp" />
+    <ClCompile Include="FGUI\widgets\combobox.cpp" />
+    <ClCompile Include="FGUI\widgets\container.cpp" />
+    <ClCompile Include="FGUI\widgets\keybinder.cpp" />
+    <ClCompile Include="FGUI\widgets\label.cpp" />
+    <ClCompile Include="FGUI\widgets\listbox.cpp" />
+    <ClCompile Include="FGUI\widgets\multibox.cpp" />
+    <ClCompile Include="FGUI\widgets\slider.cpp" />
+    <ClCompile Include="FGUI\widgets\tabpanel.cpp" />
+    <ClCompile Include="FGUI\widgets\textbox.cpp" />
+    <ClCompile Include="FGUI\widgets\widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="auth\api.hpp" />
-    <ClInclude Include="auth\Fingerprint.hpp" />
-    <ClInclude Include="auth\WinReg.hpp" />
+    <ClInclude Include="cpr\api.h" />
+    <ClInclude Include="cpr\auth.h" />
+    <ClInclude Include="cpr\bearer.h" />
+    <ClInclude Include="cpr\body.h" />
+    <ClInclude Include="cpr\callback.h" />
+    <ClInclude Include="cpr\connect_timeout.h" />
+    <ClInclude Include="cpr\cookies.h" />
+    <ClInclude Include="cpr\cpr.h" />
+    <ClInclude Include="cpr\cprtypes.h" />
+    <ClInclude Include="cpr\curlholder.h" />
+    <ClInclude Include="cpr\curl_container.h" />
+    <ClInclude Include="cpr\digest.h" />
+    <ClInclude Include="cpr\error.h" />
+    <ClInclude Include="cpr\limit_rate.h" />
+    <ClInclude Include="cpr\low_speed.h" />
+    <ClInclude Include="cpr\max_redirects.h" />
+    <ClInclude Include="cpr\multipart.h" />
+    <ClInclude Include="cpr\ntlm.h" />
+    <ClInclude Include="cpr\parameters.h" />
+    <ClInclude Include="cpr\payload.h" />
+    <ClInclude Include="cpr\proxies.h" />
+    <ClInclude Include="cpr\proxyauth.h" />
+    <ClInclude Include="cpr\response.h" />
+    <ClInclude Include="cpr\session.h" />
+    <ClInclude Include="cpr\ssl_options.h" />
+    <ClInclude Include="cpr\status_codes.h" />
+    <ClInclude Include="cpr\timeout.h" />
+    <ClInclude Include="cpr\unix_socket.h" />
+    <ClInclude Include="cpr\user_agent.h" />
+    <ClInclude Include="cpr\util.h" />
+    <ClInclude Include="cpr\verbose.h" />
+    <ClInclude Include="utils\Fingerprint.hpp" />
+    <ClInclude Include="utils\WinReg.hpp" />
     <ClInclude Include="core\core.hpp" />
-    <ClInclude Include="core\drawing\framework.hpp" />
+    <ClInclude Include="core\drawing\fgui\FInput.hpp" />
+    <ClInclude Include="core\drawing\fgui\FRenderer.hpp" />
+    <ClInclude Include="core\drawing\ui.hpp" />
     <ClInclude Include="core\main\aimutils.hpp" />
     <ClInclude Include="core\main\cache.hpp" />
-    <ClInclude Include="core\main\config.hpp" />
     <ClInclude Include="core\sdk\utils\crc32.hpp" />
     <ClInclude Include="core\drawing\d3d.hpp" />
     <ClInclude Include="core\sdk\il2cpp\dissector.hpp" />
@@ -185,6 +256,25 @@
     <ClInclude Include="core\drawing\renderer.hpp" />
     <ClInclude Include="core\sdk\utils\string.hpp" />
     <ClInclude Include="core\sdk\utils\xorf.hpp" />
+    <ClInclude Include="FGUI\dependencies\external\json.hpp" />
+    <ClInclude Include="FGUI\FGUI.hpp" />
+    <ClInclude Include="FGUI\internal\aliases.hpp" />
+    <ClInclude Include="FGUI\internal\definitions.hpp" />
+    <ClInclude Include="FGUI\internal\helpers.hpp" />
+    <ClInclude Include="FGUI\misc\builder.hpp" />
+    <ClInclude Include="FGUI\widgets\button.hpp" />
+    <ClInclude Include="FGUI\widgets\checkbox.hpp" />
+    <ClInclude Include="FGUI\widgets\colorpicker.hpp" />
+    <ClInclude Include="FGUI\widgets\combobox.hpp" />
+    <ClInclude Include="FGUI\widgets\container.hpp" />
+    <ClInclude Include="FGUI\widgets\keybinder.hpp" />
+    <ClInclude Include="FGUI\widgets\label.hpp" />
+    <ClInclude Include="FGUI\widgets\listbox.hpp" />
+    <ClInclude Include="FGUI\widgets\multibox.hpp" />
+    <ClInclude Include="FGUI\widgets\slider.hpp" />
+    <ClInclude Include="FGUI\widgets\tabpanel.hpp" />
+    <ClInclude Include="FGUI\widgets\textbox.hpp" />
+    <ClInclude Include="FGUI\widgets\widgets.hpp" />
     <ClInclude Include="settings.hpp" />
     <ClInclude Include="core\stdafx.hpp" />
     <ClInclude Include="core\sdk\structs.hpp" />
@@ -198,6 +288,7 @@
     <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_LCC_inline.h" />
     <ClInclude Include="ThemidaSDK\SecureEngineCustomVMs_VC_inline.h" />
     <ClInclude Include="ThemidaSDK\ThemidaSDK.h" />
+    <ClInclude Include="utils\Cryptography.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

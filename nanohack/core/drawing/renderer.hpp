@@ -115,12 +115,10 @@ namespace Renderer {
 
 	Vector2 get_text_size(std::wstring text, float sz) 	{
 		const auto str = text;
-		const auto str_len = static_cast<std::uint32_t>(str.size( ));
+		const auto str_len = static_cast<std::uint32_t>(str.length( ));
 
 		IDWriteTextLayout* dwrite_layout = nullptr;
-
-		if (m_pTextEngine->CreateTextLayout(str.c_str( ), str_len, m_pTextFormat, screen_size.x, screen_size.y, &dwrite_layout) != S_OK)
-			return Vector2(0, 0);
+		RET_CHK(m_pTextEngine->CreateTextLayout(str.c_str(), str_len, m_pTextFormat, screen_size.x, screen_size.y, &dwrite_layout)) Vector2(0,0);
 
 		const DWRITE_TEXT_RANGE range
 		{
@@ -129,13 +127,11 @@ namespace Renderer {
 		};
 
 		dwrite_layout->SetFontSize(sz, range);
+
 		DWRITE_TEXT_METRICS metrics;
 		dwrite_layout->GetMetrics(&metrics);
 
-		float textW = metrics.width;
-		float textH = metrics.height;
-
-		return Vector2(textW, textH);
+		return Vector2(metrics.width, metrics.height);
 	}
 
 

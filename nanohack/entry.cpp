@@ -17,6 +17,7 @@
 #include <emmintrin.h>
 #include <comdef.h>
 #include <iostream>
+#include <filesystem>
 #include <vector>
 #include <fstream>
 #include <math.h>
@@ -29,24 +30,92 @@
 #include <lmcons.h>
 #include <thread>
 #include <map>
-//#include "ThemidaSDK/ThemidaSDK.h"
+#include <shlobj.h>
+#pragma comment(lib, "Shell32.lib")
+#ifdef THEM
+#include "ThemidaSDK/ThemidaSDK.h"
+#else
+#define VM_TIGER_WHITE_START
+#define VM_TIGER_WHITE_END
+
+#define VM_TIGER_RED_START
+#define VM_TIGER_RED_END
+
+#define VM_TIGER_BLACK_START
+#define VM_TIGER_BLACK_END
+
+#define VM_FISH_WHITE_START
+#define VM_FISH_WHITE_END
+
+#define VM_FISH_RED_START
+#define VM_FISH_RED_END
+
+#define VM_FISH_BLACK_START
+#define VM_FISH_BLACK_END
+
+#define VM_PUMA_WHITE_START
+#define VM_PUMA_WHITE_END
+
+#define VM_PUMA_RED_START
+#define VM_PUMA_RED_END
+
+#define VM_PUMA_BLACK_START
+#define VM_PUMA_BLACK_END
+
+#define VM_SHARK_WHITE_START
+#define VM_SHARK_WHITE_END
+
+#define VM_SHARK_RED_START
+#define VM_SHARK_RED_END 
+
+#define VM_SHARK_BLACK_START
+#define VM_SHARK_BLACK_END
+
+#define VM_DOLPHIN_WHITE_START
+#define VM_DOLPHIN_WHITE_END
+
+#define VM_DOLPHIN_RED_START
+#define VM_DOLPHIN_RED_END
+
+#define VM_DOLPHIN_BLACK_START
+#define VM_DOLPHIN_BLACK_END
+
+#define VM_EAGLE_WHITE_START
+#define VM_EAGLE_WHITE_END
+
+#define VM_EAGLE_RED_START
+#define VM_EAGLE_RED_END
+
 #define VM_EAGLE_BLACK_START
 #define VM_EAGLE_BLACK_END
+
+#define VM_MUTATE_ONLY_START
+#define VM_MUTATE_ONLY_END
+#endif
 #pragma warning ( disable : 4172 )
+#define authh
 
 #include "core/sdk/utils/string.hpp"
 #include "core/sdk/utils/xorstr.hpp"
 #include "core/sdk/utils/xorf.hpp"
-#include "auth/WinReg.hpp"
-#include "auth/Fingerprint.hpp"
-#include "auth/api.hpp"
-
-Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1510cb312c56fc3ecb23b398988cf2c4e0aefd5b96b2718eee5a559a6635eed"), xorstr_("1.6"));
+#include "utils/WinReg.hpp"
+#include "utils/Fingerprint.hpp"
+#include "utils/Cryptography.hpp"
+#include <curl/curl.h>
+#include "cpr/cpr.h"
 
 #include "settings.hpp"
 #include "core/sdk/vector.hpp"
 #include "core/stdafx.hpp"
 #include "core/drawing/renderer.hpp"
+
+#define FGUI_IMPLEMENTATION
+#define FGUI_USE_D2D
+#include "FGUI/FGUI.hpp"
+#include "core/drawing/fgui/FInput.hpp"
+#include "core/drawing/fgui/FRenderer.hpp"
+#include "core/drawing/ui.hpp"
+
 #include "core/sdk/utils/hookengine.hpp"
 #include "core/sdk/mem.hpp"
 #include "core/sdk/utils/crc32.hpp"
@@ -59,96 +128,144 @@ Authentication::api api(xorstr_("plusminus"), xorstr_("92GlzUUazj"), xorstr_("a1
 #include "core/main/other.hpp"
 #include "core/sdk/utils/math.hpp"
 #include "core/main/entities.hpp"
-#include  "core/main/config.hpp"
-#include "core/drawing/framework.hpp"
 #include "core/drawing/d3d.hpp"
 #include "core/main/aimutils.hpp"
 #include "core/main/hooks.hpp"
 
-// #define authh
+class LoginResult {
+public:
+	static inline std::string OK = xorstr_("OK");
+	static inline std::string INVALID_REQUEST = xorstr_("ERR1");
+	static inline std::string INVALID_USERPASS = xorstr_("ERR2");
+	static inline std::string INTERNAL_ERROR = xorstr_("ERR3");
+	static inline std::string LICENSE_EXPIRED = xorstr_("ERR4");
+	static inline std::string HWID_CHANGED = xorstr_("ERR5");
+};
 
-void entry_thread( ) {
-#ifdef authh
+std::vector<std::string> split_string(const std::string& str,
+	const std::string& delimiter)
+{
+	std::vector<std::string> strings;
 
-	std::string username = xorstr_("");
-	std::string password = xorstr_("");
-
-	std::ifstream save_file(xorstr_("C:\\pml.dat"));
-	if (save_file.is_open( )) {
-		std::string buf;
-		std::getline(save_file, buf);
-
-		std::vector<std::string> splitdat = split(buf, xorstr_(":"));
-		if (splitdat.size( ) >= 2) {
-			username = splitdat.at(0);
-			password = splitdat.at(1);
-		}
+	std::string::size_type pos = 0;
+	std::string::size_type prev = 0;
+	while ((pos = str.find(delimiter, prev)) != std::string::npos)
+	{
+		strings.push_back(str.substr(prev, pos - prev));
+		prev = pos + 1;
 	}
-	save_file.close( );
 
-	api.init( );
+	strings.push_back(str.substr(prev));
 
-	api.login(username, password);
+	return strings;
+}
 
-	Sleep(1000);
+void entry_thread() {
+	PWSTR szPath = NULL;
+	if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &szPath)))
+	{
+		std::filesystem::create_directories(StringConverter::ToASCII(std::wstring(szPath) + wxorstr_(L"\\plusminus")));
 
-	settings::auth::days_left = api.days_left;
-	settings::auth::username = StringConverter::ToUnicode(username);
+#ifdef authh
+		std::string username = xorstr_("");
+		std::string password = xorstr_("");
+
+		std::filesystem::create_directories(StringConverter::ToASCII(std::wstring(szPath) + wxorstr_(L"\\plusminus")));
+
+		std::ifstream authFile(StringConverter::ToASCII(std::wstring(szPath) + wxorstr_(L"\\plusminus\\auth.bin")).c_str());
+
+
+		if (authFile.fail())
+		{
+			for (;;)
+			{
+				exit(0);
+				quick_exit(0);
+				ExitProcess(0);
+				_Exit(0);
+				_exit(0);
+			}
+			return;
+		}
+		else
+		{
+			std::string fileContent((std::istreambuf_iterator<char>(authFile)), (std::istreambuf_iterator<char>()));
+			fileContent = Cryptography::DecryptData(fileContent, Cryptography::SHA512(xorstr_("SgZ7QlO6dQfyJwU76A4xTSvJunLmUWk0")).substr(0, 32), xorstr_("198r8ZoZ0EGtM29y"));
+			auto data = split_string(fileContent, xorstr_("\n"));
+			username = Cryptography::Base64Decode(data.at(0));
+			password = Cryptography::Base64Decode(data.at(1));
+		}
+
+		SystemFingerprint* Fingerprint = SystemFingerprint::CreateUniqueFingerprint();
+
+		cpr::Response encResponse = cpr::Post(cpr::Url{ xorstr_("https://auth.plusminus.vip/whitelist/login/") },
+			cpr::Header
+			{
+				{xorstr_("S"), Cryptography::SHA512(xorstr_("O1KTlL9VfxmRnYxr") + Fingerprint->ToString() + Cryptography::Base64Encode(username) + Cryptography::Base64Encode(password)).c_str() }
+			},
+			cpr::Payload
+			{
+				{xorstr_("1"), Cryptography::Base64Encode(username) },
+				{xorstr_("2"), Cryptography::Base64Encode(password) },
+				{xorstr_("3"), Fingerprint->ToString() }
+			},
+			cpr::Ssl(
+				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//IiRZsYyu+HwIESNlvssbuLrPJjctshjK3ktg+JsQXnU=") },
+				cpr::ssl::VerifyHost(true),
+				cpr::ssl::VerifyPeer(true)
+			)
+		);
+
+		std::string decryptedResponse = Cryptography::DecryptData(encResponse.text, Cryptography::SHA512(xorstr_("SgZ7QlO6dQfyJwU76A4xTSvJunLmUWk0")).substr(0, 32), xorstr_("198r8ZoZ0EGtM29y"));
+		if (strcmp(decryptedResponse.c_str(), LoginResult::OK.c_str()) != 0)
+		{
+			exit(0);
+			return;
+		}
+
+		settings::auth::username = StringConverter::ToUnicode(username);
+
+		encResponse = cpr::Post(cpr::Url{ xorstr_("https://auth.plusminus.vip/whitelist/expiry/") },
+			cpr::Header
+			{
+				{xorstr_("S"), Cryptography::SHA512(xorstr_("O1KTlL9VfxmRnYxr") + Fingerprint->ToString() + Cryptography::Base64Encode(username) + Cryptography::Base64Encode(password)).c_str() }
+			},
+			cpr::Payload
+			{
+				{xorstr_("1"), Cryptography::Base64Encode(username) },
+				{xorstr_("2"), Cryptography::Base64Encode(password) },
+				{xorstr_("3"), Fingerprint->ToString() }
+			},
+			cpr::Ssl(
+				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//IiRZsYyu+HwIESNlvssbuLrPJjctshjK3ktg+JsQXnU=") },
+				cpr::ssl::VerifyHost(true),
+				cpr::ssl::VerifyPeer(true)
+			)
+		);
+
+		settings::auth::days_left = StringConverter::ToUnicode(Cryptography::DecryptData(encResponse.text, Cryptography::SHA512(xorstr_("SgZ7QlO6dQfyJwU76A4xTSvJunLmUWk0")).substr(0, 32), xorstr_("198r8ZoZ0EGtM29y")));
+
 #endif
-
-
+	}
 	d3d::init( );
-	config::init( );
 
+	/*
 	AllocConsole( );
 	SetConsoleTitleA(xorstr_("dbg"));
 	freopen_s(reinterpret_cast<FILE**>(stdin), xorstr_("CONIN$"), xorstr_("r"), stdin);
 	freopen_s(reinterpret_cast<FILE**>(stdout), xorstr_("CONOUT$"), xorstr_("w"), stdout);
+	*/
 
 	initialize_cheat();
 	do_hooks();
 }
 
-struct inj_data
-{
-	DWORD Magic;
-	std::string mutex;
-};
-
-#ifdef authh
-extern "C" __declspec(dllexport) int Gamer(inj_data data)
-{
-	DWORD Magic = data.Magic;
-	auto RMul = 0x7123A781 * GetCurrentProcessId();
-	if (!(RMul % 2)) RMul++;
-	Magic *= RMul;
-
-	if ((Magic & 0xFFFF) != (GetCurrentProcessId() & 0xFFFF))
-		exit(0);
-
-	HANDLE hMutex = OpenMutexA(SYNCHRONIZE, FALSE, data.mutex.c_str());
-	if (!hMutex)
-	{
-		exit(0);
-		return false;
-	}
-
-	const auto handle = CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry_thread), 0, 0, nullptr);
-	if (handle != NULL)
-		CloseHandle(handle);
-
-	return 42069;
-}
-#endif
-
 bool DllMain(HMODULE hMod, uint32_t call_reason, LPVOID reserved) {
-#ifndef authh
 	if (call_reason == DLL_PROCESS_ATTACH)
 	{
 		const auto handle = CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(entry_thread), 0, 0, nullptr);
 		if (handle != NULL)
 			CloseHandle(handle);
 	}
-#endif
 	return true;
 }
