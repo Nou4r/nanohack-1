@@ -42,7 +42,7 @@ namespace d3d {
 					entities::loop( );
 
 				if (plusminus::ui::get_bool(xorstr_("draw targeting fov")))
-					Renderer::circle(screen_center, plusminus::ui::get_color(xorstr_("draw targeting fov")), plusminus::ui::get_float(xorstr_("targeting fov color")), 1.f);
+					Renderer::circle(screen_center, plusminus::ui::get_color(xorstr_("targeting fov color")), plusminus::ui::get_float(xorstr_("targeting fov")), 1.f);
 
 				Renderer::end_frame( );
 			}
