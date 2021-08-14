@@ -55,7 +55,6 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 	auto localPlayer = LocalPlayer::Entity( );
 	if (localPlayer) {
 
-
 		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == localPlayer->userID( )) { // isAuthoritative
 			if (plusminus::ui::get_bool(xorstr_("bullet tracers"))) {
 				DDraw::Line(localPlayer->eyes( )->position( ), ret->hitPositionWorld( ), Color(1, 0, 0, 1), 1.5f, false, true);
