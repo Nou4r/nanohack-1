@@ -58,7 +58,6 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 		if (reinterpret_cast<BasePlayer*>(self->ignoreEntity( ))->userID( ) == localPlayer->userID( )) { // isAuthoritative
 			if (plusminus::ui::get_bool(xorstr_("bullet tracers"))) {
 				DDraw::Line(localPlayer->eyes( )->position( ), ret->hitPositionWorld( ), Color(1, 0, 0, 1), 1.5f, false, true);
-				DDraw::Sphere(ret->pointEnd( ), 0.05f, Color(1, 0, 0, 1), 1.5f, false);
 			}
 
 
@@ -72,13 +71,8 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 
 							if (plusminus::ui::get_bool(xorstr_("big bullets"))) {
 								auto bone = entity->model( )->find_bone(ret->hitPositionWorld( ));
-								if (bone.second) { // f
-									if (plusminus::ui::get_bool(xorstr_("bullet tracers")))
-										DDraw::Sphere(ret->hitPositionWorld( ), 0.05f, Color(1, 1, 1, 1), 1.5f, false);
-
+								if (bone.second) {
 									ret->hitPositionWorld( ) = bone.first->position( );
-
-									DDraw::Sphere(ret->hitPositionWorld( ), 0.05f, Color(0, 1, 0, 1), 1.5f, false);
 								}
 							}
 							if (plusminus::ui::get_combobox(xorstr_("hitbox override")) != 0) {
