@@ -60,7 +60,6 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 				DDraw::Line(localPlayer->eyes( )->position( ), ret->hitPositionWorld( ), Color(1, 0, 0, 1), 1.5f, false, true);
 			}
 
-
 			if (entity) {
 				if (entity->IsPlayer( )) {
 					if (entity->isCached( )) {
