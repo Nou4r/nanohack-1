@@ -287,11 +287,7 @@ namespace plusminus::ui
 		wrapper::checkbox(xorstr_("no attack restriction"), Vector2(160.0f, 0), Tabs::Misc);
 		wrapper::checkbox(xorstr_("no sprinting restriction"), Vector2(160.0f, 0), Tabs::Misc);
 		wrapper::checkbox(xorstr_("no fall damage"), Vector2(160.0f, 0), Tabs::Misc);
-<<<<<<< Updated upstream
-		wrapper::combobox(xorstr_("crosshair"), { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats"), xorstr_("dot") }, Vector2(160.0f, 0), Tabs::Misc);
-=======
 		wrapper::combobox(xorstr_("crosshair"), { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats"), xorstr_("circle"), xorstr_("swastika") }, Vector2(160.0f, 0), Tabs::Misc);
->>>>>>> Stashed changes
 		wrapper::textbox(xorstr_("config name"), Vector2(160.0f, 0), Tabs::Misc, xorstr_("default"));
 		wrapper::button(xorstr_("Save Config"), [&]() {
 			PWSTR szPath = NULL;
