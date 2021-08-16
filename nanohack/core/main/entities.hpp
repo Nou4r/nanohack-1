@@ -93,7 +93,30 @@ namespace entities {
 					return plusminus::ui::get_color("invisible boxes");
 		}
 	}
+
+	float BOG_TO_GRD(float BOG) {
+		return (180 / M_PI) * BOG;
+	}
+
+	float GRD_TO_BOG(float GRD) {
+		return (M_PI / 180) * GRD;
+	}
+
+	__forceinline uint32_t RandomInteger(uint32_t Min, uint32_t Max)
+	{
+		std::random_device rd;
+		std::mt19937 eng(rd());
+		const std::uniform_int_distribution<uint32_t> distr(Min, Max);
+		return distr(eng);
+	}
+
 	void loop( ) {
+		static Color3 clr = Color3(RandomInteger(100, 255), RandomInteger(100, 255), RandomInteger(100, 255), 255);
+		static float faken_rot = 0.0f;
+		static int gamerjuice = 0;
+		float a = screen_center.y / 30.0f;
+		float gamma = atan(a / a);
+
 		switch (plusminus::ui::get_combobox(xorstr_("crosshair"))) {
 		case 1:
 			Renderer::circle(screen_center - Vector2(2, 2), Color3(255, 255, 255), 4.f, 0.75f);
@@ -115,6 +138,31 @@ namespace entities {
 			Renderer::circle(screen_center, Color3(0, 0, 0), 4.f, 1.f);
 			Renderer::circle(screen_center, Color3(255, 255, 255), 3.f, 1.f);
 			break;
+		case 4:
+
+			if ((int)faken_rot > 89) { faken_rot = (float)0; }
+			faken_rot++;
+
+			if (gamerjuice > 30)
+			{
+				gamerjuice = 0;
+				clr = Color3(RandomInteger(0, 255), RandomInteger(0, 255), RandomInteger(0, 255), 255);
+			}
+			else
+				gamerjuice++;
+
+			for (int i = 0; i < 4; i++)
+			{
+				std::vector <int> p;
+				p.push_back(a * sin(GRD_TO_BOG(faken_rot + (i * 90))));									//p[0]		p0_A.x
+				p.push_back(a * cos(GRD_TO_BOG(faken_rot + (i * 90))));									//p[1]		p0_A.y
+				p.push_back((a / cos(gamma)) * sin(GRD_TO_BOG(faken_rot + (i * 90) + BOG_TO_GRD(gamma))));	//p[2]		p0_B.x
+				p.push_back((a / cos(gamma)) * cos(GRD_TO_BOG(faken_rot + (i * 90) + BOG_TO_GRD(gamma))));	//p[3]		p0_B.y
+
+
+				Renderer::line(screen_center, { screen_center.x + p[0], screen_center.y - p[1] }, clr);
+				Renderer::line({ screen_center.x + p[0], screen_center.y - p[1] }, { screen_center.x + p[2], screen_center.y - p[3] }, clr);
+			}
 		default:
 			break;
 		}

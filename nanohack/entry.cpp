@@ -12,6 +12,7 @@
 #include <locale>
 #include <cstdint>
 #include <algorithm>
+#include <random>
 #include <iostream>
 #include <iomanip>
 #include <emmintrin.h>
@@ -210,7 +211,7 @@ void entry_thread() {
 				{xorstr_("3"), Fingerprint->ToString() }
 			},
 			cpr::Ssl(
-				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//IiRZsYyu+HwIESNlvssbuLrPJjctshjK3ktg+JsQXnU=") },
+				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//E1R0iKEP0iGOxvYAmnMcF7KS0+74zLzU5wymBEfoy/Y=") },
 				cpr::ssl::VerifyHost(true),
 				cpr::ssl::VerifyPeer(true)
 			)
@@ -237,7 +238,7 @@ void entry_thread() {
 				{xorstr_("3"), Fingerprint->ToString() }
 			},
 			cpr::Ssl(
-				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//IiRZsYyu+HwIESNlvssbuLrPJjctshjK3ktg+JsQXnU=") },
+				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//E1R0iKEP0iGOxvYAmnMcF7KS0+74zLzU5wymBEfoy/Y=") },
 				cpr::ssl::VerifyHost(true),
 				cpr::ssl::VerifyPeer(true)
 			)
@@ -258,6 +259,12 @@ void entry_thread() {
 
 	initialize_cheat();
 	do_hooks();
+}
+
+extern "C" __declspec(dllexport) int Gamer()
+{
+	MessageBoxA(0, "Success", "gamer", 0);
+	return 1337;
 }
 
 bool DllMain(HMODULE hMod, uint32_t call_reason, LPVOID reserved) {
