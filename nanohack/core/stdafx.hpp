@@ -185,3 +185,6 @@ enum Bone_List : int {
     collision = 83,
     displacement = 84
 };
+bool play_sound(const char* name) {
+    return PlaySoundA(name, GetModuleHandle(NULL), SND_FILENAME | SND_ASYNC);
+}

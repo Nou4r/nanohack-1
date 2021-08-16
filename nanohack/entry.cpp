@@ -33,6 +33,7 @@
 #include <map>
 #include <shlobj.h>
 #pragma comment(lib, "Shell32.lib")
+#pragma comment(lib, "Winmm.lib")
 #ifdef THEM
 #include "ThemidaSDK/ThemidaSDK.h"
 #else
@@ -94,7 +95,7 @@
 #define VM_MUTATE_ONLY_END
 #endif
 #pragma warning ( disable : 4172 )
-#define authh
+//#define authh
 
 #include "core/sdk/utils/string.hpp"
 #include "core/sdk/utils/xorstr.hpp"
@@ -124,7 +125,6 @@
 #include "core/sdk/il2cpp/dissector.hpp"
 #include "core/sdk/structs.hpp"
 #include "core/sdk/game.hpp"
-#include "core/core.hpp"
 #include "core/main/cache.hpp"
 #include "core/main/other.hpp"
 #include "core/sdk/utils/math.hpp"

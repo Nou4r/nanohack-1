@@ -260,28 +260,20 @@ namespace entities {
 						Renderer::rectangle_filled(Vector2(belt::pos.x + 5.0f, belt::pos.y + 5.0f), Vector2(w - 10, h - 10), Color3(25, 25, 25));
 
 						Renderer::text({ belt::pos.x + 7.0f, belt::pos.y - 16.0f }, Color3(255, 255, 255), 12.f, false, false, target_ply->_displayName( ));
-						if (std::uint64_t(target_ply->inventory()) > 0x1000)
-						{
-							if (std::uint64_t(target_ply->inventory()->containerBelt()) > 0x1000)
-							{
-								if (std::uint64_t(target_ply->inventory()->containerBelt()->itemList()) > 0x1000)
-								{
-									auto list = target_ply->inventory()->containerBelt()->itemList();
-									if (list) {
-										int y = 0;
-										for (int i = 0; i < list->size; i++) {
-											auto item = (Item*)list->get(i);
-											if (!item)
-												continue;
 
-											Color3 col = item->uid() == target_ply->clActiveItem() ? Color3(255, 0, 0) : Color3(255, 255, 255);
+						auto list = target_ply->inventory( )->containerBelt( )->itemList( );
+						if (list) {
+							int y = 0;
+							for (int i = 0; i < list->size; i++) {
+								auto item = (Item*)list->get(i);
+								if (!item)
+									continue;
 
-											Renderer::text({ belt::pos.x + 7.0f, belt::pos.y + 7.0f + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info()->displayName()->english(), item->amount());
+								Color3 col = item->uid( ) == target_ply->clActiveItem( ) ? Color3(255, 0, 0) : Color3(255, 255, 255);
 
-											y += 15;
-										}
-									}
-								}
+								Renderer::text({ belt::pos.x + 7.0f, belt::pos.y + 7.0f + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
+
+								y += 15;
 							}
 						}
 					}

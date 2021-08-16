@@ -237,7 +237,6 @@
     <ClInclude Include="cpr\verbose.h" />
     <ClInclude Include="utils\Fingerprint.hpp" />
     <ClInclude Include="utils\WinReg.hpp" />
-    <ClInclude Include="core\core.hpp" />
     <ClInclude Include="core\drawing\fgui\FInput.hpp" />
     <ClInclude Include="core\drawing\fgui\FRenderer.hpp" />
     <ClInclude Include="core\drawing\ui.hpp" />

@@ -1,6 +1,5 @@
 namespace other {
 	Vector3 m_manipulate = Vector3::Zero( );
-	float m_last_manipulate_time = 0.f;
 
 	float m_max_eye = 0.f;
 
@@ -55,7 +54,6 @@ namespace other {
 		}
 
 		m_manipulate = choice;
-		m_last_manipulate_time = Time::time( );
 	}
 	void test_bundle(AssetBundle* bundle) {
 		if (!bundle) {

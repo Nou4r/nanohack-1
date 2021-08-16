@@ -23,12 +23,18 @@ namespace mem {
 
 		return 0;
 	}
-	template<typename T = uintptr_t>
-	T read_chain(uintptr_t start_address, std::vector<uintptr_t> addresses) {
-		T ret = start_address;
-		for (uintptr_t addy : addresses) {
-			ret = *reinterpret_cast<T*>(ret + addy);
-		}
-		return ret;
+	template<typename T = uintptr_t, typename A>
+	T& read(A address) {
+		auto addresss = (DWORD64)address;
+		if (addresss > 0x40000 && (addresss + sizeof(T)) < 0x7FFFFFFF0000)
+			return *(T*)addresss;
+
+		T n = { };
+		return reinterpret_cast<T&>(n);
+	}
+	template <typename T>
+	void write(uintptr_t address, T data) {
+		if (address > 0x40000 && (address + sizeof(T)) < 0x7FFFFFFF0000)
+			*(T*)(address) = data;
 	}
 }

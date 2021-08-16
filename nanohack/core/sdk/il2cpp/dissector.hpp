@@ -243,7 +243,7 @@ private:
 #define FIELD(field_path,name,type) type& name() { \
 		NP(type) \
 		static auto off = OFFSET(field_path); \
-		return *reinterpret_cast<type*>(this + off); }
+		return mem::read<type>(this + off); }
 
 #define OFFSET_FIELD(offset,name,type) type& name() { \
 		NP(type) \

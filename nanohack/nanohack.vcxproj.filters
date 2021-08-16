@@ -185,7 +185,6 @@
     <ClInclude Include="utils\Fingerprint.hpp" />
     <ClInclude Include="utils\WinReg.hpp" />
     <ClInclude Include="core\sdk\utils\xorf.hpp" />
-    <ClInclude Include="core\core.hpp" />
     <ClInclude Include="utils\Cryptography.hpp" />
     <ClInclude Include="core\drawing\fgui\FRenderer.hpp" />
     <ClInclude Include="core\drawing\fgui\FInput.hpp" />
