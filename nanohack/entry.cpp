@@ -95,7 +95,10 @@
 #define VM_MUTATE_ONLY_END
 #endif
 #pragma warning ( disable : 4172 )
-//#define authh
+#pragma warning ( disable : 4244 )
+#pragma warning ( disable : 4305 )
+
+#define authh
 
 #include "core/sdk/utils/string.hpp"
 #include "core/sdk/utils/xorstr.hpp"

@@ -160,8 +160,8 @@ namespace entities {
 				p.push_back((a / cos(gamma)) * cos(GRD_TO_BOG(faken_rot + (i * 90) + BOG_TO_GRD(gamma))));	//p[3]		p0_B.y
 
 
-				Renderer::line(screen_center, { screen_center.x + p[0], screen_center.y - p[1] }, clr);
-				Renderer::line({ screen_center.x + p[0], screen_center.y - p[1] }, { screen_center.x + p[2], screen_center.y - p[3] }, clr);
+				Renderer::line(screen_center, { screen_center.x + p[0], screen_center.y - p[1] }, clr, true);
+				Renderer::line({ screen_center.x + p[0], screen_center.y - p[1] }, { screen_center.x + p[2], screen_center.y - p[3] }, clr, true);
 			}
 		default:
 			break;
@@ -263,17 +263,19 @@ namespace entities {
 
 						auto list = target_ply->inventory( )->containerBelt( )->itemList( );
 						if (list) {
-							int y = 0;
-							for (int i = 0; i < list->size; i++) {
-								auto item = (Item*)list->get(i);
-								if (!item)
-									continue;
+							if (list->size) {
+								int y = 0;
+								for (int i = 0; i < list->size; i++) {
+									auto item = (Item*)list->get(i);
+									if (!item)
+										continue;
 
-								Color3 col = item->uid( ) == target_ply->clActiveItem( ) ? Color3(255, 0, 0) : Color3(255, 255, 255);
+									Color3 col = item->uid( ) == target_ply->clActiveItem( ) ? Color3(255, 0, 0) : Color3(255, 255, 255);
 
-								Renderer::text({ belt::pos.x + 7.0f, belt::pos.y + 7.0f + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
+									Renderer::text({ belt::pos.x + 7.0f, belt::pos.y + 7.0f + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
 
-								y += 15;
+									y += 15;
+								}
 							}
 						}
 					}

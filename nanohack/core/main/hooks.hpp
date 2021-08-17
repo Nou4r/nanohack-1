@@ -229,13 +229,13 @@ bool IsDown_hk(InputState* self, BUTTON btn) {
 void OnAttacked_hk(BaseCombatEntity* self, HitInfo* info) {
 	self->OnAttacked(info);
 
-	if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
+	/*if (self->class_name_hash( ) == STATIC_CRC32("BasePlayer")) {
 		if (info->Initiator( ) == LocalPlayer::Entity( )) {
 			auto entity = reinterpret_cast<BasePlayer*>(self);
 
 			play_sound(xorstr_("hs.wav"));
 		}
-	}
+	}*/
 
 }
 void ClientInput_hk(BasePlayer* plly, uintptr_t state) {

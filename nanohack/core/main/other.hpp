@@ -1,8 +1,6 @@
 namespace other {
 	Vector3 m_manipulate = Vector3::Zero( );
 
-	float m_max_eye = 0.f;
-
 	void find_manipulate_angle( ) {
 		auto loco = LocalPlayer::Entity( );
 		Vector3 re_p = loco->transform( )->position( ) + loco->transform( )->up( ) * (PlayerEyes::EyeOffset( ).y + loco->eyes( )->viewOffset( ).y);

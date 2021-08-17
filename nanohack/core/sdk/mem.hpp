@@ -29,7 +29,7 @@ namespace mem {
 		if (addresss > 0x40000 && (addresss + sizeof(T)) < 0x7FFFFFFF0000)
 			return *(T*)addresss;
 
-		T n = { };
+		auto n = nullptr;
 		return reinterpret_cast<T&>(n);
 	}
 	template <typename T>

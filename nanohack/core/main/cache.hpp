@@ -93,7 +93,7 @@ namespace bonecache {
 
 				if (target_ply != nullptr) {
 					if (player->userID( ) == target_ply->userID( )) {
-						float h = LocalPlayer::Entity( )->mounted( ) == nullptr ? 7 : 28;
+						float h = LocalPlayer::Entity( )->mounted( ) == nullptr ? 8 : 28;
 						auto right = LocalPlayer::Entity( )->eyes( )->MovementRight( );
 
 						if ((LineOfSight(target, LocalPlayer::Entity( )->bones( )->head->position + Vector3(0, h, 0)) ||
