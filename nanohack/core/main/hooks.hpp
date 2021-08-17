@@ -7,11 +7,6 @@ void ClientUpdate_hk(BasePlayer* player) {
 		if (plusminus::ui::get_bool(xorstr_("players")) || plusminus::ui::get_bool(xorstr_("sleepers"))) {
 			bonecache::cachePlayer(player);
 		}
-		if (local->userID( ) == player->userID( )) {
-			if (target_ply != nullptr)
-				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->is_teammate( ) || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || entities::dfc(target_ply) > plusminus::ui::get_float(xorstr_("targeting fov")) || (target_ply->playerModel( )->isNpc( ) && !plusminus::ui::get_bool(xorstr_("npc"))))
-					target_ply = nullptr;
-		}
 	}
 	return player->ClientUpdate( );
 }
@@ -64,7 +59,7 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 				if (entity->IsPlayer( )) {
 					if (entity->isCached( )) {
 						if (localPlayer->isCached( )) {
-							// trajectory_end = ~1 meter
+							// trajectory_end = 1 meter
 							// player_distance = 0.2 meter
 							// profit $$$$$$
 
@@ -80,6 +75,8 @@ Attack* BuildAttackMessage_hk(HitTest* self) {
 								else if (plusminus::ui::get_combobox(xorstr_("hitbox override")) == 2)
 									ret->hitBone( ) = StringPool::Get(xorstr_("head"));
 								else if (plusminus::ui::get_combobox(xorstr_("hitbox override")) == 3) {
+
+									// yandere dev in this bitch
 									int num = rand( ) % 100;
 									if (num > 90)
 										ret->hitBone( ) = StringPool::Get(xorstr_("head"));
@@ -359,6 +356,33 @@ float GetRandomVelocity_hk(ItemModProjectile* self) {
 }
 void ProcessAttack_hk(BaseMelee* self, HitTest* hit) {
 	auto entity = hit->HitEntity( );
+
+	//if (target_ply != nullptr) {
+	//	auto l1 = target_ply->playerModel( )->_multiMesh( )->Renderers( );
+	//	if (l1) {
+	//		for (int i = 0; i < l1->size; i++) {
+	//			auto rend = (Renderer_*)l1->get(i);
+	//			if (!rend)
+	//				continue;
+
+	//			std::cout << *reinterpret_cast<uintptr_t*>(rend->material( ) + 0xB0) << std::endl;
+	//			std::cout << reinterpret_cast<uintptr_t>(rend->material( )->shader( )) << std::endl << std::endl;
+
+	//			if (plusminus::ui::get_float(xorstr_("targeting fov")) > 1000) {
+	//				auto list = *reinterpret_cast<Array<Material*>**>(rend + 0x140);
+	//				if (list) {
+	//					for (int j = 0; j < list->size( ); j++) {
+	//						auto g = list->get(j);
+	//						if (!g)
+	//							continue;
+
+	//						*reinterpret_cast<Material**>(g) = nullptr;
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 	if (!plusminus::ui::get_bool(xorstr_("farm assist")) || !entity)
 		return self->ProcessAttack(hit);

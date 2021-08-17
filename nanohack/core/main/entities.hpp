@@ -230,51 +230,53 @@ namespace entities {
 			viewMatrix = Camera::getViewMatrix( );
 
 			if (target_ply != nullptr) {
-				if (target_ply->isCached( )) {
-					auto bounds = target_ply->bones( )->bounds;
-					if (!bounds.empty( ))
-						Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
+				if (!target_ply->IsValid( ) || target_ply->health( ) <= 0 || target_ply->is_teammate( ) || target_ply->HasPlayerFlag(PlayerFlags::Sleeping) || entities::dfc(target_ply) > plusminus::ui::get_float(xorstr_("targeting fov")) || (target_ply->playerModel( )->isNpc( ) && !plusminus::ui::get_bool(xorstr_("npc")))) {
+					target_ply = nullptr;
+				}
+				else {
+					if (target_ply->isCached( )) {
+						auto bounds = target_ply->bones( )->bounds;
+						if (!bounds.empty( ))
+							Renderer::line({ bounds.left + ((bounds.right - bounds.left) / 2), bounds.bottom }, { screen_center.x, screen_size.y }, Color3(255, 0, 0), true);
 
-					auto mpv = target_ply->find_mpv_bone( );
-					Bone* target;
-					if (mpv != nullptr)
-						target = mpv;
-					else
-						target = target_ply->bones( )->head;
+						auto mpv = target_ply->find_mpv_bone( );
+						Bone* target;
+						if (mpv != nullptr)
+							target = mpv;
+						else
+							target = target_ply->bones( )->head;
 
-					if (target->visible)
-						Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
+						if (target->visible)
+							Renderer::boldtext({ screen_center.x + 20, screen_center.y - 20 }, Color3(66, 135, 245), 12.f, true, true, wxorstr_(L"[s]"));
 
-					if (plusminus::ui::get_bool(xorstr_("manipulator")) && target_ply->bones( )->manipulatable)
-						Renderer::boldtext({ screen_center.x - 20, screen_center.y - 20 }, Color3(173, 0, 0), 12.f, true, true, wxorstr_(L"[m]"));
+						Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
 
-					Renderer::boldtext({ screen_center.x - 20, screen_center.y + 20 }, Color3(255, 0, 0), 12.f, true, true, wxorstr_(L"[t]"));
+						if (plusminus::ui::get_bool(xorstr_("target player belt")) && !plusminus::ui::is_menu_open( )) {
+							int w = 200, h = 102;
 
-					if (plusminus::ui::get_bool(xorstr_("target player belt")) && !plusminus::ui::is_menu_open( )) {
-						int w = 200, h = 102;
+							belt::belt_tab_mov(Vector2(w, -20));
 
-						belt::belt_tab_mov(Vector2(w, -20));
+							Renderer::rectangle_filled({ belt::pos.x, belt::pos.y - 20.0f }, Vector2(w, 20), Color3(25, 25, 25));
+							Renderer::rectangle_filled(Vector2(belt::pos.x, belt::pos.y), Vector2(w, h), Color3(36, 36, 36));
+							Renderer::rectangle_filled(Vector2(belt::pos.x + 5.0f, belt::pos.y + 5.0f), Vector2(w - 10, h - 10), Color3(25, 25, 25));
 
-						Renderer::rectangle_filled({ belt::pos.x, belt::pos.y - 20.0f }, Vector2(w, 20), Color3(25, 25, 25));
-						Renderer::rectangle_filled(Vector2(belt::pos.x, belt::pos.y), Vector2(w, h), Color3(36, 36, 36));
-						Renderer::rectangle_filled(Vector2(belt::pos.x + 5.0f, belt::pos.y + 5.0f), Vector2(w - 10, h - 10), Color3(25, 25, 25));
+							Renderer::text({ belt::pos.x + 7.0f, belt::pos.y - 16.0f }, Color3(255, 255, 255), 12.f, false, false, target_ply->_displayName( ));
 
-						Renderer::text({ belt::pos.x + 7.0f, belt::pos.y - 16.0f }, Color3(255, 255, 255), 12.f, false, false, target_ply->_displayName( ));
+							auto list = target_ply->inventory( )->containerBelt( )->itemList( );
+							if (list) {
+								if (list->size) {
+									int y = 0;
+									for (int i = 0; i < list->size; i++) {
+										auto item = (Item*)list->get(i);
+										if (!item)
+											continue;
 
-						auto list = target_ply->inventory( )->containerBelt( )->itemList( );
-						if (list) {
-							if (list->size) {
-								int y = 0;
-								for (int i = 0; i < list->size; i++) {
-									auto item = (Item*)list->get(i);
-									if (!item)
-										continue;
+										Color3 col = item->uid( ) == target_ply->clActiveItem( ) ? Color3(255, 0, 0) : Color3(255, 255, 255);
 
-									Color3 col = item->uid( ) == target_ply->clActiveItem( ) ? Color3(255, 0, 0) : Color3(255, 255, 255);
+										Renderer::text({ belt::pos.x + 7.0f, belt::pos.y + 7.0f + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
 
-									Renderer::text({ belt::pos.x + 7.0f, belt::pos.y + 7.0f + y }, col, 12.f, false, false, wxorstr_(L"%s [x%d]"), item->info( )->displayName( )->english( ), item->amount( ));
-
-									y += 15;
+										y += 15;
+									}
 								}
 							}
 						}

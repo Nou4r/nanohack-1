@@ -90,24 +90,6 @@ namespace bonecache {
 					target = mpv->position;
 				else
 					target = player->bones( )->head->position;
-
-				if (target_ply != nullptr) {
-					if (player->userID( ) == target_ply->userID( )) {
-						float h = LocalPlayer::Entity( )->mounted( ) == nullptr ? 8 : 28;
-						auto right = LocalPlayer::Entity( )->eyes( )->MovementRight( );
-
-						if ((LineOfSight(target, LocalPlayer::Entity( )->bones( )->head->position + Vector3(0, h, 0)) ||
-							LineOfSight(target, LocalPlayer::Entity( )->bones( )->head->position + Vector3(right.x * h, 0, right.z * h)) ||
-							LineOfSight(target, LocalPlayer::Entity( )->bones( )->head->position + Vector3(-(right.x * h), 0, -(right.z * h)))) &&
-
-							(LineOfSight(LocalPlayer::Entity( )->bones( )->head->position, LocalPlayer::Entity( )->bones( )->head->position + Vector3(0, h, 0)) ||
-								LineOfSight(LocalPlayer::Entity( )->bones( )->head->position, LocalPlayer::Entity( )->bones( )->head->position + Vector3(right.x * h, 0, right.z * h)) ||
-								LineOfSight(LocalPlayer::Entity( )->bones( )->head->position, LocalPlayer::Entity( )->bones( )->head->position + Vector3(-(right.x * h), 0, -(right.z * h))))) {
-
-							cache->manipulatable = true;
-						}
-					}
-				}
 				
 				cache->eye_rot = player->eyes( )->rotation( );
 			}
