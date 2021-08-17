@@ -98,7 +98,7 @@
 #pragma warning ( disable : 4244 )
 #pragma warning ( disable : 4305 )
 
- #define authh
+#define authh
 
 #include "core/sdk/utils/string.hpp"
 #include "core/sdk/utils/xorstr.hpp"
