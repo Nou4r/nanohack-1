@@ -1,6 +1,8 @@
 #define NOMINMAX
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+//#define THEM
+#define authh
 
 #include <Windows.h>
 #include <stdint.h>
@@ -95,10 +97,6 @@
 #define VM_MUTATE_ONLY_END
 #endif
 #pragma warning ( disable : 4172 )
-#pragma warning ( disable : 4244 )
-#pragma warning ( disable : 4305 )
-
-#define authh
 
 #include "core/sdk/utils/string.hpp"
 #include "core/sdk/utils/xorstr.hpp"
@@ -165,18 +163,19 @@ std::vector<std::string> split_string(const std::string& str,
 }
 
 void entry_thread() {
+	VM_DOLPHIN_BLACK_START
 	PWSTR szPath = NULL;
 	if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &szPath)))
 	{
 		std::filesystem::create_directories(StringConverter::ToASCII(std::wstring(szPath) + wxorstr_(L"\\plusminus")));
 
+		settings::data_dir = StringConverter::ToASCII(std::wstring(szPath) + wxorstr_(L"\\plusminus"));
+
 #ifdef authh
 		std::string username = xorstr_("");
 		std::string password = xorstr_("");
 
-		std::filesystem::create_directories(StringConverter::ToASCII(std::wstring(szPath) + wxorstr_(L"\\plusminus")));
-
-		std::ifstream authFile(StringConverter::ToASCII(std::wstring(szPath) + wxorstr_(L"\\plusminus\\auth.bin")).c_str());
+		std::ifstream authFile(settings::data_dir + xorstr_("\\auth.bin"));
 
 
 		if (authFile.fail())
@@ -214,7 +213,7 @@ void entry_thread() {
 				{xorstr_("3"), Fingerprint->ToString() }
 			},
 			cpr::Ssl(
-				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//E1R0iKEP0iGOxvYAmnMcF7KS0+74zLzU5wymBEfoy/Y=") },
+				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//IiRZsYyu+HwIESNlvssbuLrPJjctshjK3ktg+JsQXnU=") },
 				cpr::ssl::VerifyHost(true),
 				cpr::ssl::VerifyPeer(true)
 			)
@@ -241,7 +240,7 @@ void entry_thread() {
 				{xorstr_("3"), Fingerprint->ToString() }
 			},
 			cpr::Ssl(
-				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//E1R0iKEP0iGOxvYAmnMcF7KS0+74zLzU5wymBEfoy/Y=") },
+				cpr::ssl::PinnedPublicKey{ xorstr_("sha256//IiRZsYyu+HwIESNlvssbuLrPJjctshjK3ktg+JsQXnU=") },
 				cpr::ssl::VerifyHost(true),
 				cpr::ssl::VerifyPeer(true)
 			)
@@ -253,22 +252,24 @@ void entry_thread() {
 	}
 	d3d::init( );
 
-	
-	/*AllocConsole( );
+	/*
+	AllocConsole( );
 	SetConsoleTitleA(xorstr_("dbg"));
 	freopen_s(reinterpret_cast<FILE**>(stdin), xorstr_("CONIN$"), xorstr_("r"), stdin);
-	freopen_s(reinterpret_cast<FILE**>(stdout), xorstr_("CONOUT$"), xorstr_("w"), stdout);*/
-	
+	freopen_s(reinterpret_cast<FILE**>(stdout), xorstr_("CONOUT$"), xorstr_("w"), stdout);
+	*/
 
 	initialize_cheat();
 	do_hooks();
+
+	VM_DOLPHIN_BLACK_END
 }
 
-extern "C" __declspec(dllexport) int Gamer()
-{
-	MessageBoxA(0, "Success", "gamer", 0);
-	return 1337;
-}
+//extern "C" __declspec(dllexport) int Gamer()
+//{
+//	MessageBoxA(0, "Success", "gamer", 0);
+//	return 1337;
+//}
 
 bool DllMain(HMODULE hMod, uint32_t call_reason, LPVOID reserved) {
 	if (call_reason == DLL_PROCESS_ATTACH)

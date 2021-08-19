@@ -258,7 +258,6 @@ namespace plusminus::ui
 		wrapper::reset_height();
 		wrapper::checkbox(xorstr_("psilent"), Vector2(140.0f, 0), Tabs::Combat);
 		wrapper::checkbox(xorstr_("always heli weakspot"), Vector2(140.0f, 0), Tabs::Combat);
-		//wrapper::checkbox(xorstr_("hitbox override"), Vector2(0, 0), Tabs::Combat);
 		wrapper::combobox(xorstr_("hitbox override"), { xorstr_("none"), xorstr_("body"), xorstr_("head"), xorstr_("randomize (all)"), xorstr_("randomize (main)") }, Vector2(140.0f, 0), Tabs::Combat);
 		wrapper::checkbox(xorstr_("manipulator"), Vector2(140.0f, 0), Tabs::Combat, true, false);
 		wrapper::checkbox(xorstr_("autoshoot"), Vector2(140.0f, 0), Tabs::Combat);
@@ -290,24 +289,12 @@ namespace plusminus::ui
 		wrapper::combobox(xorstr_("crosshair"), { xorstr_("none"), xorstr_("plusminus"), xorstr_("evilcheats"), xorstr_("circle"), xorstr_("swastika") }, Vector2(160.0f, 0), Tabs::Misc);
 		wrapper::textbox(xorstr_("config name"), Vector2(160.0f, 0), Tabs::Misc, xorstr_("default"));
 		wrapper::button(xorstr_("Save Config"), [&]() {
-			PWSTR szPath = NULL;
-
-			if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &szPath)))
-			{
-				std::wstring configPath = std::wstring(szPath) + wxorstr_(L"\\plusminus");
-				if(!get_text(xorstr_("config name")).empty())
-					vars::Container->SaveToFile(StringConverter::ToASCII(configPath) + xorstr_("\\") + get_text(xorstr_("config name")) + xorstr_(".cfg"));
-			}
+			if (!get_text(xorstr_("config name")).empty())
+				vars::Container->SaveToFile(settings::data_dir + xorstr_("\\") + get_text(xorstr_("config name")) + xorstr_(".cfg"));
 		}, Vector2(160.0f, 0), Tabs::Misc);
 		wrapper::button(xorstr_("Load Config"), [&]() {
-			PWSTR szPath = NULL;
-
-			if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &szPath)))
-			{
-				std::wstring configPath = std::wstring(szPath) + wxorstr_(L"\\plusminus");
-				if (!get_text(xorstr_("config name")).empty())
-					vars::Container->LoadFromFile(StringConverter::ToASCII(configPath) + xorstr_("\\") + get_text(xorstr_("config name")) + xorstr_(".cfg"));
-			}
+			if (!get_text(xorstr_("config name")).empty())
+				vars::Container->LoadFromFile(settings::data_dir + xorstr_("\\") + get_text(xorstr_("config name")) + xorstr_(".cfg"));
 		}, Vector2(160.0f, 0), Tabs::Misc);
 
 		wrapper::button(xorstr_("Panic"), [&]() {

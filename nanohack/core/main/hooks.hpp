@@ -230,7 +230,8 @@ void OnAttacked_hk(BaseCombatEntity* self, HitInfo* info) {
 		if (info->Initiator( ) == LocalPlayer::Entity( )) {
 			auto entity = reinterpret_cast<BasePlayer*>(self);
 
-			play_sound(xorstr_("hs.wav"));
+			if(std::filesystem::exists(settings::data_dir + xorstr_("\\hs.wav")))
+				play_sound((settings::data_dir + xorstr_("\\hs.wav")).c_str());
 		}
 	}*/
 
@@ -498,6 +499,7 @@ void set_flying_hk(ModelState* modelState, bool state) {
 	modelState->set_flying(false);
 }
 void do_hooks( ) {
+	VM_DOLPHIN_BLACK_START
 	hookengine::hook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
 	hookengine::hook(BasePlayer::ClientUpdate_Sleeping_, ClientUpdate_Sleeping_hk);
 	hookengine::hook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
@@ -526,8 +528,10 @@ void do_hooks( ) {
 	hookengine::hook(PlayerEyes::DoFirstPersonCamera_, DoFirstPersonCamera_hk);
 	hookengine::hook(Vector3_::MoveTowards_, MoveTowards_hk);
 	hookengine::hook(HeldEntity::AddPunch_, AddPunch_hk);
+	VM_DOLPHIN_BLACK_END
 }
 void undo_hooks( ) {
+	VM_DOLPHIN_BLACK_START
 	hookengine::unhook(BasePlayer::ClientUpdate_, ClientUpdate_hk);
 	hookengine::unhook(PlayerWalkMovement::UpdateVelocity_, UpdateVelocity_hk);
 	hookengine::unhook(PlayerWalkMovement::HandleJumping_, HandleJumping_hk);
@@ -555,4 +559,5 @@ void undo_hooks( ) {
 	hookengine::unhook(PlayerEyes::DoFirstPersonCamera_, DoFirstPersonCamera_hk);
 	hookengine::unhook(Vector3_::MoveTowards_, MoveTowards_hk);
 	hookengine::unhook(HeldEntity::AddPunch_, AddPunch_hk);
+	VM_DOLPHIN_BLACK_END
 }

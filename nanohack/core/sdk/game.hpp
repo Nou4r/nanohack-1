@@ -2014,6 +2014,7 @@ public:
 	}
 };
 void initialize_cheat( ) {
+	VM_DOLPHIN_BLACK_START
 	init_classes( );
 	init_fields( );
 	init_methods( );
@@ -2050,4 +2051,6 @@ void initialize_cheat( ) {
 	ASSIGN_HOOK("UnityEngine.CoreModule::UnityEngine::Vector3::MoveTowards(Vector3,Vector3,Single): Vector3", Vector3_::MoveTowards_);
 
 	settings::cheat_init = true;
+
+	VM_DOLPHIN_BLACK_END
 }
